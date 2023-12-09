@@ -1,4 +1,4 @@
-package cz.upce.fei.dt.views.about;
+package cz.upce.fei.dt.ui.views.about;
 
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
