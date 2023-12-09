@@ -1,0 +1,20 @@
+server:
+  port: 8888
+spring:
+  datasource:
+    url: "to-be-replace"
+    username: "to-be-replace"
+    password: "to-be-replace"
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  mustache:
+    check-template-location: false
+logging:
+  level:
+      org:
+        atmosphere: warn
+vaadin:
+  launch-browser: true
+  whitelisted-packages: com.vaadin,org,vaadin,dev.hilla,cz.upce.fei.dt
+
