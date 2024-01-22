@@ -20,20 +20,22 @@ import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.theme.lumo.Lumo;
+import cz.upce.fei.dt.beckend.services.SecurityService;
 import cz.upce.fei.dt.ui.components.AvatarMenuBar;
 
 public class MainLayout extends AppLayout {
-    public MainLayout() {
-        H1 appTitle = new H1("IS - Koloběžky");
-        appTitle.getStyle().set("font-size", "var(--lumo-font-size-l)")
-                .set("line-height", "var(--lumo-size-l)")
-                .set("margin", "0 var(--lumo-space-m)");
+    private final SecurityService securityService;
+    public MainLayout(SecurityService securityService) {
+        this.securityService = securityService;
+        createHeader();
+        createDrawer();
+    }
 
-        Tabs views = getPrimaryNavigation();
+    private void createHeader() {
         Tabs subViews = getSecondaryViews();
         DrawerToggle toggle = new DrawerToggle();
         Span spacer = new Span("");
-        AvatarMenuBar avatarMenuBar = new AvatarMenuBar();
+        AvatarMenuBar avatarMenuBar = new AvatarMenuBar(securityService);
 
         Checkbox themeSwitcher = new Checkbox("Dark Mode");
         themeSwitcher.addValueChangeListener(e -> changeTheme());
@@ -46,12 +48,20 @@ public class MainLayout extends AppLayout {
         mainHeader.setSpacing(false);
 
         VerticalLayout sideHeader = new VerticalLayout(mainHeader, subViews);
+
         sideHeader.setPadding(false);
         sideHeader.setSpacing(false);
-
-        addToDrawer(appTitle, views);
         addToNavbar(sideHeader);
+    }
 
+    private void createDrawer() {
+        H1 appTitle = new H1("IS | DT CRM");
+        //todo - move to css.
+        appTitle.getStyle().set("font-size", "var(--lumo-font-size-l)")
+                .set("line-height", "var(--lumo-size-l)")
+                .set("margin", "0 var(--lumo-space-m)");
+        Tabs views = getPrimaryNavigation();
+        addToDrawer(appTitle, views);
         setPrimarySection(Section.DRAWER);
     }
 
