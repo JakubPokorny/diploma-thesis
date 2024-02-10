@@ -11,13 +11,14 @@ import java.util.Collection;
 
 @ParentLayout(MainLayout.class)
 @Tag(Tag.DIV)
-public class CustomRouteNotFoundError extends RouteNotFoundError {
+public class CustomRouteNotFoundError extends RouteNotFoundError implements HasErrorParameter<NotFoundException>{
     public CustomRouteNotFoundError() {
         addClassName("error-view");
     }
 
     @Override
     public int setErrorParameter(BeforeEnterEvent event, ErrorParameter<NotFoundException> parameter) {
+        getElement().removeAllChildren();
         getElement().appendChild(
                 new Element("h1").setText("Stránka \"" + event.getLocation().getPath() + "\" nenalezena, 404."),
                 new Element("a").setText("Přejít domů").setAttribute("href", "/").setAttribute("class", "router-link")

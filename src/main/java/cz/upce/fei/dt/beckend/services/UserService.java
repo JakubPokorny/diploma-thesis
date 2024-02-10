@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.InvalidClassException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -23,12 +24,7 @@ public class UserService{
 
     public void saveUser(User user) {
         if (userRepository.findByEmail(user.getEmail()).isEmpty()){
-            String resetToken = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-            user.setResetToken(resetToken);
-            emailService.send(
-                    user.getEmail(),
-                    "Nastav si heslo.",
-                    "Pro nastavení hesla přejdi na http://localhost:8888/password/" + resetToken);
+            String resetToken = sendResetToken(user);
             user.setPassword(passwordEncoder.encode(resetToken));
         }
         userRepository.save(user);
@@ -41,5 +37,24 @@ public class UserService{
 
     public void deleteUser(User user) {
         userRepository.delete(user);
+    }
+
+    public void generateResetToken(User user) throws InvalidClassException {
+        if (userRepository.findByEmail(user.getEmail()).isPresent()){
+            sendResetToken(user);
+            userRepository.save(user);
+        } else {
+            throw new InvalidClassException(user.getEmail() + "nebyl najit.");
+        }
+    }
+
+    private String sendResetToken(User user){
+        String resetToken = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        user.setResetToken(resetToken);
+        emailService.send(
+                user.getEmail(),
+                "Nastav si heslo.",
+                "Pro nastavení hesla přejdi na http://localhost:8888/password/" + resetToken);
+        return resetToken;
     }
 }

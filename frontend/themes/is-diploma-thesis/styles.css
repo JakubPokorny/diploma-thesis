@@ -1,3 +1,27 @@
+/* global */
+
+/* mainLayout */
+.header{
+    margin: var(--lumo-space-m);
+}
+.app-title{
+    margin: var(--lumo-space-m);
+    font-size: var(--lumo-font-size-l);
+}
+.app-title, .page-title{
+    line-height: var(--lumo-size-l);
+}
+.page-title{
+    font-size: var(--lumo-font-size-m);
+    color: var(--lumo-primary-color);
+}
+.page-title:hover{
+    text-decoration: none;
+    color: var(--lumo-header-text-color);
+}
+
+
+/* PasswordForm */
 .password-form{
     max-width: calc(var(--lumo-size-m) * 10);
     align-self: center;
@@ -6,12 +30,19 @@
 .content{
     display: flex;
 }
+
+/* Avatar menu Bar */
+.angle-down{
+    font-size: 0.7em;
+}
+
+/* Errors */
 .error-view{
     margin: 20% auto;
     text-align: center;
 }
 .error-view h1{
-    margin: 0, var(--lumo-space-m);
-    font-size: var(--lumo-font-size-l);
+    margin: var(--lumo-space-m);
     line-height: var(--lumo-size-l);
 }
+

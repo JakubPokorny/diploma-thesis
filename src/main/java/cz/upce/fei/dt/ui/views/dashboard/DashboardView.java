@@ -25,6 +25,9 @@ import java.util.Optional;
 @RouteAlias(value = "", layout = MainLayout.class)
 public class DashboardView extends HorizontalLayout {
     public DashboardView(@Autowired AuthenticationContext authContext){
+        MainLayout.pageTitle.setText("Dashboard");
+        MainLayout.pageTitle.setRoute(DashboardView.class);
+
         add(new H1("/dashboard"));
     }
 }

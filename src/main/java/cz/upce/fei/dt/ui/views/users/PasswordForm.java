@@ -11,7 +11,6 @@ import cz.upce.fei.dt.beckend.entities.User;
 import cz.upce.fei.dt.beckend.services.UserService;
 import cz.upce.fei.dt.ui.views.LoginView;
 import cz.upce.fei.dt.ui.views.dashboard.DashboardView;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class PasswordForm extends FormLayout {
     private final Binder<User> binder = new Binder<>(User.class);

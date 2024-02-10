@@ -3,7 +3,8 @@ package cz.upce.fei.dt.ui.views;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
-import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -17,16 +18,16 @@ import com.vaadin.flow.router.RouterLayout;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.flow.theme.lumo.Lumo;
-import cz.upce.fei.dt.beckend.services.SecurityService;
 import cz.upce.fei.dt.ui.components.AvatarMenuBar;
 import cz.upce.fei.dt.ui.views.contracts.ContractsView;
 import cz.upce.fei.dt.ui.views.dashboard.DashboardView;
 import cz.upce.fei.dt.ui.views.dials.DialsView;
 import cz.upce.fei.dt.ui.views.users.UsersView;
-import org.springframework.beans.factory.annotation.Autowired;
 
-public class MainLayout extends AppLayout implements RouterLayout {
+@JsModule("prefers-color-scheme.js")
+public class MainLayout extends AppLayout implements RouterLayout{
     private final transient AuthenticationContext authContext;
+    public static RouterLink pageTitle;
     public MainLayout(AuthenticationContext authContext) {
         this.authContext = authContext;
         if (!authContext.isAuthenticated())
@@ -36,45 +37,54 @@ public class MainLayout extends AppLayout implements RouterLayout {
     }
 
     private void createHeader() {
-        DrawerToggle drawer = new DrawerToggle();
-
+        pageTitle = new RouterLink("Dashboard", DashboardView.class);
+        pageTitle.setClassName("page-title");
         Span spacer = new Span("");
-        AvatarMenuBar avatarMenuBar = new AvatarMenuBar(authContext);
+        HorizontalLayout header = new HorizontalLayout(
+                new DrawerToggle(),
+                pageTitle,
+                spacer,
+                new AvatarMenuBar(authContext),
+                createThemeSwitcher());
+        header.setClassName("header");
+        header.setSpacing(true);
+        header.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
+        header.expand(spacer);
+        header.setWidthFull();
 
-        Checkbox themeSwitcher = new Checkbox("Dark Mode");
-        themeSwitcher.addValueChangeListener(e -> changeTheme());
+        VerticalLayout navbar = new VerticalLayout(header);
+        navbar.setPadding(false);
+        navbar.setSpacing(false);
+        addToNavbar(header);
+    }
 
+    private Button createThemeSwitcher() {
+        Button themeSwitcher = new Button();
+        themeSwitcher.setClassName("theme-switcher");
+        if (UI.getCurrent().getElement().getThemeList().contains(Lumo.DARK)){
+            themeSwitcher.setIcon(VaadinIcon.SUN_RISE.create());
+        }else {
+            themeSwitcher.setIcon(VaadinIcon.MOON_O.create());
+        }
 
-        HorizontalLayout mainHeader = new HorizontalLayout(drawer, spacer, avatarMenuBar, themeSwitcher);
-        mainHeader.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
-        mainHeader.expand(spacer);
-        mainHeader.setWidthFull();
-        mainHeader.setSpacing(false);
-
-        VerticalLayout sideHeader = new VerticalLayout(mainHeader);
-
-        sideHeader.setPadding(false);
-        sideHeader.setSpacing(false);
-        addToNavbar(mainHeader);
+        themeSwitcher.addClickListener(click -> {
+            ThemeList themeList = UI.getCurrent().getElement().getThemeList();
+            if (themeList.contains(Lumo.DARK)) {
+                themeList.remove(Lumo.DARK);
+                themeSwitcher.setIcon(VaadinIcon.MOON_O.create());
+            } else {
+                themeList.add(Lumo.DARK);
+                themeSwitcher.setIcon(VaadinIcon.SUN_RISE.create());
+            }
+        });
+        return themeSwitcher;
     }
 
     private void createDrawer() {
         H1 appTitle = new H1("IS | DT CRM");
-        appTitle.getStyle().set("font-size", "var(--lumo-font-size-l)")
-                .set("line-height", "var(--lumo-size-l)")
-                .set("margin", "0 var(--lumo-space-m)");
+        appTitle.addClassName("app-title");
         addToDrawer(appTitle, getDrawerNavigation());
         setPrimarySection(Section.DRAWER);
-    }
-
-    private void changeTheme() {
-        ThemeList themeList = UI.getCurrent().getElement().getThemeList();
-        if (themeList.contains(Lumo.DARK)) {
-            themeList.remove(Lumo.DARK);
-        } else {
-            themeList.add(Lumo.DARK);
-        }
-
     }
 
     private Tabs getDrawerNavigation() {

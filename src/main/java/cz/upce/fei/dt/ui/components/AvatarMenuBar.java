@@ -3,37 +3,43 @@ package cz.upce.fei.dt.ui.components;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.SubMenu;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.spring.security.AuthenticationContext;
-import com.vaadin.flow.theme.lumo.LumoUtility;
-import cz.upce.fei.dt.beckend.services.SecurityService;
+import cz.upce.fei.dt.beckend.entities.User;
 
-import javax.swing.*;
-
-public class AvatarMenuBar extends Div{
+public class AvatarMenuBar extends HorizontalLayout{
     public AvatarMenuBar(AuthenticationContext authContext) {
-        Avatar avatar = new Avatar("Jakub Pokorný");
-        Span label = new Span(avatar.getName());
-        label.getStyle()
-                .set("margin", "0 8px");
-        //todo add arrow icon
+        if (authContext.getAuthenticatedUser(User.class).isEmpty())
+            return;
 
-        Div login = new Div(avatar, label);
-        login.getStyle().set("display", "flex")
-                .set("align-items", "center");
+        User user = authContext.getAuthenticatedUser(User.class).get();
+        HorizontalLayout userMenuItem = createUserMenuItem(user);
 
         MenuBar menuBar = new MenuBar();
         menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY_INLINE);
-        MenuItem menuItem = menuBar.addItem(login);
+        MenuItem menuItem = menuBar.addItem(userMenuItem);
         SubMenu subMenu = menuItem.getSubMenu();
         subMenu.addItem("Profil");
-        subMenu.addItem("Nastavení");
-        subMenu.addItem("Nápověda");
         subMenu.addItem("Odhlásit", click -> authContext.logout());
 
         add(menuBar);
+    }
+
+    private static HorizontalLayout createUserMenuItem(User user) {
+        Avatar avatar = new Avatar(user.getFirstName() + " " + user.getLastName());
+        Span label = new Span(avatar.getName());
+        Icon angleDown = new Icon(VaadinIcon.ANGLE_DOWN);
+        angleDown.setClassName("angle-down");
+
+        HorizontalLayout userMenuItem = new HorizontalLayout(avatar, label, angleDown);
+        userMenuItem.setSpacing(true);
+        userMenuItem.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
+        return userMenuItem;
     }
 }
