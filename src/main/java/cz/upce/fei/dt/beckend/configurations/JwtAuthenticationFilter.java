@@ -18,12 +18,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-@Component
+//@Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    @Autowired
+    //@Autowired
     private final JwtService jwtService;
-    @Autowired
+    //@Autowired
     private final UserDetailsService userDetailsService;
 
     @Override

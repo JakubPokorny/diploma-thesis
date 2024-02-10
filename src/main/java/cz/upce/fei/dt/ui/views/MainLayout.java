@@ -1,16 +1,11 @@
 package cz.upce.fei.dt.ui.views;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
-import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.contextmenu.MenuItem;
-import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -18,50 +13,57 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.dom.ThemeList;
+import com.vaadin.flow.router.RouterLayout;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.flow.theme.lumo.Lumo;
 import cz.upce.fei.dt.beckend.services.SecurityService;
 import cz.upce.fei.dt.ui.components.AvatarMenuBar;
+import cz.upce.fei.dt.ui.views.contracts.ContractsView;
+import cz.upce.fei.dt.ui.views.dashboard.DashboardView;
+import cz.upce.fei.dt.ui.views.dials.DialsView;
+import cz.upce.fei.dt.ui.views.users.UsersView;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class MainLayout extends AppLayout {
-    private final SecurityService securityService;
-    public MainLayout(SecurityService securityService) {
-        this.securityService = securityService;
+public class MainLayout extends AppLayout implements RouterLayout {
+    private final transient AuthenticationContext authContext;
+    public MainLayout(AuthenticationContext authContext) {
+        this.authContext = authContext;
+        if (!authContext.isAuthenticated())
+            return;
         createHeader();
         createDrawer();
     }
 
     private void createHeader() {
-        Tabs subViews = getSecondaryViews();
-        DrawerToggle toggle = new DrawerToggle();
+        DrawerToggle drawer = new DrawerToggle();
+
         Span spacer = new Span("");
-        AvatarMenuBar avatarMenuBar = new AvatarMenuBar(securityService);
+        AvatarMenuBar avatarMenuBar = new AvatarMenuBar(authContext);
 
         Checkbox themeSwitcher = new Checkbox("Dark Mode");
         themeSwitcher.addValueChangeListener(e -> changeTheme());
 
 
-        HorizontalLayout mainHeader = new HorizontalLayout(toggle, spacer, avatarMenuBar, themeSwitcher);
+        HorizontalLayout mainHeader = new HorizontalLayout(drawer, spacer, avatarMenuBar, themeSwitcher);
         mainHeader.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
         mainHeader.expand(spacer);
         mainHeader.setWidthFull();
         mainHeader.setSpacing(false);
 
-        VerticalLayout sideHeader = new VerticalLayout(mainHeader, subViews);
+        VerticalLayout sideHeader = new VerticalLayout(mainHeader);
 
         sideHeader.setPadding(false);
         sideHeader.setSpacing(false);
-        addToNavbar(sideHeader);
+        addToNavbar(mainHeader);
     }
 
     private void createDrawer() {
         H1 appTitle = new H1("IS | DT CRM");
-        //todo - move to css.
         appTitle.getStyle().set("font-size", "var(--lumo-font-size-l)")
                 .set("line-height", "var(--lumo-size-l)")
                 .set("margin", "0 var(--lumo-space-m)");
-        Tabs views = getPrimaryNavigation();
-        addToDrawer(appTitle, views);
+        addToDrawer(appTitle, getDrawerNavigation());
         setPrimarySection(Section.DRAWER);
     }
 
@@ -75,43 +77,15 @@ public class MainLayout extends AppLayout {
 
     }
 
-    private Tabs getSecondaryViews() {
-        Tabs tabs = new Tabs();
-        tabs.add(
-                new Tab("Všichni"),
-                new Tab("Správci"),
-                new Tab("Konstruktéři")
-        );
-        return tabs;
-    }
+    private Tabs getDrawerNavigation() {
+        Tab dashboard = new Tab(VaadinIcon.DASHBOARD.create(), new RouterLink("Dashboard", DashboardView.class));
+        Tab users = new Tab(VaadinIcon.USERS.create(), new RouterLink("Uživatelé", UsersView.class));
+        Tab contracts = new Tab(VaadinIcon.CART.create(), new RouterLink("Zakázky", ContractsView.class));
+        Tab dials = new Tab(VaadinIcon.DATABASE.create(), new RouterLink("Číselniky", DialsView.class));
 
-    private Tabs getPrimaryNavigation() {
-        Tabs tabs = new Tabs();
-        tabs.add(
-                createTab(VaadinIcon.USERS, "Uživatelé"),
-                createTab(VaadinIcon.CART, "Zakázky"),
-                createTab(VaadinIcon.DATABASE, "Číselníky")
-        );
+        Tabs tabs = new Tabs(dashboard,users,contracts,dials);
         tabs.setOrientation(Tabs.Orientation.VERTICAL);
-        tabs.setSelectedIndex(1);
+        tabs.setSelectedIndex(0);
         return tabs;
-    }
-
-    private Component createTab(VaadinIcon viewIcon, String label) {
-        Icon icon = viewIcon.create();
-        icon.getStyle().set("box-sizing", "border-box")
-                .set("margin-inline-end", "var(--lumo-space-m)")
-                .set("padding", "var(--lumo-space-xs)");
-
-        Span showAbleLabel = new Span(label);
-        showAbleLabel.setId("sideTab");
-        //TODO hide just label;
-
-        RouterLink link = new RouterLink();
-
-        link.add(icon, showAbleLabel);
-        //link.setRoute();
-        link.setTabIndex(-1);
-        return new Tab(link);
     }
 }

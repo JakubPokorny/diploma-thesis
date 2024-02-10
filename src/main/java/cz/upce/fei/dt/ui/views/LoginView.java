@@ -22,7 +22,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         login.setAction("login");
         login.setForgotPasswordButtonVisible(true);
 
-        add(new H1("Login | DT CRM"), login);
+        add(new H1("Příhlášení | DT CRM"), login);
     }
     @Override
     public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {

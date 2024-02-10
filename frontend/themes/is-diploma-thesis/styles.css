@@ -1,0 +1,17 @@
+.password-form{
+    max-width: calc(var(--lumo-size-m) * 10);
+    align-self: center;
+    padding: var(--lumo-space-l);
+}
+.content{
+    display: flex;
+}
+.error-view{
+    margin: 20% auto;
+    text-align: center;
+}
+.error-view h1{
+    margin: 0, var(--lumo-space-m);
+    font-size: var(--lumo-font-size-l);
+    line-height: var(--lumo-size-l);
+}

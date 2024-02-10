@@ -7,13 +7,14 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.menubar.MenuBarVariant;
+import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import cz.upce.fei.dt.beckend.services.SecurityService;
 
 import javax.swing.*;
 
 public class AvatarMenuBar extends Div{
-    public AvatarMenuBar(SecurityService securityService) {
+    public AvatarMenuBar(AuthenticationContext authContext) {
         Avatar avatar = new Avatar("Jakub Pokorný");
         Span label = new Span(avatar.getName());
         label.getStyle()
@@ -31,7 +32,7 @@ public class AvatarMenuBar extends Div{
         subMenu.addItem("Profil");
         subMenu.addItem("Nastavení");
         subMenu.addItem("Nápověda");
-        subMenu.addItem("Odhlásit", e -> securityService.logout());
+        subMenu.addItem("Odhlásit", click -> authContext.logout());
 
         add(menuBar);
     }
