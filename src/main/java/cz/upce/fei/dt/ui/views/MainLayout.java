@@ -1,5 +1,6 @@
 package cz.upce.fei.dt.ui.views;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
@@ -19,6 +20,7 @@ import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.flow.theme.lumo.Lumo;
 import cz.upce.fei.dt.ui.components.AvatarMenuBar;
+import cz.upce.fei.dt.ui.views.contacts.ContactsView;
 import cz.upce.fei.dt.ui.views.contracts.ContractsView;
 import cz.upce.fei.dt.ui.views.dashboard.DashboardView;
 import cz.upce.fei.dt.ui.views.dials.DialsView;
@@ -27,7 +29,7 @@ import cz.upce.fei.dt.ui.views.users.UsersView;
 @JsModule("prefers-color-scheme.js")
 public class MainLayout extends AppLayout implements RouterLayout{
     private final transient AuthenticationContext authContext;
-    public static RouterLink pageTitle;
+    private static RouterLink pageTitle;
     public MainLayout(AuthenticationContext authContext) {
         this.authContext = authContext;
         if (!authContext.isAuthenticated())
@@ -56,6 +58,11 @@ public class MainLayout extends AppLayout implements RouterLayout{
         navbar.setPadding(false);
         navbar.setSpacing(false);
         addToNavbar(header);
+    }
+
+    public static void setPageTitle(String title, Class<? extends Component> navigationTarget){
+        pageTitle.setText(title);
+        pageTitle.setRoute(navigationTarget);
     }
 
     private Button createThemeSwitcher() {
@@ -88,12 +95,13 @@ public class MainLayout extends AppLayout implements RouterLayout{
     }
 
     private Tabs getDrawerNavigation() {
-        Tab dashboard = new Tab(VaadinIcon.DASHBOARD.create(), new RouterLink("Dashboard", DashboardView.class));
-        Tab users = new Tab(VaadinIcon.USERS.create(), new RouterLink("Uživatelé", UsersView.class));
-        Tab contracts = new Tab(VaadinIcon.CART.create(), new RouterLink("Zakázky", ContractsView.class));
-        Tab dials = new Tab(VaadinIcon.DATABASE.create(), new RouterLink("Číselniky", DialsView.class));
-
-        Tabs tabs = new Tabs(dashboard,users,contracts,dials);
+        Tabs tabs = new Tabs(
+                new Tab(VaadinIcon.DASHBOARD.create(), new RouterLink("Dashboard", DashboardView.class)),
+                new Tab(VaadinIcon.USERS.create(), new RouterLink("Uživatelé", UsersView.class)),
+                new Tab(VaadinIcon.NOTEBOOK.create(), new RouterLink("Kontakty", ContactsView.class)),
+                new Tab(VaadinIcon.CART.create(), new RouterLink("Zakázky", ContractsView.class)),
+                new Tab(VaadinIcon.DATABASE.create(), new RouterLink("Číselniky", DialsView.class))
+        );
         tabs.setOrientation(Tabs.Orientation.VERTICAL);
         tabs.setSelectedIndex(0);
         return tabs;

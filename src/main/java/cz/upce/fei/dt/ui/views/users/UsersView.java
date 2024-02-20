@@ -1,6 +1,7 @@
 package cz.upce.fei.dt.ui.views.users;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
@@ -8,6 +9,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 import cz.upce.fei.dt.beckend.entities.User;
 import cz.upce.fei.dt.beckend.services.UserService;
 import cz.upce.fei.dt.ui.views.MainLayout;
@@ -15,6 +17,7 @@ import jakarta.annotation.security.RolesAllowed;
 import java.io.InvalidClassException;
 
 @Route(value = "users", layout = MainLayout.class)
+@RouteAlias(value = "uzivatele", layout = MainLayout.class)
 @PageTitle("Users")
 @RolesAllowed("ADMIN")
 public class UsersView extends VerticalLayout {
@@ -23,6 +26,9 @@ public class UsersView extends VerticalLayout {
     private final Grid<User> grid = new Grid<>(User.class, false);
 
     public UsersView(UserService userService) {
+        grid.setClassName("grid-content");
+
+        MainLayout.setPageTitle("Uživatelé", UsersView.class);
         this.service = userService;
         setSizeFull();
 
@@ -46,7 +52,7 @@ public class UsersView extends VerticalLayout {
 
     private void configureForm() {
         form = new UserForm();
-        form.setWidth("25em");
+        form.setClassName("edit-form");
         form.setVisible(false);
 
         form.addSaveListener(this::saveUser);

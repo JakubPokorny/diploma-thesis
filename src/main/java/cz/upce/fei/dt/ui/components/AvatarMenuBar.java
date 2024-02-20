@@ -17,12 +17,12 @@ public class AvatarMenuBar extends HorizontalLayout{
     public AvatarMenuBar(AuthenticationContext authContext) {
         if (authContext.getAuthenticatedUser(User.class).isEmpty())
             return;
-
         User user = authContext.getAuthenticatedUser(User.class).get();
-        HorizontalLayout userMenuItem = createUserMenuItem(user);
 
         MenuBar menuBar = new MenuBar();
         menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY_INLINE);
+
+        HorizontalLayout userMenuItem = createUserMenuItem(user);
         MenuItem menuItem = menuBar.addItem(userMenuItem);
         SubMenu subMenu = menuItem.getSubMenu();
         subMenu.addItem("Profil");

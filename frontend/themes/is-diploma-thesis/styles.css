@@ -46,3 +46,18 @@
     line-height: var(--lumo-size-l);
 }
 
+/* Edit-form*/
+.edit-form{
+    width: 30em;
+}
+
+@media only screen and (max-width: 550px) {
+    .edit-form{
+        flex-grow: 2;
+    }
+    .grid-content{
+        flex-grow: 0;
+        flex-shrink: 99999999;
+    }
+}
+
