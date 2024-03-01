@@ -13,11 +13,10 @@
 }
 .page-title{
     font-size: var(--lumo-font-size-m);
-    color: var(--lumo-primary-color);
+    color: var(--lumo-header-text-color);
 }
 .page-title:hover{
     text-decoration: none;
-    color: var(--lumo-header-text-color);
 }
 
 
