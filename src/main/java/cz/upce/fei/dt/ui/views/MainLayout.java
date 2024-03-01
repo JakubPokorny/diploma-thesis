@@ -20,7 +20,7 @@ import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.flow.theme.lumo.Lumo;
 import cz.upce.fei.dt.ui.components.AvatarMenuBar;
-import cz.upce.fei.dt.ui.views.contacts.ContactsView;
+import cz.upce.fei.dt.ui.views.customerContacts.ContactsView;
 import cz.upce.fei.dt.ui.views.contracts.ContractsView;
 import cz.upce.fei.dt.ui.views.dashboard.DashboardView;
 import cz.upce.fei.dt.ui.views.dials.DialsView;
@@ -67,21 +67,15 @@ public class MainLayout extends AppLayout implements RouterLayout{
 
     private Button createThemeSwitcher() {
         Button themeSwitcher = new Button();
+        themeSwitcher.setIcon(VaadinIcon.ADJUST.create());
         themeSwitcher.setClassName("theme-switcher");
-        if (UI.getCurrent().getElement().getThemeList().contains(Lumo.DARK)){
-            themeSwitcher.setIcon(VaadinIcon.SUN_RISE.create());
-        }else {
-            themeSwitcher.setIcon(VaadinIcon.MOON_O.create());
-        }
 
         themeSwitcher.addClickListener(click -> {
             ThemeList themeList = UI.getCurrent().getElement().getThemeList();
             if (themeList.contains(Lumo.DARK)) {
                 themeList.remove(Lumo.DARK);
-                themeSwitcher.setIcon(VaadinIcon.MOON_O.create());
             } else {
                 themeList.add(Lumo.DARK);
-                themeSwitcher.setIcon(VaadinIcon.SUN_RISE.create());
             }
         });
         return themeSwitcher;
