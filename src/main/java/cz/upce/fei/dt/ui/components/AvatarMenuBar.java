@@ -34,8 +34,9 @@ public class AvatarMenuBar extends HorizontalLayout{
     private static HorizontalLayout createUserMenuItem(User user) {
         Avatar avatar = new Avatar(user.getFirstName() + " " + user.getLastName());
         Span label = new Span(avatar.getName());
+        label.setClassName("user-name");
         Icon angleDown = new Icon(VaadinIcon.ANGLE_DOWN);
-        angleDown.setClassName("angle-down");
+        angleDown.setClassName("user-name-angle-down");
 
         HorizontalLayout userMenuItem = new HorizontalLayout(avatar, label, angleDown);
         userMenuItem.setSpacing(true);
