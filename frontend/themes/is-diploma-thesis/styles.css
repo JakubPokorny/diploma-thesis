@@ -1,5 +1,7 @@
 /* global */
-
+#pointer{
+    cursor: pointer;
+}
 /* mainLayout */
 .header{
     margin: var(--lumo-space-m);
@@ -45,32 +47,24 @@
     line-height: var(--lumo-size-l);
 }
 
-/* Edit-form*/
-.form-layout{
-    width: 20em;
-}
+/* GridFormLayout*/
+
 .form-top-actions{
     flex-direction: row-reverse;
 }
-.edit-form{
-    /*width: 30em;*/
-}
-
 .address-form-divider{
     padding: 16px 0px 4px 0px;
+}
+.form-top-actions > vaadin-button{
+    margin: 0 1px;
+}
+.form-top-actions > vaadin-button:first-child{
+    margin: 0 0 0 1px;
 }
 
 @media only screen and (max-width: 550px) {
     .user-name, .user-name-angle-down{
         display: none;
     }
-    /*.edit-form{*/
-    /*    flex-grow: 2;*/
-    /*}*/
-    /*.content-wrapper{*/
-    /*    display: flex;*/
-    /*    flex-grow: 0;*/
-    /*    flex-shrink: 99999999;*/
-    /*}*/
 }
 

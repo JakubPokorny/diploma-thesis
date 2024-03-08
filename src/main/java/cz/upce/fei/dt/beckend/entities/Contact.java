@@ -8,24 +8,26 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
 @Entity
-@Table(name = "customer_contacts")
-public class CustomerContact {
+@Table(name = "contacts")
+public class Contact {
+    public Contact() {
+        invoiceAddress = new Address();
+        deliveryAddress = new Address();
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Column(precision = 8, scale = 0)
-    private BigDecimal ICO;
+    private String ICO;
 
     @Column
     private String DIC;
@@ -39,19 +41,20 @@ public class CustomerContact {
     @Column(length = 20, nullable = false)
     private  String phone;
 
-    @Column(nullable = false)
-    @CreationTimestamp
-    private LocalDateTime created;
-
     @Column
     @UpdateTimestamp
     private LocalDateTime updated;
 
-    @ManyToMany
-    @JoinTable(
-          name = "customer_contact_addresses",
-          joinColumns = @JoinColumn(name = "customer_contact_id"),
-          inverseJoinColumns = @JoinColumn(name = "address_id")
-    )
-    private List<Address> addresses;
+    @OneToOne(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
+    @JoinColumn(name = "invoice_address_id", nullable = false)
+    private Address invoiceAddress;
+
+    @OneToOne(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
+    @JoinColumn(name = "delivery_address_id")   
+    private Address deliveryAddress;
+
+    public boolean hasDeliveryAddress() {
+        return deliveryAddress != null && !deliveryAddress.isEmpty();
+    }
+
 }

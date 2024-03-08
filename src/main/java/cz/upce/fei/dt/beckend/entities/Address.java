@@ -26,6 +26,9 @@ public class Address {
     @Column(nullable = false)
     private String street;
 
+    @Column(length = 10, nullable = false)
+    private String houseNumber;
+
     @Column(length = 100, nullable = false)
     private String city;
 
@@ -35,17 +38,11 @@ public class Address {
     @Column(length = 20, nullable = false)
     private String zipCode;
 
-    @Column(length = 50)
-    private String country;
+//    @ManyToMany(mappedBy = "addresses", fetch = FetchType.LAZY)
+//    private List<Contact> contacts;
 
-    @Column(nullable = false)
-    @CreationTimestamp
-    private LocalDateTime created;
 
-    @Column
-    @UpdateTimestamp
-    private LocalDateTime updated;
-
-    @ManyToMany(mappedBy = "addresses", fetch = FetchType.LAZY)
-    private List<CustomerContact> contacts;
+    public boolean isEmpty() {
+        return city == null && street == null && state == null && zipCode == null && houseNumber == null;
+    }
 }

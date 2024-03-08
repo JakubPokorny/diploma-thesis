@@ -32,8 +32,8 @@ public class Contract {
     private LocalDateTime updated;
 
     @ManyToOne
-    @JoinColumn(name = "customer_contact_id", nullable = false)
-    private CustomerContact customerContact;
+    @JoinColumn(name = "contacts_id", nullable = false)
+    private Contact contact;
 
     @ManyToMany
     @JoinTable(

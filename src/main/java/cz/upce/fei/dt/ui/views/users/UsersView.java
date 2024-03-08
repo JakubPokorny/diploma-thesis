@@ -1,19 +1,21 @@
 package cz.upce.fei.dt.ui.views.users;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import cz.upce.fei.dt.beckend.entities.User;
 import cz.upce.fei.dt.beckend.services.UserService;
+import cz.upce.fei.dt.ui.components.GridFormLayout;
+import cz.upce.fei.dt.ui.components.forms.events.DeleteEvent;
+import cz.upce.fei.dt.ui.components.forms.events.SaveEvent;
 import cz.upce.fei.dt.ui.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
+
 import java.io.InvalidClassException;
 
 @Route(value = "users", layout = MainLayout.class)
@@ -21,92 +23,55 @@ import java.io.InvalidClassException;
 @PageTitle("Users")
 @RolesAllowed("ADMIN")
 public class UsersView extends VerticalLayout {
-    private final UserService service;
-    private UserForm form;
-    private final Grid<User> grid = new Grid<>(User.class, false);
+    private final UserService userService;
+    private final GridFormLayout<UserForm, User> gridFormLayout;
+    private final UserForm form;
+    private final Grid<User> grid;
 
     public UsersView(UserService userService) {
-        grid.setClassName("grid-content");
-
+        this.userService = userService;
         MainLayout.setPageTitle("Uživatelé", UsersView.class);
-        this.service = userService;
         setSizeFull();
+
+        form = new UserForm();
+        grid = new Grid<>(User.class, false);
+        gridFormLayout = new GridFormLayout<>(form, grid);
 
         configureGrid();
         configureForm();
 
         Button addUser = new Button("Přidat uživatele");
-        addUser.addClickListener(event-> addUser());
+        addUser.addClickListener(event-> gridFormLayout.addNewValue(new User()));
+        gridFormLayout.getActionsLayout().add(addUser);
 
-        add(addUser, getContent());
-    }
-
-    private HorizontalLayout getContent() {
-        HorizontalLayout content = new HorizontalLayout(grid, form);
-        content.setFlexGrow(2, grid);
-        content.setFlexGrow(1, form);
-        content.addClassName("content");
-        content.setSizeFull();
-        return content;
+        add(gridFormLayout);
     }
 
     private void configureForm() {
-        form = new UserForm();
-        form.setClassName("edit-form");
-        form.setVisible(false);
-
-        form.addSaveListener(this::saveUser);
-        form.addDeleteListener(this::deleteUser);
-        form.addCloseListener(closeEvent -> closeEditor());
-
+        gridFormLayout.addSaveListener(this::saveUser);
+        gridFormLayout.addDeleteListener(this::deleteUser);
     }
 
-    public void addUser(){
-        grid.asSingleSelect().clear();
-        editUser(new User());
+    private void saveUser(SaveEvent saveEvent){
+        userService.saveUser((User) saveEvent.getValue());
+        grid.setItems(userService.getAll());
+        gridFormLayout.closeFormLayout();
     }
-    public void editUser(User user){
-        if (user == null) {
-            closeEditor();
-        }
-        else {
-            form.setUser(user);
-            form.setVisible(true);
-            addClassName("editing");
-        }
+    private void deleteUser(DeleteEvent deleteEvent){
+        userService.deleteUser((User) deleteEvent.getValue());
+        grid.setItems(userService.getAll());
+        gridFormLayout.closeFormLayout();
     }
 
-    private void saveUser(UserForm.SaveEvent saveEvent){
-        service.saveUser(saveEvent.getUser());
-        updateList();
-        closeEditor();
-    }
-    private void deleteUser(UserForm.DeleteEvent deleteEvent){
-        service.deleteUser(deleteEvent.getUser());
-        updateList();
-        closeEditor();
-    }
-
-    private void updateList() {
-        grid.setItems(service.getAll());
-    }
-
-    private void closeEditor(){
-        form.setUser(null);
-        form.setVisible(false);
-        removeClassName("editing");
-    }
     private void configureGrid() {
-        grid.addClassName("user-grid");
-        grid.setSizeFull();
-
-        grid.setItems(service.getAll());
+        grid.setItems(userService.getAll());
         grid.addColumn(User::getFirstName).setHeader("Křestní jméno");
         grid.addColumn(User::getLastName).setHeader("Příjmení");
         grid.addColumn(User::getEmail).setHeader("Email");
         grid.addColumn(User::getRoles).setHeader("Oprávnění");
         grid.addComponentColumn(this::createTokenComponent).setHeader("Token pro obnovení");
-        grid.asSingleSelect().addValueChangeListener(e->editUser(e.getValue()));
+
+        grid.asSingleSelect().addValueChangeListener(e-> gridFormLayout.showFormLayout(e.getValue()));
     }
 
     private Component createTokenComponent(User user) {
@@ -114,7 +79,7 @@ public class UsersView extends VerticalLayout {
             Button generate = new Button("Generovat");
             generate.addClickListener(click->{
                 try {
-                    service.generateResetToken(user);
+                    userService.generateResetToken(user);
                     grid.getDataProvider().refreshAll();
                 } catch (InvalidClassException exception){
                     //todo
