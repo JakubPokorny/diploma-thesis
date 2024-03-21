@@ -21,26 +21,24 @@ import cz.upce.fei.dt.ui.components.forms.events.DeleteEvent;
 import cz.upce.fei.dt.ui.components.forms.events.SaveEvent;
 import jakarta.annotation.security.PermitAll;
 
-import java.util.List;
-
 @Route(value = "products", layout = MainLayout.class)
 @RouteAlias(value = "produkty",  layout = MainLayout.class)
 @PageTitle("Produkty")
 @PermitAll
 public class ProductView extends VerticalLayout {
     private final ProductService productService;
+    private final ComponentService componentService;
     private final Grid<Product> grid;
     private final GridFormLayout<ProductForm, Product> gridFormLayout;
-    private final List<Component> components;
 
     public ProductView(
             ProductService productService,
             ComponentService componentService) {
 
         this.productService = productService;
-        components = componentService.findAllComponentsIdAndName();
+        this.componentService = componentService;
 
-        ProductForm form = new ProductForm(components);
+        ProductForm form = new ProductForm(componentService);
         grid = new Grid<>(Product.class, false);
         gridFormLayout = new GridFormLayout<>(form, grid);
         MainLayout.setPageTitle("Produkty", ProductView.class);
@@ -111,7 +109,7 @@ public class ProductView extends VerticalLayout {
         MultiSelectComboBox<Component> comboBox = new MultiSelectComboBox<>();
         comboBox.setItemLabelGenerator(Component::getName);
         comboBox.setReadOnly(true);
-        comboBox.setItems(components);
+        comboBox.setItems(query -> componentService.findAllComponentsIdAndName(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
         comboBox.setValue(product.getSelectedComponents());
         comboBox.setSizeFull();
         return comboBox;

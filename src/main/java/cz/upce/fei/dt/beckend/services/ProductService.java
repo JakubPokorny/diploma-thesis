@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -20,17 +19,14 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductComponentRepository productComponentRepository;
 
-    public List<Product> findAllProductsIdAndName(){
-        //todo add padding
-        List<Product> products = new ArrayList<>();
-        productRepository.findAllProductsIdAndName().forEach(
-                projection -> products.add(
-                        Product.builder()
-                                .id(projection.getId())
-                                .name(projection.getName())
-                                .build())
-        );
-        return products;
+    public Stream<Product> findAllProductsIdAndName(int page, int pageSize, String searchTerm){
+        return productRepository.findAllProductsIdAndName(PageRequest.of(page, pageSize), searchTerm)
+                .stream()
+                .map(iProduct -> Product.builder()
+                        .id(iProduct.getId())
+                        .name(iProduct.getName())
+                        .build()
+                );
     }
     public Stream<Product> findAll(int page, int pageSize){
         return productRepository.findAll(PageRequest.of(page,pageSize)).stream();

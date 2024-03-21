@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -20,17 +19,14 @@ public class ComponentService {
     private final ComponentRepository componentRepository;
     private final ProductComponentRepository productComponentRepository;
 
-    public List<Component> findAllComponentsIdAndName() {
-        //todo add padding
-        List<Component> components = new ArrayList<>();
-        componentRepository.findAllComponentsIDAndName().forEach(
-                projection -> components.add(
-                        Component.builder()
-                                .id(projection.getId())
-                                .name(projection.getName())
-                                .build())
-        );
-        return components;
+    public Stream<Component> findAllComponentsIdAndName(int page, int pageSize, String searchTerm) {
+        return componentRepository.findAllComponentsIDAndName(PageRequest.of(page,pageSize), searchTerm)
+                .stream()
+                .map(iComponent -> Component.builder()
+                        .id(iComponent.getId())
+                        .name(iComponent.getName())
+                        .build()
+                );
     }
     public Stream<Component> findAll(int page, int pageSize){
         return componentRepository.findAll(PageRequest.of(page, pageSize)).stream();

@@ -14,6 +14,7 @@ import com.vaadin.flow.data.validator.IntegerRangeValidator;
 import cz.upce.fei.dt.beckend.entities.Component;
 import cz.upce.fei.dt.beckend.entities.Product;
 import cz.upce.fei.dt.beckend.entities.User;
+import cz.upce.fei.dt.beckend.services.ProductService;
 import cz.upce.fei.dt.beckend.services.UserService;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,7 +36,7 @@ public class ComponentForm extends FormLayout implements IEditForm<Component> {
     private final MultiSelectComboBox<Product> productsMCB = new MultiSelectComboBox<>("Produkty");
     private final HashMap<Long, ProductComponentForm> productComponentForms = new HashMap<>();
 
-    public ComponentForm(List<Product> products, UserService userService) {
+    public ComponentForm(ProductService productService, UserService userService) {
         setClassName("edit-form");
 
         binder.forField(name)
@@ -71,7 +72,7 @@ public class ComponentForm extends FormLayout implements IEditForm<Component> {
         binder.forField(notify)
                 .bind(Component::getUser, Component::setUser);
 
-        productsMCB.setItems(products);
+        productsMCB.setItems(query -> productService.findAllProductsIdAndName(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
         productsMCB.setItemLabelGenerator(Product::getName);
         productsMCB.addSelectionListener(this::addProductComponentForm);
 
