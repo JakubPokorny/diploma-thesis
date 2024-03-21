@@ -108,6 +108,11 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.vaadin.artur.exampledata</groupId>-->
+<!--            <artifactId>exampledata</artifactId>-->
+<!--            <version>3.4.0</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-junit5</artifactId>

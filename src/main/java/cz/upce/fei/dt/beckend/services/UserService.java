@@ -3,8 +3,10 @@ package cz.upce.fei.dt.beckend.services;
 import cz.upce.fei.dt.beckend.entities.User;
 import cz.upce.fei.dt.beckend.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InvalidClassException;
 import java.time.LocalDateTime;
@@ -18,6 +20,7 @@ public class UserService{
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+    @Transactional
     public List<User> getAll() {
         return userRepository.findAll();
     }

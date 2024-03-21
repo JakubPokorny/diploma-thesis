@@ -1,5 +1,7 @@
 package cz.upce.fei.dt.beckend.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -53,6 +55,16 @@ public class User implements UserDetails {
     @Column
     @UpdateTimestamp
     private LocalDateTime updated;
+
+    @OneToMany(mappedBy = "user")
+    @JsonBackReference
+    @JsonIgnore
+    List<Component> components;
+
+
+    public String getFullName(){
+        return firstName + " " + lastName;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

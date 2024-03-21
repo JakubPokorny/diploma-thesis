@@ -1,7 +1,8 @@
 package cz.upce.fei.dt.ui.components;
 
-import com.helger.commons.error.IError;
-import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
@@ -12,10 +13,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.data.binder.ValidationException;
-import com.vaadin.flow.data.binder.ValidationResult;
-import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 import cz.upce.fei.dt.ui.components.forms.IEditForm;
 import cz.upce.fei.dt.ui.components.forms.events.CloseEvent;
@@ -24,10 +22,6 @@ import cz.upce.fei.dt.ui.components.forms.events.ExpandEvent;
 import cz.upce.fei.dt.ui.components.forms.events.SaveEvent;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Getter
 @Setter
@@ -71,9 +65,7 @@ public class GridFormLayout<F extends FormLayout & IEditForm<T>, T> extends Hori
         dialog.setCancelable(true);
         dialog.setConfirmText("Odstranit");
         dialog.setConfirmButtonTheme("error primary");
-        dialog.addConfirmListener(confirmEvent -> {
-            fireEvent(new DeleteEvent(this, form.getValue()));
-        });
+        dialog.addConfirmListener(confirmEvent -> fireEvent(new DeleteEvent(this, form.getValue())));
         dialog.open();
     }
 
@@ -108,17 +100,17 @@ public class GridFormLayout<F extends FormLayout & IEditForm<T>, T> extends Hori
         form.expand(!contentLayout.isVisible());
     }
 
-    public Registration addDeleteListener(ComponentEventListener<DeleteEvent> listener) {
-        return addListener(DeleteEvent.class, listener);
+    public void addDeleteListener(ComponentEventListener<DeleteEvent> listener) {
+        addListener(DeleteEvent.class, listener);
     }
-    public Registration addSaveListener(ComponentEventListener<SaveEvent> listener) {
-        return addListener(SaveEvent.class, listener);
+    public void addSaveListener(ComponentEventListener<SaveEvent> listener) {
+        addListener(SaveEvent.class, listener);
     }
-    public Registration addCloseListener(ComponentEventListener<CloseEvent> listener) {
-        return addListener(CloseEvent.class, listener);
+    public void addCloseListener(ComponentEventListener<CloseEvent> listener) {
+        addListener(CloseEvent.class, listener);
     }
-    public Registration addExpandListener(ComponentEventListener<ExpandEvent> listener){
-        return addListener(ExpandEvent.class, listener);
+    public void addExpandListener(ComponentEventListener<ExpandEvent> listener){
+        addListener(ExpandEvent.class, listener);
     }
 
     private void configureContentLayout(Grid<T> content){
@@ -201,7 +193,7 @@ public class GridFormLayout<F extends FormLayout & IEditForm<T>, T> extends Hori
             form.validate();
             fireEvent(new SaveEvent(this, form.getValue()));
         } catch (ValidationException e) {
-            Notification.show("Nevalidní formulář.").addThemeVariants(NotificationVariant.LUMO_ERROR);
+            Notification.show("Nevalidní vstupy ve formuláři.").addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }
 }

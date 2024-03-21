@@ -1,6 +1,5 @@
 package cz.upce.fei.dt;
 
-import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.theme.Theme;
 import org.springframework.boot.SpringApplication;
@@ -22,4 +21,17 @@ public class Application extends SpringBootServletInitializer implements AppShel
         SpringApplication.run(Application.class, args);
     }
 
+    //@Bean
+//    public CommandLineRunner commandLineRunner(
+//            ContactRepository contactRepository
+//    )
+//    {
+//        return args -> {
+//            ExampleDataGenerator<Contact> generator = new ExampleDataGenerator<>(Contact.class, LocalDateTime.now());
+//            generator.setData(Contact::setName, DataType.COMPANY_NAME);
+//            //generator.setData(Contact::setICO, DataType.NUMBER_UP_TO_10000.toString());
+//            //generator.setData(Contact::setInvoiceAddress, DataType<Address>);
+//            List<Contact> list = generator.create(100, 1);
+//        };
+//    }
 }

@@ -23,7 +23,6 @@ import cz.upce.fei.dt.ui.components.AvatarMenuBar;
 import cz.upce.fei.dt.ui.views.customerContacts.ContactsView;
 import cz.upce.fei.dt.ui.views.contracts.ContractsView;
 import cz.upce.fei.dt.ui.views.dashboard.DashboardView;
-import cz.upce.fei.dt.ui.views.dials.DialsView;
 import cz.upce.fei.dt.ui.views.users.UsersView;
 
 @JsModule("prefers-color-scheme.js")
@@ -94,7 +93,8 @@ public class MainLayout extends AppLayout implements RouterLayout{
                 new Tab(VaadinIcon.USERS.create(), new RouterLink("Uživatelé", UsersView.class)),
                 new Tab(VaadinIcon.NOTEBOOK.create(), new RouterLink("Kontakty", ContactsView.class)),
                 new Tab(VaadinIcon.CART.create(), new RouterLink("Zakázky", ContractsView.class)),
-                new Tab(VaadinIcon.DATABASE.create(), new RouterLink("Číselniky", DialsView.class))
+                new Tab(VaadinIcon.HOME.create(), new RouterLink("Komponenty", ComponentsView.class)),
+                new Tab(VaadinIcon.CART.create(), new RouterLink("Produkty", ProductView.class))
         );
         tabs.setOrientation(Tabs.Orientation.VERTICAL);
         tabs.setSelectedIndex(0);

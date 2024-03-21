@@ -48,7 +48,9 @@
 }
 
 /* GridFormLayout*/
-
+.form-layout{
+    overflow: auto;
+}
 .form-top-actions{
     flex-direction: row-reverse;
 }
