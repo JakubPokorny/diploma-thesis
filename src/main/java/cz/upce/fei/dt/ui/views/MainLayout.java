@@ -21,7 +21,6 @@ import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.flow.theme.lumo.Lumo;
 import cz.upce.fei.dt.ui.components.AvatarMenuBar;
 import cz.upce.fei.dt.ui.views.customerContacts.ContactsView;
-import cz.upce.fei.dt.ui.views.contracts.ContractsView;
 import cz.upce.fei.dt.ui.views.dashboard.DashboardView;
 import cz.upce.fei.dt.ui.views.users.UsersView;
 

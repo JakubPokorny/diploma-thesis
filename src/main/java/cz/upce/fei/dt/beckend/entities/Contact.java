@@ -1,18 +1,18 @@
 package cz.upce.fei.dt.beckend.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
+import lombok.*;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
-@Data
 @Builder
+@Getter
+@Setter
+@ToString
 @AllArgsConstructor
 @Entity
 @Table(name = "contacts")
@@ -24,9 +24,9 @@ public class Contact {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
-    @Column(precision = 8, scale = 0)
+    @Column(precision = 8)
     private String ICO;
 
     @Column
@@ -39,22 +39,40 @@ public class Contact {
     private String email;
 
     @Column(length = 20, nullable = false)
-    private  String phone;
+    private String phone;
 
     @Column
     @UpdateTimestamp
     private LocalDateTime updated;
 
+    @OneToMany(mappedBy = "contact")
+    @ToString.Exclude
+    Set<Contract> contracts = new HashSet<>();
+
     @OneToOne(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "invoice_address_id", nullable = false)
+    @ToString.Exclude
     private Address invoiceAddress;
 
     @OneToOne(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
-    @JoinColumn(name = "delivery_address_id")   
+    @JoinColumn(name = "delivery_address_id")
+    @ToString.Exclude
     private Address deliveryAddress;
 
     public boolean hasDeliveryAddress() {
         return deliveryAddress != null && !deliveryAddress.isEmpty();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Contact contact = (Contact) o;
+        return Objects.equals(id, contact.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

@@ -70,7 +70,6 @@ public class ProductComponentForm extends FormLayout implements IEditForm<Produc
     //region IEditForm
     @Override
     public ProductComponent getValue() {
-
         return productComponent;
     }
 

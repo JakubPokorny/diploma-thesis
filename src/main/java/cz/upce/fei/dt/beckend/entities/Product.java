@@ -5,12 +5,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.proxy.HibernateProxy;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Builder
 @Getter
@@ -52,7 +49,7 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     @ToString.Exclude
     @JsonIgnore
-    private List<ProductComponent> productComponents = new ArrayList<>();
+    private Set<ProductComponent> productComponents = new HashSet<>();
 
     public List<Component> getSelectedComponents() {
         List<Component> selectedComponents = new ArrayList<>();
@@ -65,25 +62,23 @@ public class Product {
     public List<ProductComponent> getDifference(List<ProductComponent> inDatabase) {
         productComponents.forEach(
                 toPersist -> inDatabase.removeIf(alreadySaved ->
-                    toPersist.getId().equals(alreadySaved.getId())
+                        toPersist.getId().equals(alreadySaved.getId())
                 )
         );
         return inDatabase;
     }
+
+
     @Override
-    public final boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null) return false;
-        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
-        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
-        if (thisEffectiveClass != oEffectiveClass) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         Product product = (Product) o;
-        return getId() != null && Objects.equals(getId(), product.getId());
+        return Objects.equals(id, product.id);
     }
 
     @Override
-    public final int hashCode() {
-        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    public int hashCode() {
+        return Objects.hash(id);
     }
-
 }

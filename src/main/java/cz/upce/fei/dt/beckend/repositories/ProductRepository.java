@@ -14,7 +14,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
     @EntityGraph(value = "Product.eagerlyFetchComponent")
-    @NonNull Page<Product> findAll(@NonNull Pageable pageable);
+    @NonNull
+    Page<Product> findAll(@NonNull Pageable pageable);
 
     @Query(value = "select id, name from products " +
             "where lower(name) like lower(concat('%', :searchTerm, '%'))", nativeQuery = true)

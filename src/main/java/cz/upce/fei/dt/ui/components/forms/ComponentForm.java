@@ -33,7 +33,7 @@ public class ComponentForm extends FormLayout implements IEditForm<Component> {
     private final IntegerField amount = new IntegerField("Skladem");
     private final IntegerField min  = new IntegerField("Minimálně skladem");
     private final ComboBox<User> notify = new ComboBox<>("Notifikovat");
-    private final MultiSelectComboBox<Product> productsMCB = new MultiSelectComboBox<>("Produkty");
+    private final MultiSelectComboBox<Product> productsMSB = new MultiSelectComboBox<>("Produkty");
     private final HashMap<Long, ProductComponentForm> productComponentForms = new HashMap<>();
 
     public ComponentForm(ProductService productService, UserService userService) {
@@ -72,11 +72,11 @@ public class ComponentForm extends FormLayout implements IEditForm<Component> {
         binder.forField(notify)
                 .bind(Component::getUser, Component::setUser);
 
-        productsMCB.setItems(query -> productService.findAllProductsIdAndName(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
-        productsMCB.setItemLabelGenerator(Product::getName);
-        productsMCB.addSelectionListener(this::addProductComponentForm);
+        productsMSB.setItems(query -> productService.findAllProductsIdAndName(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
+        productsMSB.setItemLabelGenerator(Product::getName);
+        productsMSB.addSelectionListener(this::addProductComponentForm);
 
-        this.add(name, description, amount, min, notify, productsMCB);
+        this.add(name, description, amount, min, notify, productsMSB);
     }
 
     private void addProductComponentForm(MultiSelectionEvent<MultiSelectComboBox<Product>, Product> event) {
@@ -104,7 +104,7 @@ public class ComponentForm extends FormLayout implements IEditForm<Component> {
 
     @Override
     public void setValue(Component value) {
-        productsMCB.clear();
+        productsMSB.clear();
 
         component = value;
         if (component != null){
@@ -116,7 +116,7 @@ public class ComponentForm extends FormLayout implements IEditForm<Component> {
                 productComponentForms.put(productComponent.getProduct().getId(), form);
                 this.add(form);
             });
-            productsMCB.setValue(selectedProducts);
+            productsMSB.setValue(selectedProducts);
         }
         binder.readBean(component);
     }

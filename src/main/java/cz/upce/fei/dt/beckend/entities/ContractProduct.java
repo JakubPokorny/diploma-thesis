@@ -1,6 +1,6 @@
 package cz.upce.fei.dt.beckend.entities;
 
-import cz.upce.fei.dt.beckend.entities.keys.ProductComponentKey;
+import cz.upce.fei.dt.beckend.entities.keys.ContractProductKey;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,28 +13,27 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "product_components")
-public class ProductComponent {
-
+@Table(name = "contract_products")
+public class ContractProduct {
     @EmbeddedId
-    private ProductComponentKey id = new ProductComponentKey();
+    private ContractProductKey id = new ContractProductKey();
 
     @Column(nullable = false)
     private int amount;
 
     @ManyToOne
-    @MapsId("componentId")
-    @JoinColumn(name = "component_id")
-    private Component component;
+    @MapsId("contractId")
+    @JoinColumn(name = "contract_id")
+    private Contract contract;
 
     @ManyToOne
     @MapsId("productId")
     @JoinColumn(name = "product_id")
     private Product product;
 
-    public void setComponent(Component component) {
-        this.component = component;
-        id.setComponentId(component.getId());
+    public void setContract(Contract contract) {
+        this.contract = contract;
+        id.setContractId(contract.getId());
     }
 
     public void setProduct(Product product) {
@@ -42,11 +41,12 @@ public class ProductComponent {
         id.setProductId(product.getId());
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ProductComponent that = (ProductComponent) o;
+        ContractProduct that = (ContractProduct) o;
         return Objects.equals(id, that.id);
     }
 

@@ -43,7 +43,7 @@ public class ProductForm extends FormLayout implements IEditForm<Product> {
 
     private void addProductComponentForm(MultiSelectionEvent<MultiSelectComboBox<Component>, Component> event) {
         event.getAddedSelection().forEach(component -> {
-            if (!productComponentForms.containsKey(component.getId())){
+            if (!productComponentForms.containsKey(component.getId())) {
                 ProductComponentForm form = new ProductComponentForm(component);
                 productComponentForms.put(component.getId(), form);
                 this.add(form);
@@ -67,7 +67,7 @@ public class ProductForm extends FormLayout implements IEditForm<Product> {
     public void setValue(Product value) {
         componentMCB.clear();
         product = value;
-        if (product != null){
+        if (product != null) {
             List<Component> selectedComponents = new ArrayList<>();
             product.getProductComponents().forEach(productComponent -> {
                 selectedComponents.add(productComponent.getComponent());
@@ -84,7 +84,7 @@ public class ProductForm extends FormLayout implements IEditForm<Product> {
     @Override
     public void validate() throws ValidationException {
         binder.writeBean(product);
-        for (ProductComponentForm form : productComponentForms.values()){
+        for (ProductComponentForm form : productComponentForms.values()) {
             form.getProductCB().setValue(product);
             form.getProductComponent().setProduct(product);
             form.validate();

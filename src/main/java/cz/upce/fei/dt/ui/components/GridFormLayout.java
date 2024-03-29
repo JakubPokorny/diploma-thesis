@@ -55,7 +55,8 @@ public class GridFormLayout<F extends FormLayout & IEditForm<T>, T> extends Hori
         add(contentLayout, formLayout);
 
     }
-    private void showConfirmDeleteDialog(){
+
+    private void showConfirmDeleteDialog() {
         ConfirmDialog dialog = new ConfirmDialog();
 
         dialog.setHeader("Odstranit záznam");
@@ -69,32 +70,35 @@ public class GridFormLayout<F extends FormLayout & IEditForm<T>, T> extends Hori
         dialog.open();
     }
 
-    public void addNewValue(T value){
+    public void addNewValue(T value) {
         content.asSingleSelect().clear();
         showFormLayout(value);
     }
-    public void showFormLayout(T value){
-        if (value == null){
+
+    public void showFormLayout(T value) {
+        if (value == null) {
             closeFormLayout();
-        }else{
+        } else {
             form.setValue(value);
             formLayout.setVisible(true);
             addClassName("editing");
             UI.getCurrent().getPage().retrieveExtendedClientDetails(receiver -> {
                 int screenWidth = receiver.getScreenWidth();
                 int screenHeight = receiver.getScreenHeight();
-                if (screenWidth < 550 || screenHeight < 400){
+                if (screenWidth < 550 || screenHeight < 400) {
                     contentLayout.setVisible(false);
                 }
             });
         }
     }
+
     public void closeFormLayout() {
         form.setValue(null);
         formLayout.setVisible(false);
         contentLayout.setVisible(true);
         removeClassName("editing");
     }
+
     public void expandFormLayout() {
         contentLayout.setVisible(!contentLayout.isVisible());
         form.expand(!contentLayout.isVisible());
@@ -103,17 +107,20 @@ public class GridFormLayout<F extends FormLayout & IEditForm<T>, T> extends Hori
     public void addDeleteListener(ComponentEventListener<DeleteEvent> listener) {
         addListener(DeleteEvent.class, listener);
     }
+
     public void addSaveListener(ComponentEventListener<SaveEvent> listener) {
         addListener(SaveEvent.class, listener);
     }
+
     public void addCloseListener(ComponentEventListener<CloseEvent> listener) {
         addListener(CloseEvent.class, listener);
     }
-    public void addExpandListener(ComponentEventListener<ExpandEvent> listener){
+
+    public void addExpandListener(ComponentEventListener<ExpandEvent> listener) {
         addListener(ExpandEvent.class, listener);
     }
 
-    private void configureContentLayout(Grid<T> content){
+    private void configureContentLayout(Grid<T> content) {
         actionsLayout = new HorizontalLayout();
         actionsLayout.setClassName("content-actions");
         filtersLayout = new HorizontalLayout();
@@ -126,7 +133,8 @@ public class GridFormLayout<F extends FormLayout & IEditForm<T>, T> extends Hori
 
         contentLayout.add(actionsLayout, filtersLayout, content);
     }
-    private void configureFormLayout(F form){
+
+    private void configureFormLayout(F form) {
         formLayout.setClassName("form-layout");
         formLayout.setWidth("40%");
         formLayout.setVisible(false);
@@ -139,7 +147,8 @@ public class GridFormLayout<F extends FormLayout & IEditForm<T>, T> extends Hori
 
         formLayout.add(createFormTopActions(), form, createFormBottomActions());
     }
-    private HorizontalLayout createFormTopActions(){
+
+    private HorizontalLayout createFormTopActions() {
         HorizontalLayout topActions = new HorizontalLayout();
         topActions.setClassName("form-top-actions");
         topActions.setSpacing(false);
@@ -147,7 +156,7 @@ public class GridFormLayout<F extends FormLayout & IEditForm<T>, T> extends Hori
         topActions.setWidthFull();
 
         final Button save = new Button(LumoIcon.CHECKMARK.create());
-        final Button delete = new Button(LumoIcon.CROSS.create());
+        final Button delete = new Button(VaadinIcon.TRASH.create());
         final Button close = new Button(VaadinIcon.CLOSE_CIRCLE_O.create());
         final Button expand = new Button(VaadinIcon.EXPAND_FULL.create());
 
@@ -167,7 +176,8 @@ public class GridFormLayout<F extends FormLayout & IEditForm<T>, T> extends Hori
         topActions.add(close, expand, delete, save);
         return topActions;
     }
-    private VerticalLayout createFormBottomActions(){
+
+    private VerticalLayout createFormBottomActions() {
         VerticalLayout bottomActions = new VerticalLayout();
         bottomActions.setPadding(false);
         bottomActions.setMargin(false);
@@ -180,7 +190,7 @@ public class GridFormLayout<F extends FormLayout & IEditForm<T>, T> extends Hori
         save.setWidthFull();
 
         final Button delete = new Button("Smazat");
-        delete.setPrefixComponent(LumoIcon.CROSS.create());
+        delete.setPrefixComponent(VaadinIcon.TRASH.create());
         delete.addThemeVariants(ButtonVariant.LUMO_ERROR);
         delete.addClickListener(event -> showConfirmDeleteDialog());
         delete.setWidthFull();
@@ -188,7 +198,8 @@ public class GridFormLayout<F extends FormLayout & IEditForm<T>, T> extends Hori
         bottomActions.add(save, delete);
         return bottomActions;
     }
-    private void validateAndSave(){
+
+    private void validateAndSave() {
         try {
             form.validate();
             fireEvent(new SaveEvent(this, form.getValue()));
