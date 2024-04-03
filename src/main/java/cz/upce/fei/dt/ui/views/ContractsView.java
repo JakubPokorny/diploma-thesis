@@ -14,6 +14,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import cz.upce.fei.dt.beckend.entities.Contract;
 import cz.upce.fei.dt.beckend.entities.Product;
+import cz.upce.fei.dt.beckend.exceptions.StockException;
 import cz.upce.fei.dt.beckend.services.*;
 import cz.upce.fei.dt.ui.components.GridFormLayout;
 import cz.upce.fei.dt.ui.components.forms.ContractForm;
@@ -89,6 +90,8 @@ public class ContractsView extends VerticalLayout {
             updateGrid();
             gridFormLayout.closeFormLayout();
             Notification.show("Zakázka " + contract.getId() + " uložena.").addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        } catch (StockException stockException) {
+            stockException.showNotification();
         } catch (Exception exception) {
             Notification.show(exception.getMessage()).addThemeVariants(NotificationVariant.LUMO_ERROR);
         }

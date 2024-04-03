@@ -56,7 +56,7 @@ public class ProductService {
 
     public void deleteProduct(Product product) throws Exception {
         Product wantToDelete = productRepository.findById(product.getId())
-                .orElseThrow(() -> new Exception("Produkt " + product.getName() + " nenalezan."));
+                .orElseThrow(() -> new Exception("Produkt " + product.getName() + " nenalezen."));
         productRepository.delete(wantToDelete);
     }
 }

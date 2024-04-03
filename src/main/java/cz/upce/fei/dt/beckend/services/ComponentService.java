@@ -1,5 +1,6 @@
 package cz.upce.fei.dt.beckend.services;
 
+import cz.upce.fei.dt.beckend.dto.CheckStockDto;
 import cz.upce.fei.dt.beckend.entities.Component;
 import cz.upce.fei.dt.beckend.entities.ProductComponent;
 import cz.upce.fei.dt.beckend.repositories.ComponentRepository;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -18,9 +20,10 @@ import java.util.stream.Stream;
 public class ComponentService {
     private final ComponentRepository componentRepository;
     private final ProductComponentRepository productComponentRepository;
+    private final EmailService emailService;
 
     public Stream<Component> findAllComponentsIdAndName(int page, int pageSize, String searchTerm) {
-        return componentRepository.findAllComponentsIDAndName(PageRequest.of(page,pageSize), searchTerm)
+        return componentRepository.findAllComponentsIDAndName(PageRequest.of(page, pageSize), searchTerm)
                 .stream()
                 .map(iComponent -> Component.builder()
                         .id(iComponent.getId())
@@ -28,13 +31,15 @@ public class ComponentService {
                         .build()
                 );
     }
-    public Stream<Component> findAll(int page, int pageSize){
+
+    public Stream<Component> findAll(int page, int pageSize) {
         return componentRepository.findAll(PageRequest.of(page, pageSize)).stream();
     }
+
     @Transactional
-    public void saveComponent(Component component){
+    public void saveComponent(Component component) {
         component.setUpdated(LocalDateTime.now());
-        if (component.getId() == null){
+        if (component.getId() == null) {
             List<ProductComponent> productComponents = component.getProductComponents();
             component.setProductComponents(null);
             Component savedComponent = componentRepository.save(component);
@@ -51,10 +56,25 @@ public class ComponentService {
             componentRepository.save(component);
         }
     }
+
     public void deleteComponent(Component component) throws Exception {
         Component wantToDelete = componentRepository.findById(component.getId())
-                .orElseThrow(()-> new Exception("Komponenta "+ component.getName() +" nenalezana."));
+                .orElseThrow(() -> new Exception("Komponenta " + component.getName() + " nenalezana."));
         componentRepository.delete(wantToDelete);
     }
 
+    @Transactional
+    public void updateAllAmount(Collection<CheckStockDto> checkers) {
+        checkers.forEach(stockDto -> {
+            componentRepository.updateAmountById(stockDto.getComponentId(), stockDto.getComponentsInStock());
+            if (stockDto.getMinComponentsInStock() != null && stockDto.getComponentsInStock() < stockDto.getMinComponentsInStock() && stockDto.getEmail() != null) {
+                emailService.sendStockNotification(
+                        stockDto.getEmail(),
+                        stockDto.getComponentName(),
+                        stockDto.getComponentsInStock(),
+                        stockDto.getMinComponentsInStock()
+                );
+            }
+        });
+    }
 }

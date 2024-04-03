@@ -20,4 +20,10 @@ public class EmailService {
         message.setText(text);
         sender.send(message);
     }
+
+    public void sendStockNotification(String to, String componentName, int componentsInStock, int minComponentsInStock){
+        String subject = "Sklad: %s na %d pod %d".formatted(componentName, componentsInStock, minComponentsInStock);
+        String text = "Komponenta %s skladem %d, tedy pod nastavenou hranici %d.".formatted(componentName, componentsInStock, minComponentsInStock);
+        send(to, subject, text);
+    }
 }

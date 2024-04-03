@@ -33,14 +33,18 @@ public class ContractService {
             contract.setContractProducts(null);
             Contract savedContract = contractRepository.save(contract);
 
+
             for (ContractProduct contractProduct : contractProducts) {
                 contractProduct.setContract(savedContract);
-                contractProductService.save(contractProduct);
             }
+            contractProductService.saveAll(contractProducts);
 
             contract.getCurrentDeadline().setContract(savedContract);
             deadlineService.save(contract.getCurrentDeadline());
         } else {
+            contractProductService.deleteAllOrphans(contract);
+            contractProductService.saveAll(contract.getContractProducts());
+
             contractRepository.save(contract);
             deadlineService.save(contract.getCurrentDeadline());
         }
@@ -49,6 +53,9 @@ public class ContractService {
     @Transactional
     public void deleteContract(Contract contract) {
         contract.getFiles().forEach(fileService::delete);
+        contractProductService.deleteAll(contract);
         contractRepository.delete(contract);
     }
+
+
 }

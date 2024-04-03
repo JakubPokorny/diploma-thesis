@@ -59,7 +59,7 @@ public class Contract {
     @ToString.Exclude
     private Contact contact;
 
-    @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "contract")
     @ToString.Exclude
     @JsonIgnore
     private Set<ContractProduct> contractProducts = new HashSet<>();
