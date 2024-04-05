@@ -37,11 +37,12 @@ public class ContractsView extends VerticalLayout {
             ContactService contactService,
             ProductService productService,
             NoteService noteService,
-            FileService fileService) {
+            FileService fileService,
+            DeadlineService deadlineService) {
         this.contractService = contractService;
         this.productService = productService;
 
-        ContractForm form = new ContractForm(contactService, productService, noteService, fileService);
+        ContractForm form = new ContractForm(contactService, productService, noteService, fileService, deadlineService);
         grid = new Grid<>(Contract.class, false);
         gridFormLayout = new GridFormLayout<>(form, grid);
         MainLayout.setPageTitle("Zakázky", ContractsView.class);

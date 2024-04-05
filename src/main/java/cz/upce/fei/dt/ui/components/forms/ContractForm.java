@@ -11,10 +11,7 @@ import cz.upce.fei.dt.beckend.entities.Contract;
 import cz.upce.fei.dt.beckend.entities.ContractProduct;
 import cz.upce.fei.dt.beckend.entities.Product;
 import cz.upce.fei.dt.beckend.entities.keys.ContractProductKey;
-import cz.upce.fei.dt.beckend.services.ContactService;
-import cz.upce.fei.dt.beckend.services.FileService;
-import cz.upce.fei.dt.beckend.services.NoteService;
-import cz.upce.fei.dt.beckend.services.ProductService;
+import cz.upce.fei.dt.beckend.services.*;
 import cz.upce.fei.dt.ui.components.forms.events.FileForm;
 
 import java.util.Collections;
@@ -27,25 +24,26 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
     private final MultiSelectComboBox<Product> productsMSB = new MultiSelectComboBox<>("Objednané Produkty");
     private final FormLayout contractProductFormsLayout = new FormLayout();
     private final HashMap<Long, ContractProductForm> contractProductForms = new HashMap<>();
-    private final DeadlineForm deadlineForm = new DeadlineForm();
+    private final DeadlineForm deadlineForm;
     private final NoteService noteService;
     private NoteForm noteForm;
     private final FileService fileService;
     private FileForm fileForm;
     private Contract contract;
 
-    public ContractForm(ContactService contactService, ProductService productService, NoteService noteService, FileService fileService) {
+    public ContractForm(ContactService contactService, ProductService productService, NoteService noteService, FileService fileService, DeadlineService deadlineService) {
         setClassName("edit-form");
 
         this.noteService = noteService;
         this.fileService = fileService;
+        deadlineForm = new DeadlineForm(deadlineService);
 
         setupContactCB(contactService);
         setupProductMSB(productService);
         setupContractProductsForms();
 
         this.setColspan(productsMSB, 3);
-        this.setColspan(deadlineForm, 3);
+        this.setColspan(deadlineForm, 6);
         this.setColspan(contractProductFormsLayout, 3);
         add(contactCB, productsMSB, contractProductFormsLayout, deadlineForm);
     }
