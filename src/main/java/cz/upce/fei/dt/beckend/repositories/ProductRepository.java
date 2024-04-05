@@ -13,6 +13,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
@@ -34,12 +35,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                 c.min as minComponentsInStock,
                 u.email as email
             from Product p
-            left join ProductComponent pc on pc.product.id = p.id
+            join ProductComponent pc on pc.product.id = p.id
             left join Component c on c.id = pc.component.id
             left join User u on u.id = c.user.id
             where p.id = :productId
             """)
-    List<ICheckProduct> findByProductId(@Param("productId") Long productId);
+    Optional<List<ICheckProduct>> findByProductId(@Param("productId") Long productId);
 
 
 }

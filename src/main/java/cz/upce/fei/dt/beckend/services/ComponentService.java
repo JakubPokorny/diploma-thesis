@@ -64,8 +64,8 @@ public class ComponentService {
     }
 
     @Transactional
-    public void updateAllAmount(Collection<CheckStockDto> checkers) {
-        checkers.forEach(stockDto -> {
+    public void updateAllAmountAssigned(Collection<CheckStockDto> assigned) {
+        assigned.forEach(stockDto -> {
             componentRepository.updateAmountById(stockDto.getComponentId(), stockDto.getComponentsInStock());
             if (stockDto.getMinComponentsInStock() != null && stockDto.getComponentsInStock() < stockDto.getMinComponentsInStock() && stockDto.getEmail() != null) {
                 emailService.sendStockNotification(
