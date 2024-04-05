@@ -25,6 +25,7 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
     private final FormLayout contractProductFormsLayout = new FormLayout();
     private final HashMap<Long, ContractProductForm> contractProductForms = new HashMap<>();
     private final DeadlineForm deadlineForm;
+    private final DeadlineService deadlineService;
     private final NoteService noteService;
     private NoteForm noteForm;
     private final FileService fileService;
@@ -36,6 +37,7 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
 
         this.noteService = noteService;
         this.fileService = fileService;
+        this.deadlineService = deadlineService;
         deadlineForm = new DeadlineForm(deadlineService);
 
         setupContactCB(contactService);
@@ -132,18 +134,20 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
 
             productsMSB.setValue(contract.getSelectedProducts());
 
-            deadlineForm.setValue(contract.getCurrentDeadline());
+            deadlineForm.setValue(deadlineService.findFirstByContractIdOrderByCreatedDesc(contract.getId()));
 
             if (contract.getId() != null) {
                 addFileForm();
                 addNoteForm();
             }
         } else {
-            if (fileForm != null)
+            if (fileForm != null) {
                 remove(fileForm);
+            }
             fileForm = null;
-            if (noteForm != null)
+            if (noteForm != null) {
                 remove(noteForm);
+            }
             noteForm = null;
         }
 

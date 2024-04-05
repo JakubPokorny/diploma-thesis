@@ -33,6 +33,11 @@ public class DeadlineService {
         deadline.setId(null); // save as new deadline
         deadlineRepository.save(deadline);
     }
+
+    public void deleteAll(Long contractId){
+        deadlineRepository.deleteAllByContractId(contractId);
+    }
+
     public Stream<Deadline> findAllByContractId(Long contractId, int page, int pageSize){
         return deadlineRepository.findAllByContractId(contractId, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "created")))
                 .stream()
@@ -45,5 +50,9 @@ public class DeadlineService {
                         .deadline(iDeadline.getDeadline())
                         .created(iDeadline.getCreated())
                         .build());
+    }
+
+    public Deadline findFirstByContractIdOrderByCreatedDesc(Long contractId){
+        return deadlineRepository.findFirstByContractIdOrderByCreatedDesc(contractId).orElse(new Deadline());
     }
 }

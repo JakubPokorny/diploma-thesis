@@ -26,18 +26,13 @@ import java.util.Set;
                 @NamedAttributeNode(value = "contact"),
                 @NamedAttributeNode(value = "files"),
                 @NamedAttributeNode(value = "notes"),
-                @NamedAttributeNode(value = "contractProducts", subgraph = "contractProductSubgraph"),
-                @NamedAttributeNode(value = "deadlines", subgraph = "deadlinesSubgraph")
+                @NamedAttributeNode(value = "contractProducts", subgraph = "contractProductSubgraph")
         },
         subgraphs = {
                 @NamedSubgraph(
                         name = "contractProductSubgraph",
                         attributeNodes = {@NamedAttributeNode("product")}
                 ),
-                @NamedSubgraph(
-                        name = "deadlinesSubgraph",
-                        attributeNodes = {@NamedAttributeNode("user")}
-                )
         }
 )
 public class Contract {
@@ -64,7 +59,7 @@ public class Contract {
     @JsonIgnore
     private Set<ContractProduct> contractProducts = new HashSet<>();
 
-    @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "contract")
     @ToString.Exclude
     @JsonIgnore
     private Set<Deadline> deadlines = new HashSet<>();

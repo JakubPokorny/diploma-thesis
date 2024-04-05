@@ -10,10 +10,16 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface DeadlineRepository extends JpaRepository<Deadline, Long> {
 
     @Query("select d from Deadline d where d.contract.id = :contractId")
     @NonNull
     Page<IDeadline> findAllByContractId(@Param("contractId") Long contractId, @NonNull Pageable pageable);
+
+    Optional<Deadline> findFirstByContractIdOrderByCreatedDesc(Long contractId);
+
+    void deleteAllByContractId(Long contractId);
 }

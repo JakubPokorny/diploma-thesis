@@ -2,6 +2,7 @@ package cz.upce.fei.dt.beckend.services;
 
 import cz.upce.fei.dt.beckend.entities.Contract;
 import cz.upce.fei.dt.beckend.entities.ContractProduct;
+import cz.upce.fei.dt.beckend.entities.Deadline;
 import cz.upce.fei.dt.beckend.repositories.ContractRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -33,27 +34,32 @@ public class ContractService {
             contract.setContractProducts(null);
             Contract savedContract = contractRepository.save(contract);
 
-
             for (ContractProduct contractProduct : contractProducts) {
                 contractProduct.setContract(savedContract);
             }
             contractProductService.saveAll(contractProducts);
 
-            contract.getCurrentDeadline().setContract(savedContract);
-            deadlineService.save(contract.getCurrentDeadline());
+            Deadline deadline = contract.getCurrentDeadline();
+            deadline.setContract(savedContract);
+            deadlineService.save(deadline);
         } else {
             contractProductService.deleteAllOrphans(contract);
             contractProductService.saveAll(contract.getContractProducts());
 
-            contractRepository.save(contract);
             deadlineService.save(contract.getCurrentDeadline());
+
+            contractRepository.save(contract);
         }
     }
 
     @Transactional
     public void deleteContract(Contract contract) {
         contract.getFiles().forEach(fileService::delete);
+
         contractProductService.deleteAll(contract);
+
+        deadlineService.deleteAll(contract.getId());
+
         contractRepository.delete(contract);
     }
 
