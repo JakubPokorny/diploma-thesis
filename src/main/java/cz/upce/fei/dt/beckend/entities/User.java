@@ -26,7 +26,7 @@ public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(length = 100, nullable = false, unique = true)
     private String email;
@@ -60,7 +60,7 @@ public class User implements UserDetails {
     @ToString.Exclude
     List<Component> components;
 
-    public String getFullName(){
+    public String getFullName() {
         return firstName + " " + lastName;
     }
 
@@ -75,7 +75,7 @@ public class User implements UserDetails {
     }
 
     @Override
-    public String getPassword(){
+    public String getPassword() {
         return password;
     }
 
@@ -104,7 +104,7 @@ public class User implements UserDetails {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return id == user.id && Objects.equals(email, user.email);
+        return id.equals(user.id) && Objects.equals(email, user.email);
     }
 
     @Override

@@ -6,4 +6,7 @@ public interface IProductComponent {
     ProductComponentKey getId();
     int getAmount();
 
+    IProduct getProduct();
+    IComponent getComponent();
+
 }

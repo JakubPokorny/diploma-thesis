@@ -1,9 +1,10 @@
 package cz.upce.fei.dt.beckend.services;
 
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import cz.upce.fei.dt.beckend.entities.User;
 import cz.upce.fei.dt.beckend.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import java.io.InvalidClassException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Stream;
 
 
 @Service
@@ -20,8 +22,20 @@ public class UserService{
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+
+    public Stream<User> findAllByFirstnameAndLastname(Query<User, String> query){
+        String searchTerm = query.getFilter().orElse("");
+        return userRepository.findAllByFirstnameAndLastname(VaadinSpringDataHelpers.toSpringPageRequest(query), searchTerm)
+                .stream()
+                .map(iUser -> User.builder()
+                        .id(iUser.getId())
+                        .firstName(iUser.getFirstName())
+                        .lastName(iUser.getLastName())
+                        .build()
+                );
+    }
     @Transactional
-    public List<User> getAll() {
+    public List<User> findAll() {
         return userRepository.findAll();
     }
 

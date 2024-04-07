@@ -57,18 +57,18 @@ public class ComponentForm extends FormLayout implements IEditForm<Component> {
         binder.forField(amount)
                 .withValidator(new IntegerRangeValidator("Skladem mimo hodnoty <0;4 294 967 296>", 0, Integer.MAX_VALUE ))
                 .asRequired()
-                .bind(Component::getAmount, Component::setAmount);
+                .bind(Component::getInStock, Component::setInStock);
 
         min.setStepButtonsVisible(true);
         min.setMin(0);
         min.setMax(Integer.MAX_VALUE);
         binder.forField(min)
                 .withValidator(new IntegerRangeValidator("Minimum mimo hodnoty <0;4 294 967 296>", 0, Integer.MAX_VALUE ))
-                .bind(Component::getMin, Component::setMin);
+                .bind(Component::getMinInStock, Component::setMinInStock);
 
-        notify.setItems(userService.getAll());
+        notify.setItems(userService.findAll());
         notify.setItemLabelGenerator(User::getFullName);
-        //todo clear button for notify combobox
+        notify.setClearButtonVisible(true);
         binder.forField(notify)
                 .bind(Component::getUser, Component::setUser);
 

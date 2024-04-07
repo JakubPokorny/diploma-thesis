@@ -7,9 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Builder
 @Getter
@@ -48,10 +46,10 @@ public class Component {
     private String description;
 
     @Column(nullable = false)
-    private Integer amount = 0;
+    private int inStock;
 
     @Column
-    private Integer min;
+    private Integer minInStock;
 
     @Column
     @CreationTimestamp
@@ -64,7 +62,7 @@ public class Component {
     @OneToMany(mappedBy = "component", cascade = CascadeType.ALL)
     @ToString.Exclude
     @JsonIgnore
-    private List<ProductComponent> productComponents = new ArrayList<>();
+    private Set<ProductComponent> productComponents = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "user_id")

@@ -15,13 +15,13 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import cz.upce.fei.dt.beckend.entities.Deadline;
 import cz.upce.fei.dt.beckend.entities.State;
 import cz.upce.fei.dt.beckend.services.DeadlineService;
+import cz.upce.fei.dt.beckend.utilities.CzechI18n;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
-import java.util.List;
 
 @Getter
 @Setter
@@ -51,7 +51,7 @@ public class DeadlineForm extends FormLayout implements IEditForm<Deadline> {
                 .asRequired()
                 .bind(Deadline::getState, Deadline::setState);
 
-        deadlineDate.setI18n(getCzechI18n());
+        deadlineDate.setI18n(CzechI18n.getDatePickerI18n());
         binder.forField(deadlineDate)
                 .withValidator(localDate -> localDate == null || localDate.isAfter(LocalDate.now().minusDays(1)), "Vyberte Deadline v budoucnosti.")
                 .bind(Deadline::getDeadline, Deadline::setDeadline);
@@ -78,17 +78,6 @@ public class DeadlineForm extends FormLayout implements IEditForm<Deadline> {
 
     private void showHistory(ClickEvent<Button> event) {
         historyGrid.setVisible(!historyGrid.isVisible());
-    }
-
-    private static DatePicker.DatePickerI18n getCzechI18n() {
-        DatePicker.DatePickerI18n czech = new DatePicker.DatePickerI18n();
-        czech.setMonthNames(List.of("Leden", "Únor", "Březen", "Duben", "Květen", "Červen", "Červenec", "Srpen", "Září", "Říjen", "Listopad", "Prosinec"));
-        czech.setWeekdays(List.of("Pondělí", "Úterý", "Středa", "Čtvrtek", "Pátek", "Sobota", "Neděle"));
-        czech.setWeekdaysShort(List.of("Po", "Út", "St", "Čt", "Pá", "So", "Ne"));
-        czech.setToday("Dnes");
-        czech.setCancel("Zrušit");
-        czech.setDateFormat("d. M. yyyy");
-        return czech;
     }
 
     //region IEditForm

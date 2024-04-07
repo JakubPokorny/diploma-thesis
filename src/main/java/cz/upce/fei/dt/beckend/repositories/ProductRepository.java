@@ -31,8 +31,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                 pc.amount as componentPerProduct,
                 c.id as componentId,
                 c.name as componentName,
-                c.amount as componentsInStock,
-                c.min as minComponentsInStock,
+                c.inStock as componentsInStock,
+                c.minInStock as minComponentsInStock,
                 u.email as email
             from Product p
             join ProductComponent pc on pc.product.id = p.id

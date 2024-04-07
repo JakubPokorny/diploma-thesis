@@ -3,10 +3,12 @@ package cz.upce.fei.dt.ui.views;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -16,6 +18,8 @@ import cz.upce.fei.dt.beckend.entities.Product;
 import cz.upce.fei.dt.beckend.services.ComponentService;
 import cz.upce.fei.dt.beckend.services.ProductService;
 import cz.upce.fei.dt.beckend.services.UserService;
+import cz.upce.fei.dt.beckend.services.filters.ComponentFilter;
+import cz.upce.fei.dt.ui.components.FilterFields;
 import cz.upce.fei.dt.ui.components.GridFormLayout;
 import cz.upce.fei.dt.ui.components.forms.ComponentForm;
 import cz.upce.fei.dt.ui.components.forms.events.DeleteEvent;
@@ -29,8 +33,12 @@ import jakarta.annotation.security.PermitAll;
 public class ComponentsView extends VerticalLayout {
     private final ComponentService componentService;
     private final ProductService productService;
+    private final UserService userService;
     private final Grid<Component> grid;
     private final GridFormLayout<ComponentForm, Component> gridFormLayout;
+
+    private final ComponentFilter componentFilter = new ComponentFilter();
+    private ConfigurableFilterDataProvider<Component, Void, ComponentFilter> configurableFilterDataProvider;
 
 
     public ComponentsView(ComponentService componentService,
@@ -39,6 +47,7 @@ public class ComponentsView extends VerticalLayout {
 
         this.componentService = componentService;
         this.productService = productService;
+        this.userService = userService;
 
         ComponentForm form = new ComponentForm(productService, userService);
         grid = new Grid<>(Component.class, false);
@@ -99,16 +108,37 @@ public class ComponentsView extends VerticalLayout {
         grid.setClassName("grid-content");
         grid.setSizeFull();
 
-        grid.addColumn(Component::getName).setHeader("Název");
-        grid.addColumn(Component::getDescription).setHeader("Popis");
-        grid.addColumn(Component::getAmount).setHeader("Skladem");
-        grid.addColumn(Component::getMin).setHeader("Minimum pro notifikaci");
-        grid.addColumn(this::getFullName).setHeader("Notifikovat");
-        grid.addComponentColumn(this::createProductsComponent).setHeader("Produkty").setWidth("150px");
-        grid.addColumn(new LocalDateTimeRenderer<>(Component::getUpdated, "H:mm d. M. yyyy")).setHeader("Naposledy upraveno");
+        DataProvider<Component, ComponentFilter> dataProvider = DataProvider.fromFilteringCallbacks(
+                componentService::findAll,
+                componentService::getCount
+        );
+
+        configurableFilterDataProvider = dataProvider.withConfigurableFilter();
+        configurableFilterDataProvider.setFilter(componentFilter);
+
+        Grid.Column<Component> nameColumn = grid.addColumn(Component::getName).setHeader("Název").setKey("name").setWidth("150px");
+        Grid.Column<Component> descriptionColumn = grid.addColumn(Component::getDescription).setHeader("Popis").setKey("description").setWidth("150px");
+        Grid.Column<Component> inStockColumn = grid.addColumn(Component::getInStock).setHeader("Skladem").setKey("inStock").setWidth("150px");
+        Grid.Column<Component> minInStockColumn = grid.addColumn(Component::getMinInStock).setHeader("Minimum pro notifikaci").setKey("minInStock").setWidth("150px");
+        Grid.Column<Component> userColumn = grid.addColumn(this::getFullName).setHeader("Notifikovat").setWidth("150px");
+        Grid.Column<Component> productsColumn = grid.addComponentColumn(this::createProductsComponent).setHeader("Produkty").setWidth("150px");
+        Grid.Column<Component> updatedColumn = grid.addColumn(new LocalDateTimeRenderer<>(Component::getUpdated, "H:mm d. M. yyyy")).setHeader("Naposledy upraveno").setKey("updated").setWidth("200px");
+
+
+        HeaderRow headerRow = grid.appendHeaderRow();
+        headerRow.getCell(nameColumn).setComponent(FilterFields.createTextFieldFilter( "název", componentFilter::setNameFilter,configurableFilterDataProvider));
+        headerRow.getCell(descriptionColumn).setComponent(FilterFields.createTextFieldFilter( "popis", componentFilter::setDescriptionFilter,configurableFilterDataProvider));
+        headerRow.getCell(inStockColumn).setComponent(FilterFields.createFromToIntegerFilter(componentFilter::setFromAmountFilter, componentFilter::setToAmountFilter, configurableFilterDataProvider));
+        headerRow.getCell(minInStockColumn).setComponent(FilterFields.createFromToIntegerFilter(componentFilter::setFromMinAmountFilter, componentFilter::setToMinAmountFilter, configurableFilterDataProvider));
+        headerRow.getCell(productsColumn).setComponent(FilterFields.createProductMultiSelectComboBoxFilter("produkty", componentFilter::setProductsFilter, configurableFilterDataProvider, productService));
+        headerRow.getCell(userColumn).setComponent(FilterFields.createUserMultiSelectComboBoxFilter("uživatelé", componentFilter::setUsersFilter, configurableFilterDataProvider, userService));
+        headerRow.getCell(updatedColumn).setComponent(FilterFields.createFromToDateTimePickerFilter(componentFilter::setFromUpdatedFilter, componentFilter::setToUpdatedFilter, configurableFilterDataProvider));
 
         grid.asSingleSelect().addValueChangeListener(e-> gridFormLayout.showFormLayout(e.getValue()));
-        grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
+        //grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
+
+        grid.setMultiSort(true, Grid.MultiSortPriority.APPEND);
+        grid.setSortableColumns("name", "description", "inStock", "minInStock", "updated");
 
         updateGrid();
     }
@@ -131,6 +161,6 @@ public class ComponentsView extends VerticalLayout {
     //endregion
 
     private void updateGrid(){
-        grid.setItems(query -> componentService.findAll(query.getPage(), query.getPageSize()));
+        grid.setItems(configurableFilterDataProvider);
     }
 }

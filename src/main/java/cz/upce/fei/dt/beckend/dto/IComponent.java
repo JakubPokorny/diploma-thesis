@@ -1,9 +1,38 @@
 package cz.upce.fei.dt.beckend.dto;
 
+import cz.upce.fei.dt.beckend.entities.keys.ProductComponentKey;
+
+import java.time.LocalDateTime;
+
+//todo repair
 public interface IComponent {
     Long getId();
+
     String getName();
-    int getAmount();
-    int getMin();
-    IUser getIUser();
+
+    String getDescription();
+
+    int getInStock();
+
+    Integer getMinInStock();
+
+    LocalDateTime getUpdated();
+
+    IUser getUser();
+
+    IProductComponent getProductComponents();
+
+    Long getUserId();
+
+    String getFirstName();
+
+    String getLastName();
+
+    ProductComponentKey getProductComponentId();
+
+    int getProductComponentAmount();
+
+    Long getProductId();
+
+    String getProductName();
 }

@@ -33,7 +33,7 @@ public class ContractProductService {
         HashMap<Long, CheckStockDto> missingComponents = getMissingComponents(toAssign);
         if (missingComponents.isEmpty()) {
             contractProductRepository.saveAll(contractProducts);
-            componentService.updateAllAmountAssigned(toAssign.values());
+            componentService.updateAllInStockAssigned(toAssign.values());
         } else {
             throw new StockException(missingComponents.values(), "Objednávku nelze vytvořit, protože některé komponenty nejsou skladem.");
         }
@@ -45,7 +45,7 @@ public class ContractProductService {
         HashMap<Long, CheckStockDto> toUpdate;
         if (!orphans.isEmpty()) {
             toUpdate = getComponentsToRelease(orphans);
-            componentService.updateAllAmountAssigned(toUpdate.values());
+            componentService.updateAllInStockAssigned(toUpdate.values());
             contractProductRepository.deleteAll(orphans);
         }
     }
@@ -54,7 +54,7 @@ public class ContractProductService {
     public void deleteAll(Contract contract) {
         HashMap<Long, CheckStockDto> toUpdate = getComponentsToRelease(contract.getContractProducts());
         if (!toUpdate.isEmpty()) {
-            componentService.updateAllAmountAssigned(toUpdate.values());
+            componentService.updateAllInStockAssigned(toUpdate.values());
         }
         contractProductRepository.deleteAll(contract.getContractProducts());
     }

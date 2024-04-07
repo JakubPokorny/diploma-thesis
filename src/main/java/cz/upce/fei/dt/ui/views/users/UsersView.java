@@ -54,17 +54,17 @@ public class UsersView extends VerticalLayout {
 
     private void saveUser(SaveEvent saveEvent){
         userService.saveUser((User) saveEvent.getValue());
-        grid.setItems(userService.getAll());
+        grid.setItems(userService.findAll());
         gridFormLayout.closeFormLayout();
     }
     private void deleteUser(DeleteEvent deleteEvent){
         userService.deleteUser((User) deleteEvent.getValue());
-        grid.setItems(userService.getAll());
+        grid.setItems(userService.findAll());
         gridFormLayout.closeFormLayout();
     }
 
     private void configureGrid() {
-        grid.setItems(userService.getAll());
+        grid.setItems(userService.findAll());
         grid.addColumn(User::getFirstName).setHeader("Křestní jméno");
         grid.addColumn(User::getLastName).setHeader("Příjmení");
         grid.addColumn(User::getEmail).setHeader("Email");
