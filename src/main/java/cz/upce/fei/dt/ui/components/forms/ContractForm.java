@@ -56,11 +56,11 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
         contractProductFormsLayout.setClassName("contract-products-layout");
         contractProductFormsLayout.setResponsiveSteps(
                 new ResponsiveStep("0", 1),
-                new ResponsiveStep("200px", 2),
-                new ResponsiveStep("400px", 3),
+                new ResponsiveStep("300px", 2),
+                new ResponsiveStep("450px", 3),
                 new ResponsiveStep("600px", 4),
-                new ResponsiveStep("800px", 5),
-                new ResponsiveStep("1000px", 6)
+                new ResponsiveStep("750px", 5),
+                new ResponsiveStep("900px", 6)
         );
     }
 
@@ -81,6 +81,7 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
                 .asRequired()
                 .bind(Contract::getContact, Contract::setContact);
     }
+
     private void addProductComponentForm(MultiSelectionEvent<MultiSelectComboBox<Product>, Product> event) {
         productsMSB.setHelperText("");
         event.getAddedSelection().forEach(product -> {

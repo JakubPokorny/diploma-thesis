@@ -9,13 +9,14 @@ import cz.upce.fei.dt.beckend.entities.ContractProduct;
 
 public class ContractProductForm extends FormLayout implements IEditForm<ContractProduct> {
     private final Binder<ContractProduct> binder = new BeanValidationBinder<>(ContractProduct.class);
-    private final IntegerField amount = new IntegerField();
     private ContractProduct contractProduct;
+    private final IntegerField amount = new IntegerField();
 
     public ContractProductForm(ContractProduct contractProduct) {
         amount.setLabel(contractProduct.getProduct().getName());
         amount.setMin(1);
         amount.setValue(1);
+        amount.setStep(1);
         amount.setMax(Integer.MAX_VALUE);
         amount.setStepButtonsVisible(true);
         binder.forField(amount)
