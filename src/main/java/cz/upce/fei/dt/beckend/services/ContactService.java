@@ -22,7 +22,7 @@ public class ContactService {
                 .map(iContact -> Contact.builder()
                         .id(iContact.getId())
                         .ICO(iContact.getICO())
-                        .name(iContact.getName())
+                        .client(iContact.getName())
                         .build()
                 );
     }

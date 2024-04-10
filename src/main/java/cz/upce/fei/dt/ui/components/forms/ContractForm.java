@@ -105,7 +105,7 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
     }
 
     private String getContactLabel(Contact contact) {
-        return contact.getName() + ", IČO:" + contact.getICO();
+        return contact.getClient() + ", IČO:" + contact.getICO();
     }
 
     //endregion

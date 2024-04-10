@@ -33,7 +33,7 @@ public class Contact {
     private String DIC;
 
     @Column(length = 100, nullable = false)
-    private String name;
+    private String client;
 
     @Column(length = 100, nullable = false)
     private String email;

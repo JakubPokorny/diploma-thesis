@@ -29,6 +29,7 @@ public class ContactsView extends VerticalLayout {
     private final GridFormLayout<ContactForm, Contact> gridFormLayout;
     private final ContactForm form;
     private final Grid<Contact> grid;
+
     public ContactsView(ContactService contactService, AddressService addressService) {
         this.contactService = contactService;
         this.addressService = addressService;
@@ -49,6 +50,7 @@ public class ContactsView extends VerticalLayout {
 
         add(gridFormLayout);
     }
+
     private void configureForm() {
         gridFormLayout.addSaveListener(this::saveContact);
         gridFormLayout.addDeleteListener(this::deleteContact);
@@ -71,14 +73,14 @@ public class ContactsView extends VerticalLayout {
         grid.setSizeFull();
 
         grid.addColumn(Contact::getICO).setHeader("IČO");
-        grid.addColumn(Contact::getName).setHeader("Název");
+        grid.addColumn(Contact::getClient).setHeader("Název");
         grid.addColumn(Contact::getEmail).setHeader("Email");
         grid.addColumn(Contact::getPhone).setHeader("Telefon");
         grid.addColumn(contact -> ContactsView.formatAddress(contact.getInvoiceAddress())).setHeader("Fakturační adresa");
         grid.addColumn(contact -> ContactsView.formatAddress(contact.getDeliveryAddress())).setHeader("Doručovácí adresa");
         grid.addColumn(new LocalDateTimeRenderer<>(Contact::getUpdated, "H:m d. M. yyyy")).setHeader("Poslední úprava");
 
-        grid.asSingleSelect().addValueChangeListener(e-> gridFormLayout.showFormLayout(e.getValue()));
+        grid.asSingleSelect().addValueChangeListener(e -> gridFormLayout.showFormLayout(e.getValue()));
         grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
 
         grid.setItems(contactService.getAll());
@@ -86,6 +88,6 @@ public class ContactsView extends VerticalLayout {
 
     private static String formatAddress(Address address) {
         return address != null ? String.format("%s %s, %s %s, %s", address.getStreet(), address.getHouseNumber(),
-                address.getCity(),address.getZipCode(), address.getState()) : "";
+                address.getCity(), address.getZipCode(), address.getState()) : "";
     }
 }

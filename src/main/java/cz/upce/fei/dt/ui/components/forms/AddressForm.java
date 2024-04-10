@@ -17,70 +17,104 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AddressForm extends FormLayout implements IEditForm<Address>, HasValue<HasValue.ValueChangeEvent<Address>, Address> {
-    private final Binder<Address> binder;
-    private final TextField street;
-    private final TextField houseNumber;
-    private final TextField city;
-    private final TextField zipCode;
-    private final TextField state;
+    private final Binder<Address> binder = new BeanValidationBinder<>(Address.class);
     private Address address;
-    public AddressForm(String title) {
+    private final Span divider = new Span();
+    private Icon dividerIcon = new Icon();
+    private final TextField street = new TextField("Ulice");
+    private final TextField houseNumber = new TextField("Číslo domu");
+    private final TextField city = new TextField("Město");
+    private final TextField zipCode = new TextField("PSČ");
+    private final TextField state = new TextField("Stát");
+
+    public AddressForm(String label, boolean visible) {
         addClassName("address-form");
-        binder = new BeanValidationBinder<>(Address.class);
 
-        street = new TextField("Ulice");
-        binder.forField(street)
-                .asRequired()
-                .bind(Address::getStreet, Address::setStreet);
+        setupDivider(label, visible);
+        setupStreet();
+        setupHouseNumber();
+        setupCity();
+        setupZipCode();
+        setupState();
 
-        houseNumber = new TextField("Číslo domu");
-        binder.forField(houseNumber)
-                .asRequired()
-                .bind(Address::getHouseNumber, Address::setHouseNumber);
+        this.setResponsiveSteps(
+                new ResponsiveStep("0", 1),
+                new ResponsiveStep("300px", 3)
+        );
 
-        city = new TextField("Město");
-        binder.forField(city)
-                .asRequired()
-                .bind(Address::getCity, Address::setCity);
+        this.setColspan(divider, 3);
+        this.setColspan(street, 2);
+        this.setColspan(city, 2);
+        this.setColspan(state, 3);
 
-        zipCode = new TextField("PSČ");
-        binder.forField(zipCode)
-                .asRequired()
-                .bind(Address::getZipCode, Address::setZipCode);
-
-        state = new TextField("Stát");
-        binder.forField(state)
-                .asRequired()
-                .bind(Address::getState, Address::setState);
-
-        add(createDivider(title), street, houseNumber, city, zipCode, state);
+        add(divider, street, houseNumber, city, zipCode, state);
     }
 
-    private Span createDivider(String title) {
-        Span divider = new Span(title + " ");
-        divider.setClassName("address-form-divider");
-        Icon icon = new Icon(VaadinIcon.ANGLE_DOWN);
-        icon.setSize("0.7em");
-        divider.add(icon);
-        divider.addClickListener(click -> switchVisible());
-        return divider;
-    }
-
-    private void switchVisible() {
-        if (street.isVisible() || city.isVisible() || zipCode.isVisible() || state.isVisible()){
-            setVisible(false);
-        }else{
-            setVisible(true);
-        }
-    }
-    public void setVisible(boolean visible){
+    public void setVisible(boolean visible) {
         street.setVisible(visible);
         houseNumber.setVisible(visible);
         city.setVisible(visible);
         zipCode.setVisible(visible);
         state.setVisible(visible);
+
+        divider.remove(dividerIcon);
+        if (visible) {
+            dividerIcon = new Icon(VaadinIcon.ANGLE_DOWN);
+            divider.setId("active");
+        } else {
+            dividerIcon = new Icon(VaadinIcon.ANGLE_RIGHT);
+            divider.setId("");
+        }
+        dividerIcon.setSize("0.7em");
+        divider.add(dividerIcon);
     }
 
+    //region Setups
+    private void setupDivider(String title, boolean visible) {
+        divider.setClassName("address-form-divider");
+        divider.setText(title + " ");
+
+        this.setVisible(visible);
+        divider.addClickListener(click -> switchVisible());
+    }
+
+    private void switchVisible() {
+        this.setVisible(!street.isVisible() && !city.isVisible() && !zipCode.isVisible() && !state.isVisible());
+    }
+
+    private void setupState() {
+        binder.forField(state)
+                .asRequired()
+                .bind(Address::getState, Address::setCity);
+    }
+
+    private void setupZipCode() {
+        binder.forField(zipCode)
+                .asRequired()
+                .bind(Address::getZipCode, Address::setZipCode);
+    }
+
+    private void setupCity() {
+        binder.forField(city)
+                .asRequired()
+                .bind(Address::getCity, Address::setCity);
+    }
+
+    private void setupHouseNumber() {
+        binder.forField(houseNumber)
+                .asRequired()
+                .bind(Address::getHouseNumber, Address::setHouseNumber);
+    }
+
+    private void setupStreet() {
+        binder.forField(street)
+                .asRequired()
+                .bind(Address::getStreet, Address::setStreet);
+    }
+
+    //endregion
+
+    //region IEditForm, HasValue
     @Override
     public void setValue(Address address) {
         this.address = address;
@@ -104,10 +138,9 @@ public class AddressForm extends FormLayout implements IEditForm<Address>, HasVa
 
     @Override
     public void expand(boolean expended) {
-
     }
 
-    public boolean isEmpty(){
+    public boolean isEmpty() {
         return street.isEmpty() && houseNumber.isEmpty() && city.isEmpty() && zipCode.isEmpty() && state.isEmpty();
     }
 
@@ -130,4 +163,6 @@ public class AddressForm extends FormLayout implements IEditForm<Address>, HasVa
     public boolean isRequiredIndicatorVisible() {
         return false;
     }
+
+    //endregion
 }

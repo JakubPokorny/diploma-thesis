@@ -139,7 +139,7 @@ public class ContractsView extends VerticalLayout {
     }
 
     private Span getClient(Contract contract) {
-        return new Span(contract.getContact().getName());
+        return new Span(contract.getContact().getClient());
     }
     //endregion
 
