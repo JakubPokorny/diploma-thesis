@@ -51,6 +51,9 @@ public class Component {
     @Column
     private Integer minInStock;
 
+    @Column(nullable = false)
+    private Double price;
+
     @Column
     @CreationTimestamp
     private LocalDateTime created;

@@ -3,13 +3,16 @@ package cz.upce.fei.dt.ui.components.forms;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
+import com.vaadin.flow.data.validator.DoubleRangeValidator;
 import com.vaadin.flow.data.validator.IntegerRangeValidator;
 import cz.upce.fei.dt.beckend.entities.Component;
 import cz.upce.fei.dt.beckend.entities.Product;
@@ -32,6 +35,7 @@ public class ComponentForm extends FormLayout implements IEditForm<Component> {
     private final TextArea description = new TextArea("Popis");
     private final IntegerField inStock = new IntegerField("Skladem");
     private final IntegerField minInStock = new IntegerField("Minimálně skladem");
+    private final NumberField price = new NumberField("Cena");
     private final ComboBox<User> notify = new ComboBox<>("Notifikovat");
     private final MultiSelectComboBox<Product> productsMSB = new MultiSelectComboBox<>("Produkty");
     private final FormLayout productComponentsFormLayout = new FormLayout();
@@ -44,17 +48,19 @@ public class ComponentForm extends FormLayout implements IEditForm<Component> {
         setupDescription();
         setupInStock();
         setupMinInStock();
+        setupPrice();
         setupNotify(userService);
         setupProductMSB(productService);
         setupProductComponentsForms();
 
-        this.setResponsiveSteps(new ResponsiveStep("0", 1), new ResponsiveStep("600px", 3));
-        this.setColspan(name, 3);
-        this.setColspan(description, 3);
-        this.setColspan(productsMSB, 3);
-        this.setColspan(productComponentsFormLayout, 3);
-        this.add(name, description, inStock, minInStock, notify, productsMSB, productComponentsFormLayout);
+        this.setResponsiveSteps(new ResponsiveStep("0", 1), new ResponsiveStep("600px", 4));
+        this.setColspan(name, 4);
+        this.setColspan(description, 4);
+        this.setColspan(productsMSB, 4);
+        this.setColspan(productComponentsFormLayout, 4);
+        this.add(name, description, inStock, minInStock, price, notify, productsMSB, productComponentsFormLayout);
     }
+
 
     //region Setups
 
@@ -64,11 +70,19 @@ public class ComponentForm extends FormLayout implements IEditForm<Component> {
         notify.setClearButtonVisible(true);
         binder.forField(notify).bind(Component::getUser, Component::setUser);
     }
+    private void setupPrice() {
+        price.setStepButtonsVisible(true);
+        price.setMin(0);
+        price.setMax(Double.MAX_VALUE);
+        price.setSuffixComponent(new Span("Kč"));
+        binder.forField(price).withValidator(new DoubleRangeValidator("Minimum mimo hodnoty", 0.0, Double.MAX_VALUE)).asRequired().bind(Component::getPrice, Component::setPrice);
+    }
 
     private void setupMinInStock() {
         minInStock.setStepButtonsVisible(true);
         minInStock.setMin(0);
         minInStock.setMax(Integer.MAX_VALUE);
+        minInStock.setSuffixComponent(new Span("ks"));
         binder.forField(minInStock).withValidator(new IntegerRangeValidator("Minimum mimo hodnoty <0;4 294 967 296>", 0, Integer.MAX_VALUE)).bind(Component::getMinInStock, Component::setMinInStock);
     }
 
@@ -77,6 +91,7 @@ public class ComponentForm extends FormLayout implements IEditForm<Component> {
         inStock.setMin(0);
         inStock.setMax(Integer.MAX_VALUE);
         inStock.setValue(0);
+        inStock.setSuffixComponent(new Span("ks"));
         binder.forField(inStock).withValidator(new IntegerRangeValidator("Skladem mimo hodnoty <0;4 294 967 296>", 0, Integer.MAX_VALUE)).asRequired().bind(Component::getInStock, Component::setInStock);
     }
 

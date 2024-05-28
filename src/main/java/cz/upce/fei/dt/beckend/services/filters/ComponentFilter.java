@@ -13,6 +13,8 @@ public class ComponentFilter {
     private Integer toInStockFilter;
     private Integer fromMinInStockFilter;
     private Integer toMinInStockFilter;
+    private Double fromPriceFilter;
+    private Double toPriceFilter;
     private LocalDateTime fromUpdatedFilter;
     private LocalDateTime toUpdatedFilter;
     private Set<Long> productsFilter;

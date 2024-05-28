@@ -74,15 +74,9 @@ public class ComponentsView extends VerticalLayout {
 
     //region configures: grid, form, actions, filters, events
     private void configureFilters() {
-//        all = createTabWithBadge("Všechny", "contrast", ComponentTag.ALL);
-//        inStock = createTabWithBadge("Skladem", componentService.getCountInStock(), "success", ComponentTag.IN_STOCK);
-//        supply = createTabWithBadge("Doplnit", componentService.getCountInStockSupply(), "", ComponentTag.SUPPLY);
-//        missing = createTabWithBadge("Chybí", componentService.getCountInStockMissing(), "error", ComponentTag.MISSING);
-
         Tabs tabs = new Tabs(all, inStock, supply, missing);
         tabs.setClassName("tabs");
         tabs.setMaxWidth("100%");
-        //tabs.setWidth("350px");
         tabs.setSelectedIndex(0);
 
         gridFormLayout.getFiltersLayout().add(tabs);
@@ -142,6 +136,7 @@ public class ComponentsView extends VerticalLayout {
         Grid.Column<Component> descriptionColumn = grid.addColumn(Component::getDescription).setHeader("Popis").setKey("description").setWidth("150px");
         Grid.Column<Component> inStockColumn = grid.addComponentColumn(this::createInStockBadge).setHeader("Skladem").setKey("inStock").setWidth("150px");
         Grid.Column<Component> minInStockColumn = grid.addColumn(Component::getMinInStock).setHeader("Minimum pro notifikaci").setKey("minInStock").setWidth("150px");
+        Grid.Column<Component> priceColumn = grid.addColumn(this::getPrice).setHeader("Cena").setKey("price").setWidth("150px");
         Grid.Column<Component> userColumn = grid.addColumn(this::getFullName).setHeader("Notifikovat").setWidth("150px");
         Grid.Column<Component> productsColumn = grid.addComponentColumn(this::createProductsComponent).setHeader("Produkty").setWidth("150px");
         Grid.Column<Component> updatedColumn = grid.addColumn(new LocalDateTimeRenderer<>(Component::getUpdated, "H:mm d. M. yyyy")).setHeader("Naposledy upraveno").setKey("updated").setWidth("200px");
@@ -152,6 +147,7 @@ public class ComponentsView extends VerticalLayout {
         headerRow.getCell(descriptionColumn).setComponent(FilterFields.createTextFieldFilter( "popis", componentFilter::setDescriptionFilter,configurableFilterDataProvider));
         headerRow.getCell(inStockColumn).setComponent(FilterFields.createFromToIntegerFilter(componentFilter::setFromInStockFilter, componentFilter::setToInStockFilter, configurableFilterDataProvider));
         headerRow.getCell(minInStockColumn).setComponent(FilterFields.createFromToIntegerFilter(componentFilter::setFromMinInStockFilter, componentFilter::setToMinInStockFilter, configurableFilterDataProvider));
+        headerRow.getCell(priceColumn).setComponent(FilterFields.createFromToNumberFilter(componentFilter::setFromPriceFilter, componentFilter::setToPriceFilter, configurableFilterDataProvider));
         headerRow.getCell(productsColumn).setComponent(FilterFields.createProductMultiSelectComboBoxFilter("produkty", componentFilter::setProductsFilter, configurableFilterDataProvider, productService));
         headerRow.getCell(userColumn).setComponent(FilterFields.createUserMultiSelectComboBoxFilter("uživatelé", componentFilter::setUsersFilter, configurableFilterDataProvider, userService));
         headerRow.getCell(updatedColumn).setComponent(FilterFields.createFromToDateTimePickerFilter(componentFilter::setFromUpdatedFilter, componentFilter::setToUpdatedFilter, configurableFilterDataProvider));
@@ -160,9 +156,13 @@ public class ComponentsView extends VerticalLayout {
         //grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
 
         grid.setMultiSort(true, Grid.MultiSortPriority.APPEND);
-        grid.setSortableColumns("name", "description", "inStock", "minInStock", "updated");
+        grid.setSortableColumns("name", "description", "inStock", "minInStock", "price", "updated");
 
         updateGrid();
+    }
+
+    private String getPrice(Component component) {
+        return component.getPrice() != null ? String.format("%,.2f", component.getPrice()) + " Kč" : "";
     }
 
     private Span createInStockBadge(Component component) {

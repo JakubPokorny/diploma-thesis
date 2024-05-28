@@ -9,10 +9,7 @@ import com.vaadin.flow.component.datepicker.DatePickerVariant;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.datetimepicker.DateTimePickerVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.IntegerField;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.textfield.TextFieldBase;
-import com.vaadin.flow.component.textfield.TextFieldVariant;
+import com.vaadin.flow.component.textfield.*;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import cz.upce.fei.dt.beckend.entities.Product;
@@ -35,6 +32,16 @@ public class FilterFields {
 
         IntegerField fromAmountFilter = createIntegerField("od", fromInteger, dataProvider);
         IntegerField toAmountFilter = createIntegerField("do", toInteger, dataProvider);
+        return createFilterHeaderLayout(fromAmountFilter, toAmountFilter);
+    }
+
+    public static Component createFromToNumberFilter(
+            Consumer<Double> fromNumber,
+            Consumer<Double> toNumber,
+            ConfigurableFilterDataProvider<?, ?, ?> dataProvider) {
+
+        NumberField fromAmountFilter = createNumberField("od", fromNumber, dataProvider);
+        NumberField toAmountFilter = createNumberField("do",toNumber, dataProvider);
         return createFilterHeaderLayout(fromAmountFilter, toAmountFilter);
     }
 
@@ -123,6 +130,7 @@ public class FilterFields {
     }
     private static DateTimePicker createDateTimePickerField(String placeHolder, Consumer<LocalDateTime> consumer, ConfigurableFilterDataProvider<?, ?, ?> dataProvider) {
         DateTimePicker dateTimePicker = new DateTimePicker();
+//        dateTimePicker.setMinWidth("250px");
         dateTimePicker.setDatePlaceholder("datum "+placeHolder+"...");
         dateTimePicker.setTimePlaceholder("čas "+placeHolder+"...");
         dateTimePicker.setWidthFull();
@@ -149,11 +157,9 @@ public class FilterFields {
 
     private static IntegerField createIntegerField(String placeholder, Consumer<Integer> consumer, ConfigurableFilterDataProvider<?, ?, ?> dataProvider) {
         IntegerField integerField = new IntegerField();
-        setupTextBase(integerField, placeholder);
+        setupNumberBase(integerField, placeholder);
         integerField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
-        integerField.setStepButtonsVisible(true);
         integerField.setStep(1);
-        integerField.setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         integerField.addValueChangeListener(event -> {
             consumer.accept(event.getValue());
@@ -161,6 +167,19 @@ public class FilterFields {
         });
 
         return integerField;
+    }
+    private static NumberField createNumberField(String placeholder, Consumer<Double> consumer, ConfigurableFilterDataProvider<?, ?, ?> dataProvider) {
+        NumberField numberField = new NumberField();
+        setupNumberBase(numberField, placeholder);
+        numberField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+        numberField.setStep(25);
+
+        numberField.addValueChangeListener(event -> {
+            consumer.accept(event.getValue());
+            dataProvider.refreshAll();
+        });
+
+        return numberField;
     }
 
     private static VerticalLayout createFilterHeaderLayout(Component... components) {
@@ -170,8 +189,13 @@ public class FilterFields {
         return layout;
     }
 
-    private static void setupTextBase(TextFieldBase<?, ?> component, String placeHolder) {
-        component.setPlaceholder(placeHolder + "...");
+    private static void setupNumberBase(AbstractNumberField<?, ?> component, String placeholder) {
+        setupTextBase(component, placeholder);
+        component.setStepButtonsVisible(true);
+        component.setValueChangeMode(ValueChangeMode.ON_CHANGE);
+    }
+    private static void setupTextBase(TextFieldBase<?, ?> component, String placeholder) {
+        component.setPlaceholder(placeholder + "...");
         component.setClearButtonVisible(true);
         component.setValueChangeMode(ValueChangeMode.LAZY);
         component.setWidthFull();

@@ -16,6 +16,8 @@ public interface IComponent {
 
     Integer getMinInStock();
 
+    Double getPrice();
+
     LocalDateTime getUpdated();
 
     IUser getUser();

@@ -13,6 +13,7 @@ public class Component_ {
     public static volatile SingularAttribute<Component, String> description;
     public static volatile SingularAttribute<Component, Integer> inStock;
     public static volatile SingularAttribute<Component, Integer> minInStock;
+    public static volatile SingularAttribute<Component, Double> price;
     public static volatile SingularAttribute<Component, LocalDateTime> created;
     public static volatile SingularAttribute<Component, LocalDateTime> updated;
     public static volatile SetAttribute<Component, ProductComponent> productComponents;

@@ -19,6 +19,8 @@ public class ComponentSpec {
                 .and(findAllIntegerLessThan(componentFilter.getToInStockFilter(), Component_.inStock))
                 .and(findAllIntegerGreaterThan(componentFilter.getFromMinInStockFilter(), Component_.minInStock))
                 .and(findAllIntegerLessThan(componentFilter.getToMinInStockFilter(), Component_.minInStock))
+                .and(findAllNumberGreaterThan(componentFilter.getFromPriceFilter(), Component_.price))
+                .and(findAllNumberLessThan(componentFilter.getToPriceFilter(), Component_.price))
                 .and(findAllLocalDateTimeLessThan(componentFilter.getToUpdatedFilter(), Component_.updated))
                 .and(findAllLocalDateTimeGreaterThan(componentFilter.getFromUpdatedFilter(), Component_.updated))
                 .and(findAllSelectedProduct(componentFilter.getProductsFilter()))
@@ -67,6 +69,17 @@ public class ComponentSpec {
                 : builder.lessThanOrEqualTo(root.get(singularAttribute), filter);
     }
 
+    private static Specification<Component> findAllNumberGreaterThan(Double filter, SingularAttribute<Component, Double> singularAttribute) {
+        return (root, query, builder) -> filter == null
+                ? null
+                : builder.greaterThanOrEqualTo(root.get(singularAttribute), filter);
+    }
+
+    private static Specification<Component> findAllNumberLessThan(Double filter, SingularAttribute<Component, Double> singularAttribute) {
+        return (root, query, builder) -> filter == null
+                ? null
+                : builder.lessThanOrEqualTo(root.get(singularAttribute), filter);
+    }
     private static Specification<Component> findAllLocalDateTimeLessThan(LocalDateTime filter, SingularAttribute<Component, LocalDateTime> singularAttribute) {
         return (root, query, builder) -> filter == null
                 ? null
