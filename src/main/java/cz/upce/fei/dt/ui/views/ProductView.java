@@ -109,7 +109,7 @@ public class ProductView extends VerticalLayout {
         MultiSelectComboBox<Component> comboBox = new MultiSelectComboBox<>();
         comboBox.setItemLabelGenerator(Component::getName);
         comboBox.setReadOnly(true);
-        comboBox.setItems(query -> componentService.findAllComponentsIdAndName(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
+        comboBox.setItems(query -> componentService.findAllByName(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
         comboBox.setValue(product.getSelectedComponents());
         comboBox.setSizeFull();
         return comboBox;

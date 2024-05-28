@@ -3,6 +3,7 @@ package cz.upce.fei.dt.beckend.services.specifications;
 import cz.upce.fei.dt.beckend.entities.Component;
 import cz.upce.fei.dt.beckend.entities.Component_;
 import cz.upce.fei.dt.beckend.services.filters.ComponentFilter;
+import cz.upce.fei.dt.beckend.services.filters.ComponentTag;
 import jakarta.persistence.metamodel.SingularAttribute;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -14,14 +15,27 @@ public class ComponentSpec {
         return Specification
                 .where(findAllStringLikeIgnoreCase(componentFilter.getNameFilter(), Component_.name))
                 .and(findAllStringLikeIgnoreCase(componentFilter.getDescriptionFilter(), Component_.description))
-                .and(findAllIntegerGreaterThan(componentFilter.getFromAmountFilter(), Component_.inStock))
-                .and(findAllIntegerLessThan(componentFilter.getToAmountFilter(), Component_.inStock))
-                .and(findAllIntegerGreaterThan(componentFilter.getFromMinAmountFilter(), Component_.minInStock))
-                .and(findAllIntegerLessThan(componentFilter.getToMinAmountFilter(), Component_.minInStock))
+                .and(findAllIntegerGreaterThan(componentFilter.getFromInStockFilter(), Component_.inStock))
+                .and(findAllIntegerLessThan(componentFilter.getToInStockFilter(), Component_.inStock))
+                .and(findAllIntegerGreaterThan(componentFilter.getFromMinInStockFilter(), Component_.minInStock))
+                .and(findAllIntegerLessThan(componentFilter.getToMinInStockFilter(), Component_.minInStock))
                 .and(findAllLocalDateTimeLessThan(componentFilter.getToUpdatedFilter(), Component_.updated))
                 .and(findAllLocalDateTimeGreaterThan(componentFilter.getFromUpdatedFilter(), Component_.updated))
                 .and(findAllSelectedProduct(componentFilter.getProductsFilter()))
-                .and(findAllSelectedUsers(componentFilter.getUsersFilter()));
+                .and(findAllSelectedUsers(componentFilter.getUsersFilter()))
+                .and(findAllTaggedAs(componentFilter.getTagFilter()));
+    }
+
+    private static Specification<Component> findAllTaggedAs(Enum<ComponentTag> tagFilter) {
+        return switch (tagFilter) {
+            case ComponentTag.IN_STOCK ->
+                    (root, query, builder) -> builder.greaterThan(root.get(Component_.inStock), root.get(Component_.minInStock));
+            case ComponentTag.SUPPLY -> (root, query, builder) -> builder.and(
+                    builder.greaterThanOrEqualTo(root.get(Component_.inStock), 0),
+                    builder.lessThanOrEqualTo(root.get(Component_.inStock), root.get(Component_.minInStock)));
+            case ComponentTag.MISSING -> (root, query, builder) -> builder.lessThan(root.get(Component_.inStock), 0);
+            default -> null;
+        };
     }
 
     private static Specification<Component> findAllSelectedUsers(Set<Long> selectedUsers) {

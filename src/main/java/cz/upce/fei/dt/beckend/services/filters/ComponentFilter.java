@@ -9,12 +9,13 @@ import java.util.Set;
 public class ComponentFilter {
     private String nameFilter;
     private String descriptionFilter;
-    private Integer fromAmountFilter;
-    private Integer toAmountFilter;
-    private Integer fromMinAmountFilter;
-    private Integer toMinAmountFilter;
+    private Integer fromInStockFilter;
+    private Integer toInStockFilter;
+    private Integer fromMinInStockFilter;
+    private Integer toMinInStockFilter;
     private LocalDateTime fromUpdatedFilter;
     private LocalDateTime toUpdatedFilter;
     private Set<Long> productsFilter;
     private Set<Long> usersFilter;
+    private Enum<ComponentTag> tagFilter = ComponentTag.ALL;
 }

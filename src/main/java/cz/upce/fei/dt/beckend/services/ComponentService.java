@@ -27,8 +27,8 @@ public class ComponentService {
     private final ProductComponentRepository productComponentRepository;
     private final EmailService emailService;
 
-    public Stream<Component> findAllComponentsIdAndName(int page, int pageSize, String searchTerm) {
-        return componentRepository.findAllComponentsIDAndName(PageRequest.of(page, pageSize), searchTerm)
+    public Stream<Component> findAllByName(int page, int pageSize, String searchTerm) {
+        return componentRepository.findAllByName(PageRequest.of(page, pageSize), searchTerm)
                 .stream()
                 .map(iComponent -> Component.builder()
                         .id(iComponent.getId())
@@ -90,62 +90,16 @@ public class ComponentService {
         return (int) componentRepository.findAll(spec, VaadinSpringDataHelpers.toSpringPageRequest(query)).stream().count();
     }
 
-    //todo error because I reduce rows -> components size 22 but grid expect 41 via getCount.
-//    public Stream<Component> findAll(Query<Component, ComponentFilter> query) {
-//        HashMap<Long, Component> components = new HashMap<>();
-//        Specification<Component> spec = ComponentSpec.filterBy(query.getFilter().orElse(new ComponentFilter()));
-//        componentRepository.findAllIComponent(spec, VaadinSpringDataHelpers.toSpringPageRequest(query))
-//                .stream()
-//                .forEach(iComponent -> {
-//                    if (components.containsKey(iComponent.getId())) {
-//                        components.get(iComponent.getId()).getProductComponents().add(toProductComponent(iComponent));
-//                    } else {
-//                        components.put(iComponent.getId(), toComponent(iComponent));
-//                    }
-//                });
-//        return components.values().stream();
-//    }
-//
-//
-//
-//    public int getCount(Query<Component, ComponentFilter> query) {
-//        Specification<Component> spec = ComponentSpec.filterBy(query.getFilter().orElse(new ComponentFilter()));
-//        return (int) componentRepository.findAllIComponent(spec, VaadinSpringDataHelpers.toSpringPageRequest(query))
-//                .stream()
-//                .count();
-//    }
-//
-//    private Component toComponent(IComponent iComponent){
-//        return Component.builder()
-//                .id(iComponent.getId())
-//                .name(iComponent.getName())
-//                .description(iComponent.getDescription())
-//                .inStock(iComponent.getInStock())
-//                .minInStock(iComponent.getMinInStock())
-//                .updated(iComponent.getUpdated())
-//                .user(toUser(iComponent))
-//                .productComponents(new HashSet<>(Set.of(toProductComponent(iComponent))))
-//                .build();
-//    }
-//    private User toUser(IComponent iComponent){
-//        return User.builder()
-//                .id(iComponent.getUserId())
-//                .firstName(iComponent.getFirstName())
-//                .lastName(iComponent.getLastName())
-//                .build();
-//    }
-//    private ProductComponent toProductComponent(IComponent iComponent){
-//        return ProductComponent.builder()
-//                .id(iComponent.getProductComponentId())
-//                .amount(iComponent.getProductComponentAmount())
-//                .product(toProduct(iComponent))
-//                .build();
-//    }
-//
-//    private Product toProduct(IComponent iComponent){
-//        return Product.builder()
-//                .id(iComponent.getProductId())
-//                .name(iComponent.getProductName())
-//                .build();
-//    }
+    public int getCountAll(){
+        return componentRepository.countAll();
+    }
+    public int getCountInStock(){
+        return componentRepository.countInStock();
+    }
+    public int getCountInStockSupply(){
+        return componentRepository.countSupply();
+    }
+    public int getCountInStockMissing(){
+        return componentRepository.countMissing();
+    }
 }

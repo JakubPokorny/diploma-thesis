@@ -43,7 +43,7 @@ public class ProductForm extends FormLayout implements IEditForm<Product> {
 
     //region Setups
     private void setupComponentMSB(ComponentService componentService) {
-        componentMSB.setItems(query -> componentService.findAllComponentsIdAndName(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
+        componentMSB.setItems(query -> componentService.findAllByName(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
         componentMSB.setItemLabelGenerator(Component::getName);
         componentMSB.setClearButtonVisible(true);
         componentMSB.addSelectionListener(this::addProductComponentForm);

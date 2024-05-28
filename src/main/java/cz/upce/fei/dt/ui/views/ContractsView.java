@@ -103,6 +103,7 @@ public class ContractsView extends VerticalLayout {
         grid.setClassName("grid-content");
         grid.setSizeFull();
 
+        //todo Klient, stav, cena, objednané produkty, created (default = tento rok)
         grid.addColumn(Contract::getId).setHeader("ID");
         grid.addComponentColumn(this::getClient).setHeader("Klient");
         grid.addComponentColumn(this::getProducts).setHeader("Objednané produkty").setWidth("150px");

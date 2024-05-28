@@ -4,9 +4,11 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
@@ -19,8 +21,10 @@ import cz.upce.fei.dt.beckend.services.ComponentService;
 import cz.upce.fei.dt.beckend.services.ProductService;
 import cz.upce.fei.dt.beckend.services.UserService;
 import cz.upce.fei.dt.beckend.services.filters.ComponentFilter;
+import cz.upce.fei.dt.beckend.services.filters.ComponentTag;
 import cz.upce.fei.dt.ui.components.FilterFields;
 import cz.upce.fei.dt.ui.components.GridFormLayout;
+import cz.upce.fei.dt.ui.components.TabWithBadge;
 import cz.upce.fei.dt.ui.components.forms.ComponentForm;
 import cz.upce.fei.dt.ui.components.forms.events.DeleteEvent;
 import cz.upce.fei.dt.ui.components.forms.events.SaveEvent;
@@ -38,6 +42,11 @@ public class ComponentsView extends VerticalLayout {
     private final GridFormLayout<ComponentForm, Component> gridFormLayout;
 
     private final ComponentFilter componentFilter = new ComponentFilter();
+    private final TabWithBadge all = createTabWithBadge("Všechny", "contrast", ComponentTag.ALL);
+    private final TabWithBadge inStock = createTabWithBadge("Skladem", "success", ComponentTag.IN_STOCK);
+    private final TabWithBadge supply = createTabWithBadge("Doplnit", "", ComponentTag.SUPPLY);
+    private final TabWithBadge missing = createTabWithBadge("Chybí", "error", ComponentTag.MISSING);
+    private DataProvider<Component, ComponentFilter> dataProvider;
     private ConfigurableFilterDataProvider<Component, Void, ComponentFilter> configurableFilterDataProvider;
 
 
@@ -57,20 +66,33 @@ public class ComponentsView extends VerticalLayout {
 
         configureGrid();
         configureForm();
-        configureActions();
         configureFilters();
+        configureActions();
 
         add(gridFormLayout);
     }
 
     //region configures: grid, form, actions, filters, events
     private void configureFilters() {
+//        all = createTabWithBadge("Všechny", "contrast", ComponentTag.ALL);
+//        inStock = createTabWithBadge("Skladem", componentService.getCountInStock(), "success", ComponentTag.IN_STOCK);
+//        supply = createTabWithBadge("Doplnit", componentService.getCountInStockSupply(), "", ComponentTag.SUPPLY);
+//        missing = createTabWithBadge("Chybí", componentService.getCountInStockMissing(), "error", ComponentTag.MISSING);
+
+        Tabs tabs = new Tabs(all, inStock, supply, missing);
+        tabs.setClassName("tabs");
+        tabs.setMaxWidth("100%");
+        //tabs.setWidth("350px");
+        tabs.setSelectedIndex(0);
+
+        gridFormLayout.getFiltersLayout().add(tabs);
     }
 
     private void configureActions() {
         Button addContact = new Button("Přidat komponentu");
         addContact.addClickListener(event -> gridFormLayout.addNewValue(new Component()));
         gridFormLayout.getActionsLayout().add(addContact);
+
     }
 
     private void configureForm() {
@@ -108,7 +130,7 @@ public class ComponentsView extends VerticalLayout {
         grid.setClassName("grid-content");
         grid.setSizeFull();
 
-        DataProvider<Component, ComponentFilter> dataProvider = DataProvider.fromFilteringCallbacks(
+       dataProvider = DataProvider.fromFilteringCallbacks(
                 componentService::findAll,
                 componentService::getCount
         );
@@ -118,7 +140,7 @@ public class ComponentsView extends VerticalLayout {
 
         Grid.Column<Component> nameColumn = grid.addColumn(Component::getName).setHeader("Název").setKey("name").setWidth("150px");
         Grid.Column<Component> descriptionColumn = grid.addColumn(Component::getDescription).setHeader("Popis").setKey("description").setWidth("150px");
-        Grid.Column<Component> inStockColumn = grid.addColumn(Component::getInStock).setHeader("Skladem").setKey("inStock").setWidth("150px");
+        Grid.Column<Component> inStockColumn = grid.addComponentColumn(this::createInStockBadge).setHeader("Skladem").setKey("inStock").setWidth("150px");
         Grid.Column<Component> minInStockColumn = grid.addColumn(Component::getMinInStock).setHeader("Minimum pro notifikaci").setKey("minInStock").setWidth("150px");
         Grid.Column<Component> userColumn = grid.addColumn(this::getFullName).setHeader("Notifikovat").setWidth("150px");
         Grid.Column<Component> productsColumn = grid.addComponentColumn(this::createProductsComponent).setHeader("Produkty").setWidth("150px");
@@ -128,8 +150,8 @@ public class ComponentsView extends VerticalLayout {
         HeaderRow headerRow = grid.appendHeaderRow();
         headerRow.getCell(nameColumn).setComponent(FilterFields.createTextFieldFilter( "název", componentFilter::setNameFilter,configurableFilterDataProvider));
         headerRow.getCell(descriptionColumn).setComponent(FilterFields.createTextFieldFilter( "popis", componentFilter::setDescriptionFilter,configurableFilterDataProvider));
-        headerRow.getCell(inStockColumn).setComponent(FilterFields.createFromToIntegerFilter(componentFilter::setFromAmountFilter, componentFilter::setToAmountFilter, configurableFilterDataProvider));
-        headerRow.getCell(minInStockColumn).setComponent(FilterFields.createFromToIntegerFilter(componentFilter::setFromMinAmountFilter, componentFilter::setToMinAmountFilter, configurableFilterDataProvider));
+        headerRow.getCell(inStockColumn).setComponent(FilterFields.createFromToIntegerFilter(componentFilter::setFromInStockFilter, componentFilter::setToInStockFilter, configurableFilterDataProvider));
+        headerRow.getCell(minInStockColumn).setComponent(FilterFields.createFromToIntegerFilter(componentFilter::setFromMinInStockFilter, componentFilter::setToMinInStockFilter, configurableFilterDataProvider));
         headerRow.getCell(productsColumn).setComponent(FilterFields.createProductMultiSelectComboBoxFilter("produkty", componentFilter::setProductsFilter, configurableFilterDataProvider, productService));
         headerRow.getCell(userColumn).setComponent(FilterFields.createUserMultiSelectComboBoxFilter("uživatelé", componentFilter::setUsersFilter, configurableFilterDataProvider, userService));
         headerRow.getCell(updatedColumn).setComponent(FilterFields.createFromToDateTimePickerFilter(componentFilter::setFromUpdatedFilter, componentFilter::setToUpdatedFilter, configurableFilterDataProvider));
@@ -141,6 +163,21 @@ public class ComponentsView extends VerticalLayout {
         grid.setSortableColumns("name", "description", "inStock", "minInStock", "updated");
 
         updateGrid();
+    }
+
+    private Span createInStockBadge(Component component) {
+        int inStock = component.getInStock();
+        Span badge = new Span(String.valueOf(component.getInStock()));
+        badge.getElement().getThemeList().add("badge pill ");
+
+        if (inStock < 0)
+            badge.getElement().getThemeList().add("error");
+        else if (component.getMinInStock() == null)
+            badge.getElement().getThemeList().add("contrast");
+        else if (inStock > component.getMinInStock())
+            badge.getElement().getThemeList().add("success");
+
+        return badge;
     }
 
     private String getFullName(Component component) {
@@ -158,9 +195,25 @@ public class ComponentsView extends VerticalLayout {
         return comboBox;
     }
 
+    private TabWithBadge createTabWithBadge(String labelText, String style, ComponentTag tag){
+        TabWithBadge tabWithBadge = new TabWithBadge(labelText, "", style);
+
+        tabWithBadge.getElement().addEventListener("click", event -> {
+            componentFilter.setTagFilter(tag);
+            dataProvider.refreshAll();
+        });
+
+        return tabWithBadge;
+    }
+
     //endregion
 
     private void updateGrid(){
         grid.setItems(configurableFilterDataProvider);
+
+        all.badge.setText(String.valueOf(componentService.getCountAll()));
+        inStock.badge.setText(String.valueOf(componentService.getCountInStock()));
+        supply.badge.setText(String.valueOf(componentService.getCountInStockSupply()));
+        missing.badge.setText(String.valueOf(componentService.getCountInStockMissing()));
     }
 }
