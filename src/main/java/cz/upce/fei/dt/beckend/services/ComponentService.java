@@ -33,8 +33,19 @@ public class ComponentService {
                 .map(iComponent -> Component.builder()
                         .id(iComponent.getId())
                         .name(iComponent.getName())
+                        .price(iComponent.getPrice())
                         .build()
                 );
+    }
+    public Stream<Component> findAll(Query<Component, ComponentFilter> query) {
+        Specification<Component> spec = ComponentSpec.filterBy(query.getFilter().orElse(new ComponentFilter()));
+        return componentRepository.findAll(spec, VaadinSpringDataHelpers.toSpringPageRequest(query))
+                .stream();
+    }
+
+    public int getCount(Query<Component, ComponentFilter> query) {
+        Specification<Component> spec = ComponentSpec.filterBy(query.getFilter().orElse(new ComponentFilter()));
+        return (int) componentRepository.findAll(spec, VaadinSpringDataHelpers.toSpringPageRequest(query)).stream().count();
     }
 
     @Transactional
@@ -79,16 +90,7 @@ public class ComponentService {
         });
     }
 
-    public Stream<Component> findAll(Query<Component, ComponentFilter> query) {
-        Specification<Component> spec = ComponentSpec.filterBy(query.getFilter().orElse(new ComponentFilter()));
-        return componentRepository.findAll(spec, VaadinSpringDataHelpers.toSpringPageRequest(query))
-                .stream();
-    }
 
-    public int getCount(Query<Component, ComponentFilter> query) {
-        Specification<Component> spec = ComponentSpec.filterBy(query.getFilter().orElse(new ComponentFilter()));
-        return (int) componentRepository.findAll(spec, VaadinSpringDataHelpers.toSpringPageRequest(query)).stream().count();
-    }
 
     public int getCountAll(){
         return componentRepository.countAll();

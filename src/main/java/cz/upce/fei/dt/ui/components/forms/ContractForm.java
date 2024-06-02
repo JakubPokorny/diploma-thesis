@@ -12,7 +12,6 @@ import cz.upce.fei.dt.beckend.entities.ContractProduct;
 import cz.upce.fei.dt.beckend.entities.Product;
 import cz.upce.fei.dt.beckend.entities.keys.ContractProductKey;
 import cz.upce.fei.dt.beckend.services.*;
-import cz.upce.fei.dt.ui.components.forms.events.FileForm;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -65,7 +64,7 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
     }
 
     private void setupProductMSB(ProductService productService) {
-        productsMSB.setItems(query -> productService.findAllProductsIdAndName(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
+        productsMSB.setItems(query -> productService.findAllByName(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
         productsMSB.setItemLabelGenerator(Product::getName);
         productsMSB.setRequired(true);
         productsMSB.addSelectionListener(this::addProductComponentForm);

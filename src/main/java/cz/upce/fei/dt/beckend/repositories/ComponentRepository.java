@@ -18,7 +18,7 @@ public interface ComponentRepository extends JpaRepository<Component, Long>, Jpa
     @NonNull
     Page<Component> findAll(@Nullable Specification<Component> specification, @NonNull Pageable pageable);
 
-    @Query(value = "select id, name from components where lower(name) like lower(concat('%', :searchTerm, '%'))", nativeQuery = true)
+    @Query(value = "select id, name, price from components where lower(name) like lower(concat('%', :searchTerm, '%'))", nativeQuery = true)
     @NonNull
     Page<IComponent> findAllByName(@NonNull Pageable pageable, @Param("searchTerm") String searchTerm);
 

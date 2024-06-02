@@ -1,6 +1,7 @@
 package cz.upce.fei.dt.ui.views.users;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
@@ -48,8 +49,8 @@ public class UsersView extends VerticalLayout {
     }
 
     private void configureForm() {
-        gridFormLayout.addSaveListener(this::saveUser);
-        gridFormLayout.addDeleteListener(this::deleteUser);
+        ComponentUtil.addListener(gridFormLayout, SaveEvent.class, this::saveUser);
+        ComponentUtil.addListener(gridFormLayout, DeleteEvent.class, this::deleteUser);
     }
 
     private void saveUser(SaveEvent saveEvent){

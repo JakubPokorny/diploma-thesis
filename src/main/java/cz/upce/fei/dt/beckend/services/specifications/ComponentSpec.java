@@ -4,25 +4,25 @@ import cz.upce.fei.dt.beckend.entities.Component;
 import cz.upce.fei.dt.beckend.entities.Component_;
 import cz.upce.fei.dt.beckend.services.filters.ComponentFilter;
 import cz.upce.fei.dt.beckend.services.filters.ComponentTag;
-import jakarta.persistence.metamodel.SingularAttribute;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.time.LocalDateTime;
 import java.util.Set;
 
 public class ComponentSpec {
+    private static final FilterUtil<Component> FILTER_UTIL = new FilterUtil<>();
+
     public static Specification<Component> filterBy(ComponentFilter componentFilter) {
         return Specification
-                .where(findAllStringLikeIgnoreCase(componentFilter.getNameFilter(), Component_.name))
-                .and(findAllStringLikeIgnoreCase(componentFilter.getDescriptionFilter(), Component_.description))
-                .and(findAllIntegerGreaterThan(componentFilter.getFromInStockFilter(), Component_.inStock))
-                .and(findAllIntegerLessThan(componentFilter.getToInStockFilter(), Component_.inStock))
-                .and(findAllIntegerGreaterThan(componentFilter.getFromMinInStockFilter(), Component_.minInStock))
-                .and(findAllIntegerLessThan(componentFilter.getToMinInStockFilter(), Component_.minInStock))
-                .and(findAllNumberGreaterThan(componentFilter.getFromPriceFilter(), Component_.price))
-                .and(findAllNumberLessThan(componentFilter.getToPriceFilter(), Component_.price))
-                .and(findAllLocalDateTimeLessThan(componentFilter.getToUpdatedFilter(), Component_.updated))
-                .and(findAllLocalDateTimeGreaterThan(componentFilter.getFromUpdatedFilter(), Component_.updated))
+                .where(FILTER_UTIL.findAllStringLikeIgnoreCase(componentFilter.getNameFilter(), Component_.name.getName()))
+                .and(FILTER_UTIL.findAllStringLikeIgnoreCase(componentFilter.getDescriptionFilter(), Component_.description.getName()))
+                .and(FILTER_UTIL.findAllIntegerGreaterThanOrEqualTo(componentFilter.getFromInStockFilter(), Component_.inStock.getName()))
+                .and(FILTER_UTIL.findAllIntegerLessThanOrEqualTo(componentFilter.getToInStockFilter(), Component_.inStock.getName()))
+                .and(FILTER_UTIL.findAllIntegerGreaterThanOrEqualTo(componentFilter.getFromMinInStockFilter(), Component_.minInStock.getName()))
+                .and(FILTER_UTIL.findAllIntegerLessThanOrEqualTo(componentFilter.getToMinInStockFilter(), Component_.minInStock.getName()))
+                .and(FILTER_UTIL.findAllDoubleGreaterThanOrEqualTo(componentFilter.getFromPriceFilter(), Component_.price.getName()))
+                .and(FILTER_UTIL.findAllDoubleLessThanOrEqualTo(componentFilter.getToPriceFilter(), Component_.price.getName()))
+                .and(FILTER_UTIL.findAllLocalDateTimeLessThanOrEqualTo(componentFilter.getToUpdatedFilter(), Component_.updated.getName()))
+                .and(FILTER_UTIL.findAllLocalDateTimeGreaterThanOrEqualTo(componentFilter.getFromUpdatedFilter(), Component_.updated.getName()))
                 .and(findAllSelectedProduct(componentFilter.getProductsFilter()))
                 .and(findAllSelectedUsers(componentFilter.getUsersFilter()))
                 .and(findAllTaggedAs(componentFilter.getTagFilter()));
@@ -45,50 +45,10 @@ public class ComponentSpec {
                 ? null
                 : root.get("user").get("id").in(selectedUsers);
     }
+
     private static Specification<Component> findAllSelectedProduct(Set<Long> selectedProducts) {
         return (root, query, builder) -> selectedProducts == null || selectedProducts.isEmpty()
                 ? null
                 : root.get("productComponents").get("id").get("productId").in(selectedProducts);
-    }
-
-    private static Specification<Component> findAllStringLikeIgnoreCase(String filter, SingularAttribute<Component, String> singularAttribute) {
-        return (root, query, builder) -> filter == null || filter.isEmpty()
-                ? null
-                : builder.like(builder.lower(root.get(singularAttribute)), "%" + filter.toLowerCase() + "%");
-    }
-
-    private static Specification<Component> findAllIntegerGreaterThan(Integer filter, SingularAttribute<Component, Integer> singularAttribute) {
-        return (root, query, builder) -> filter == null
-                ? null
-                : builder.greaterThanOrEqualTo(root.get(singularAttribute), filter);
-    }
-
-    private static Specification<Component> findAllIntegerLessThan(Integer filter, SingularAttribute<Component, Integer> singularAttribute) {
-        return (root, query, builder) -> filter == null
-                ? null
-                : builder.lessThanOrEqualTo(root.get(singularAttribute), filter);
-    }
-
-    private static Specification<Component> findAllNumberGreaterThan(Double filter, SingularAttribute<Component, Double> singularAttribute) {
-        return (root, query, builder) -> filter == null
-                ? null
-                : builder.greaterThanOrEqualTo(root.get(singularAttribute), filter);
-    }
-
-    private static Specification<Component> findAllNumberLessThan(Double filter, SingularAttribute<Component, Double> singularAttribute) {
-        return (root, query, builder) -> filter == null
-                ? null
-                : builder.lessThanOrEqualTo(root.get(singularAttribute), filter);
-    }
-    private static Specification<Component> findAllLocalDateTimeLessThan(LocalDateTime filter, SingularAttribute<Component, LocalDateTime> singularAttribute) {
-        return (root, query, builder) -> filter == null
-                ? null
-                : builder.lessThanOrEqualTo(root.get(singularAttribute), filter);
-    }
-
-    private static Specification<Component> findAllLocalDateTimeGreaterThan(LocalDateTime filter, SingularAttribute<Component, LocalDateTime> singularAttribute) {
-        return (root, query, builder) -> filter == null
-                ? null
-                : builder.greaterThanOrEqualTo(root.get(singularAttribute), filter);
     }
 }

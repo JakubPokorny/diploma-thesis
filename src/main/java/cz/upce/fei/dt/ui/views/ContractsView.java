@@ -1,6 +1,7 @@
 package cz.upce.fei.dt.ui.views;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.grid.Grid;
@@ -67,8 +68,8 @@ public class ContractsView extends VerticalLayout {
     }
 
     private void configureForm() {
-        gridFormLayout.addSaveListener(this::saveContract);
-        gridFormLayout.addDeleteListener(this::deleteContract);
+        ComponentUtil.addListener(gridFormLayout, SaveEvent.class, this::saveContract);
+        ComponentUtil.addListener(gridFormLayout, DeleteEvent.class, this::deleteContract);
     }
 
     //region events: save, delete
@@ -133,7 +134,7 @@ public class ContractsView extends VerticalLayout {
         MultiSelectComboBox<Product> comboBox = new MultiSelectComboBox<>();
         comboBox.setItemLabelGenerator(Product::getName);
         comboBox.setReadOnly(true);
-        comboBox.setItems(query -> productService.findAllProductsIdAndName(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
+        comboBox.setItems(query -> productService.findAllByName(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
         comboBox.setValue(contract.getSelectedProducts());
         comboBox.setSizeFull();
         return comboBox;

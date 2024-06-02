@@ -1,13 +1,15 @@
 package cz.upce.fei.dt.ui.views;
 
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
+import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -15,6 +17,8 @@ import cz.upce.fei.dt.beckend.entities.Component;
 import cz.upce.fei.dt.beckend.entities.Product;
 import cz.upce.fei.dt.beckend.services.ComponentService;
 import cz.upce.fei.dt.beckend.services.ProductService;
+import cz.upce.fei.dt.beckend.services.filters.ProductFilter;
+import cz.upce.fei.dt.ui.components.FilterFields;
 import cz.upce.fei.dt.ui.components.GridFormLayout;
 import cz.upce.fei.dt.ui.components.forms.ProductForm;
 import cz.upce.fei.dt.ui.components.forms.events.DeleteEvent;
@@ -30,6 +34,11 @@ public class ProductView extends VerticalLayout {
     private final ComponentService componentService;
     private final Grid<Product> grid;
     private final GridFormLayout<ProductForm, Product> gridFormLayout;
+
+    private final ProductFilter productFilter = new ProductFilter();
+    private DataProvider<Product, ProductFilter> dataProvider;
+    private ConfigurableFilterDataProvider<Product, Void, ProductFilter> configurableFilterDataProvider;
+    private Double productionPrice = 0.0;
 
     public ProductView(
             ProductService productService,
@@ -62,11 +71,11 @@ public class ProductView extends VerticalLayout {
     }
 
     private void configureForm() {
-        gridFormLayout.addSaveListener(this::saveComponent);
-        gridFormLayout.addDeleteListener(this::deleteComponent);
+        ComponentUtil.addListener(gridFormLayout, SaveEvent.class, this::saveProduct);
+        ComponentUtil.addListener(gridFormLayout, DeleteEvent.class, this::deleteProduct);
     }
     //region events: save, delete
-    private void deleteComponent(DeleteEvent deleteEvent) {
+    private void deleteProduct(DeleteEvent deleteEvent) {
         try {
             Product product = (Product) deleteEvent.getValue();
             productService.deleteProduct(product);
@@ -78,7 +87,7 @@ public class ProductView extends VerticalLayout {
         }
     }
 
-    private void saveComponent(SaveEvent saveEvent) {
+    private void saveProduct(SaveEvent saveEvent) {
         try {
             Product product = (Product) saveEvent.getValue();
             productService.saveProduct(product);
@@ -94,17 +103,48 @@ public class ProductView extends VerticalLayout {
         grid.setClassName("grid-content");
         grid.setSizeFull();
 
-        grid.addColumn(Product::getName).setHeader("Název");
-        grid.addComponentColumn(this::createProductsComponent).setHeader("Komponenty").setWidth("150px");
+        dataProvider = DataProvider.fromFilteringCallbacks(
+                productService::findAll,
+                productService::getCount
+        );
 
-        grid.addColumn(new LocalDateTimeRenderer<>(Product::getUpdated, "H:mm d. M. yyyy")).setHeader("Naposledy upraveno");
+        configurableFilterDataProvider = dataProvider.withConfigurableFilter();
+        configurableFilterDataProvider.setFilter(productFilter);
 
+        Grid.Column<Product> nameColumn = grid.addColumn(Product::getName).setHeader("Název").setKey("name").setWidth("150px");
+        Grid.Column<Product> productionPrice = grid.addColumn(this::getProductionPrice).setHeader("Výrobní cena").setKey("productionPrice").setWidth("150px");
+        Grid.Column<Product> profitColumn = grid.addColumn(this::getProfit).setHeader("Profit").setKey("profit").setWidth("150px");
+        Grid.Column<Product> sellingPrice = grid.addColumn(this::getSellingPrice).setHeader("Prodejní cena").setKey("sellingPrice").setWidth("150px");
+        Grid.Column<Product> componentsColumn = grid.addComponentColumn(this::createProductsComponent).setHeader("Komponenty").setWidth("150px");
+
+        HeaderRow headerRow = grid.appendHeaderRow();
+        headerRow.getCell(nameColumn).setComponent(FilterFields.createTextFieldFilter("název", productFilter::setNameFilter, configurableFilterDataProvider));
+        headerRow.getCell(productionPrice).setComponent(FilterFields.createFromToNumberFilter(productFilter::setFromProductionPriceFilter, productFilter::setToProductionPriceFilter, configurableFilterDataProvider));
+        headerRow.getCell(profitColumn).setComponent(FilterFields.createFromToNumberFilter(productFilter::setFromProfitFilter, productFilter::setToProfitFilter, configurableFilterDataProvider));
+        headerRow.getCell(sellingPrice).setComponent(FilterFields.createFromToNumberFilter(productFilter::setFromSellingPriceFilter, productFilter::setToSellingPriceFilter, configurableFilterDataProvider));
+        headerRow.getCell(componentsColumn).setComponent(FilterFields.createComponentMultiSelectComboBoxFilter("komponenty", productFilter::setComponentsFilter, configurableFilterDataProvider, componentService));
 
         grid.asSingleSelect().addValueChangeListener(e-> gridFormLayout.showFormLayout(e.getValue()));
-        grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
+//        grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
+
+        grid.setMultiSort(true, Grid.MultiSortPriority.APPEND);
+        grid.setSortableColumns("name", "productionPrice", "profit", "sellingPrice");
 
         updateGrid();
     }
+
+    private String getSellingPrice(Product product) {
+        return String.format("%.2f", product.getSellingPrice())+ "Kč";
+    }
+
+    private String getProfit(Product product) {
+        return String.format("%.2f", product.getProfit())+ "%";
+    }
+
+    private String getProductionPrice(Product product) {
+        return String.format("%.2f", product.getProductionPrice())+ "Kč";
+    }
+
     private MultiSelectComboBox<Component> createProductsComponent(Product product) {
         MultiSelectComboBox<Component> comboBox = new MultiSelectComboBox<>();
         comboBox.setItemLabelGenerator(Component::getName);
@@ -116,6 +156,6 @@ public class ProductView extends VerticalLayout {
     }
     //endregion
     private void updateGrid(){
-        grid.setItems(query -> productService.findAll(query.getPage(), query.getPageSize()));
+        grid.setItems(configurableFilterDataProvider);
     }
 }

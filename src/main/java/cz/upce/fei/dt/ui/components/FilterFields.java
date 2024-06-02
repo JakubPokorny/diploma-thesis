@@ -14,6 +14,7 @@ import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import cz.upce.fei.dt.beckend.entities.Product;
 import cz.upce.fei.dt.beckend.entities.User;
+import cz.upce.fei.dt.beckend.services.ComponentService;
 import cz.upce.fei.dt.beckend.services.ProductService;
 import cz.upce.fei.dt.beckend.services.UserService;
 import cz.upce.fei.dt.beckend.utilities.CzechI18n;
@@ -71,7 +72,11 @@ public class FilterFields {
     }
 
     public static Component createProductMultiSelectComboBoxFilter(String placeHolder, Consumer<Set<Long>> consumer, ConfigurableFilterDataProvider<?, ?, ?> dataProvider, ProductService productService){
-        MultiSelectComboBox<Product> filter = createMultiSelectComboBoxField(placeHolder, consumer, dataProvider, productService);
+        MultiSelectComboBox<Product> filter = createProductMultiSelectComboBoxField(placeHolder, consumer, dataProvider, productService);
+        return createFilterHeaderLayout(filter);
+    }
+    public static Component createComponentMultiSelectComboBoxFilter(String placeHolder, Consumer<Set<Long>> consumer, ConfigurableFilterDataProvider<?, ?, ?> dataProvider, ComponentService componentService){
+        MultiSelectComboBox<cz.upce.fei.dt.beckend.entities.Component> filter = createComponentMultiSelectComboBoxField(placeHolder, consumer, dataProvider, componentService);
         return createFilterHeaderLayout(filter);
     }
     public static Component createUserMultiSelectComboBoxFilter(String placeHolder, Consumer<Set<Long>> consumer, ConfigurableFilterDataProvider<?, ?, ?> dataProvider, UserService userService){
@@ -93,17 +98,33 @@ public class FilterFields {
         });
         return msb;
     }
-    private static MultiSelectComboBox<Product> createMultiSelectComboBoxField(String placeHolder, Consumer<Set<Long>> consumer, ConfigurableFilterDataProvider<?, ?, ?> dataProvider, ProductService productService) {
+    private static MultiSelectComboBox<Product> createProductMultiSelectComboBoxField(String placeHolder, Consumer<Set<Long>> consumer, ConfigurableFilterDataProvider<?, ?, ?> dataProvider, ProductService productService) {
         MultiSelectComboBox<Product> msb = new MultiSelectComboBox<>();
         setupComboBoxBase(placeHolder, msb);
 
         msb.addThemeVariants(MultiSelectComboBoxVariant.LUMO_SMALL);
         msb.setItemLabelGenerator(Product::getName);
 
-        msb.setItems(query -> productService.findAllProductsIdAndName(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
+        msb.setItems(query -> productService.findAllByName(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
 
         msb.addValueChangeListener(event -> {
             consumer.accept(event.getValue().stream().map(Product::getId).collect(Collectors.toSet()));
+            dataProvider.refreshAll();
+        });
+        return msb;
+    }
+
+    private static MultiSelectComboBox<cz.upce.fei.dt.beckend.entities.Component> createComponentMultiSelectComboBoxField(String placeHolder, Consumer<Set<Long>> consumer, ConfigurableFilterDataProvider<?, ?, ?> dataProvider, ComponentService componentService) {
+        MultiSelectComboBox<cz.upce.fei.dt.beckend.entities.Component> msb = new MultiSelectComboBox<>();
+        setupComboBoxBase(placeHolder, msb);
+
+        msb.addThemeVariants(MultiSelectComboBoxVariant.LUMO_SMALL);
+        msb.setItemLabelGenerator(cz.upce.fei.dt.beckend.entities.Component::getName);
+
+        msb.setItems(query -> componentService.findAllByName(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
+
+        msb.addValueChangeListener(event -> {
+            consumer.accept(event.getValue().stream().map(cz.upce.fei.dt.beckend.entities.Component::getId).collect(Collectors.toSet()));
             dataProvider.refreshAll();
         });
         return msb;
@@ -159,7 +180,6 @@ public class FilterFields {
         IntegerField integerField = new IntegerField();
         setupNumberBase(integerField, placeholder);
         integerField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
-        integerField.setStep(1);
 
         integerField.addValueChangeListener(event -> {
             consumer.accept(event.getValue());
@@ -172,7 +192,6 @@ public class FilterFields {
         NumberField numberField = new NumberField();
         setupNumberBase(numberField, placeholder);
         numberField.addThemeVariants(TextFieldVariant.LUMO_SMALL);
-        numberField.setStep(25);
 
         numberField.addValueChangeListener(event -> {
             consumer.accept(event.getValue());

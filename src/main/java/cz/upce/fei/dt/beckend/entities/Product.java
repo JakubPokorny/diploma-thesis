@@ -39,6 +39,18 @@ public class Product {
     private String name;
 
     @Column(nullable = false)
+    private Double productionPrice = 0.0;
+
+    @Column(nullable = false)
+    private Double profit = 0.0;
+
+    @Column(nullable = false)
+    private Double sellingPrice = 0.0;
+
+    @Column(nullable = false)
+    private Boolean ownSellingPrice = false;
+
+    @Column(nullable = false)
     @CreationTimestamp
     private LocalDateTime created;
 

@@ -1,4 +1,4 @@
-package cz.upce.fei.dt.ui.components.forms.events;
+package cz.upce.fei.dt.ui.components.forms;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;

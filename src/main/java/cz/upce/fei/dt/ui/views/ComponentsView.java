@@ -1,5 +1,6 @@
 package cz.upce.fei.dt.ui.views;
 
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.grid.Grid;
@@ -90,8 +91,8 @@ public class ComponentsView extends VerticalLayout {
     }
 
     private void configureForm() {
-        gridFormLayout.addSaveListener(this::saveComponent);
-        gridFormLayout.addDeleteListener(this::deleteComponent);
+        ComponentUtil.addListener(gridFormLayout, SaveEvent.class, this::saveComponent);
+        ComponentUtil.addListener(gridFormLayout, DeleteEvent.class, this::deleteComponent);
     }
 
 
@@ -189,7 +190,7 @@ public class ComponentsView extends VerticalLayout {
         MultiSelectComboBox<Product> comboBox = new MultiSelectComboBox<>();
         comboBox.setItemLabelGenerator(Product::getName);
         comboBox.setReadOnly(true);
-        comboBox.setItems(query -> productService.findAllProductsIdAndName(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
+        comboBox.setItems(query -> productService.findAllByName(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
         comboBox.setValue(component.getSelectedProduct());
         comboBox.setSizeFull();
         return comboBox;

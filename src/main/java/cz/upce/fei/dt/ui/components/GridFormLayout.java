@@ -1,6 +1,6 @@
 package cz.upce.fei.dt.ui.components;
 
-import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -104,22 +104,6 @@ public class GridFormLayout<F extends FormLayout & IEditForm<T>, T> extends Hori
         form.expand(!contentLayout.isVisible());
     }
 
-    public void addDeleteListener(ComponentEventListener<DeleteEvent> listener) {
-        addListener(DeleteEvent.class, listener);
-    }
-
-    public void addSaveListener(ComponentEventListener<SaveEvent> listener) {
-        addListener(SaveEvent.class, listener);
-    }
-
-    public void addCloseListener(ComponentEventListener<CloseEvent> listener) {
-        addListener(CloseEvent.class, listener);
-    }
-
-    public void addExpandListener(ComponentEventListener<ExpandEvent> listener) {
-        addListener(ExpandEvent.class, listener);
-    }
-
     private void configureContentLayout(Grid<T> content) {
         actionsLayout = new HorizontalLayout();
         actionsLayout.setClassName("content-actions");
@@ -142,8 +126,8 @@ public class GridFormLayout<F extends FormLayout & IEditForm<T>, T> extends Hori
         formLayout.setSpacing(false);
         formLayout.setMargin(false);
 
-        this.addCloseListener(closeEvent -> closeFormLayout());
-        this.addExpandListener(expandEvent -> expandFormLayout());
+        ComponentUtil.addListener(this, CloseEvent.class, event -> closeFormLayout());
+        ComponentUtil.addListener(this, ExpandEvent.class, event -> expandFormLayout());
 
         formLayout.add(createFormTopActions(), form, createFormBottomActions());
     }

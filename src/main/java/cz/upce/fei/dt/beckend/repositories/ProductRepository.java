@@ -5,26 +5,28 @@ import cz.upce.fei.dt.beckend.dto.IProduct;
 import cz.upce.fei.dt.beckend.entities.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
     @EntityGraph(value = "Product.eagerlyFetchComponent")
     @NonNull
-    Page<Product> findAll(@NonNull Pageable pageable);
+    Page<Product> findAll(@Nullable Specification<Product> specification, @NonNull Pageable pageable);
 
-    @Query(value = "select id, name from products " +
-            "where lower(name) like lower(concat('%', :searchTerm, '%'))", nativeQuery = true)
+    @Query(value = "select id, name from products where lower(name) like lower(concat('%', :searchTerm, '%'))", nativeQuery = true)
     @NonNull
-    Page<IProduct> findAllProductsIdAndName(@NonNull Pageable pageable, @Param("searchTerm") String searchTerm);
+    Page<IProduct> findAllByName(@NonNull Pageable pageable, @Param("searchTerm") String searchTerm);
 
     @Query("""
             select

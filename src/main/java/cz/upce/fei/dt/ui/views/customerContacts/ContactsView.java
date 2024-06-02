@@ -1,5 +1,6 @@
 package cz.upce.fei.dt.ui.views.customerContacts;
 
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
@@ -52,8 +53,8 @@ public class ContactsView extends VerticalLayout {
     }
 
     private void configureForm() {
-        gridFormLayout.addSaveListener(this::saveContact);
-        gridFormLayout.addDeleteListener(this::deleteContact);
+        ComponentUtil.addListener(gridFormLayout, SaveEvent.class, this::saveContact);
+        ComponentUtil.addListener(gridFormLayout, DeleteEvent.class, this::deleteContact);
     }
 
     private void saveContact(SaveEvent saveEvent) {
