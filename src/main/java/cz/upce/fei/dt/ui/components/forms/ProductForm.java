@@ -118,8 +118,8 @@ public class ProductForm extends FormLayout implements IEditForm<Product> {
         Button allow = new Button(VaadinIcon.EDIT.create());
         allow.addThemeVariants(ButtonVariant.LUMO_CONTRAST, ButtonVariant.LUMO_SMALL);
         allow.addClickListener(event -> {
-            sellingPrice.setReadOnly(!sellingPrice.isReadOnly());
             product.setOwnSellingPrice(sellingPrice.isReadOnly());
+            sellingPrice.setReadOnly(!sellingPrice.isReadOnly());
 
             updateSellingPrice();
         });
@@ -219,7 +219,7 @@ public class ProductForm extends FormLayout implements IEditForm<Product> {
         binder.readBean(product);
 
         if (product != null)
-            sellingPrice.setReadOnly(product.getOwnSellingPrice());
+            sellingPrice.setReadOnly(!product.getOwnSellingPrice());
 
     }
 
