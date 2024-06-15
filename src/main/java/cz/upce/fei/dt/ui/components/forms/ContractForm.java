@@ -1,17 +1,27 @@
 package cz.upce.fei.dt.ui.components.forms;
 
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
+import com.vaadin.flow.data.validator.DoubleRangeValidator;
 import cz.upce.fei.dt.beckend.entities.Contact;
 import cz.upce.fei.dt.beckend.entities.Contract;
 import cz.upce.fei.dt.beckend.entities.ContractProduct;
 import cz.upce.fei.dt.beckend.entities.Product;
 import cz.upce.fei.dt.beckend.entities.keys.ContractProductKey;
+import cz.upce.fei.dt.beckend.exceptions.ResourceNotFoundException;
 import cz.upce.fei.dt.beckend.services.*;
+import cz.upce.fei.dt.ui.components.ContactAccordion;
+import cz.upce.fei.dt.ui.components.PriceFieldWithButton;
+import cz.upce.fei.dt.ui.components.forms.events.UpdateContractPriceEvent;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,9 +30,11 @@ import java.util.Set;
 public class ContractForm extends FormLayout implements IEditForm<Contract> {
     private final BeanValidationBinder<Contract> binder = new BeanValidationBinder<>(Contract.class);
     private final ComboBox<Contact> contactCB = new ComboBox<>("Klient");
+    private final ContactAccordion contactAccordion = new ContactAccordion();
     private final MultiSelectComboBox<Product> productsMSB = new MultiSelectComboBox<>("Objednané Produkty");
     private final FormLayout contractProductFormsLayout = new FormLayout();
     private final HashMap<Long, ContractProductForm> contractProductForms = new HashMap<>();
+    private final PriceFieldWithButton priceField = new PriceFieldWithButton("Cena s marží", VaadinIcon.EDIT);
     private final DeadlineForm deadlineForm;
     private final DeadlineService deadlineService;
     private final NoteService noteService;
@@ -31,23 +43,36 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
     private FileForm fileForm;
     private Contract contract;
 
-    public ContractForm(ContactService contactService, ProductService productService, NoteService noteService, FileService fileService, DeadlineService deadlineService) {
+    public ContractForm(
+            ContactService contactService,
+            ProductService productService,
+            NoteService noteService,
+            FileService fileService,
+            DeadlineService deadlineService,
+            StatusService statusService) {
         setClassName("edit-form");
 
         this.noteService = noteService;
         this.fileService = fileService;
         this.deadlineService = deadlineService;
-        deadlineForm = new DeadlineForm(deadlineService);
+        deadlineForm = new DeadlineForm(deadlineService, statusService);
 
         setupContactCB(contactService);
         setupProductMSB(productService);
         setupContractProductsForms();
+        setupPriceField();
 
+        ComponentUtil.addListener(UI.getCurrent(), UpdateContractPriceEvent.class, this::updatePrice);
+
+        this.setColspan(contactCB, 3);
+        this.setColspan(contactAccordion, 3);
         this.setColspan(productsMSB, 3);
+        this.setColspan(priceField, 3);
         this.setColspan(deadlineForm, 6);
         this.setColspan(contractProductFormsLayout, 3);
-        add(contactCB, productsMSB, contractProductFormsLayout, deadlineForm);
+        add(contactCB, contactAccordion, productsMSB, contractProductFormsLayout, priceField, deadlineForm);
     }
+
 
     //region Setups
     private void setupContractProductsForms() {
@@ -63,6 +88,36 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
         );
     }
 
+    private void setupPriceField() {
+        priceField.setReadOnly(true);
+        priceField.button.addClickListener(event -> {
+            contract.setOwnPrice(priceField.isReadOnly());
+            priceField.setReadOnly(!priceField.isReadOnly());
+            updatePrice(null);
+        });
+        binder.forField(priceField)
+                .withValidator(new DoubleRangeValidator("Cena mimo hodnoty", 0.0, Double.MAX_VALUE))
+                .asRequired()
+                .bind(Contract::getPrice, Contract::setPrice);
+    }
+
+    private void updatePrice(UpdateContractPriceEvent event) {
+        if (priceField.isReadOnly() && contractProductForms != null && !contractProductForms.isEmpty()) {
+            double price = 0;
+            for (ContractProductForm form : contractProductForms.values()) {
+                try {
+                    form.validate();
+                } catch (ValidationException ex) {
+                    Notification.show(ex.getValidationErrors().toString()).addThemeVariants(NotificationVariant.LUMO_ERROR);
+                }
+                Double pricePerPiece = form.getValue().getPricePerPiece();
+                Integer amount = form.getValue().getAmount();
+                price += pricePerPiece * amount;
+            }
+            priceField.setValue(price);
+        }
+    }
+
     private void setupProductMSB(ProductService productService) {
         productsMSB.setItems(query -> productService.findAllByName(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
         productsMSB.setItemLabelGenerator(Product::getName);
@@ -72,23 +127,33 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
 
     private void setupContactCB(ContactService contactService) {
         contactCB.setItems(query ->
-                contactService.findAllContactsIdAndICOAndName(query.getPage(), query.getPageSize(), query.getFilter().orElse(""))
+                contactService.findAllByIcoOrClientOrEmailOrPhone(query.getPage(), query.getPageSize(), query.getFilter().orElse(""))
         );
+
+        contactCB.addValueChangeListener(event -> {
+            if (event != null && event.getValue() != null) {
+                try {
+                    contactAccordion.setContact(contactService.findById(event.getValue().getId()));
+                } catch (ResourceNotFoundException exception) {
+                    Notification.show(exception.getMessage()).addThemeVariants(NotificationVariant.LUMO_ERROR);
+                }
+            } else
+                contactAccordion.setContact(null);
+        });
         contactCB.setItemLabelGenerator(this::getContactLabel);
-        this.setColspan(contactCB, 3);
         binder.forField(contactCB)
                 .asRequired()
                 .bind(Contract::getContact, Contract::setContact);
     }
 
     private void addProductComponentForm(MultiSelectionEvent<MultiSelectComboBox<Product>, Product> event) {
-        productsMSB.setHelperText("");
         event.getAddedSelection().forEach(product -> {
             if (!contractProductForms.containsKey(product.getId())) {
                 ContractProductForm form = new ContractProductForm(
                         ContractProduct.builder()
                                 .id(new ContractProductKey(contract.getId(), product.getId()))
                                 .amount(1)
+                                .pricePerPiece(product.getSellingPrice())
                                 .product(product)
                                 .contract(contract)
                                 .build());
@@ -101,6 +166,7 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
         event.getRemovedSelection().forEach(product ->
                 contractProductFormsLayout.remove(contractProductForms.remove(product.getId()))
         );
+        updatePrice(null);
     }
 
     private String getContactLabel(Contact contact) {
@@ -133,7 +199,7 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
             );
 
             productsMSB.setValue(contract.getSelectedProducts());
-
+            priceField.setReadOnly(!contract.getOwnPrice());
             deadlineForm.setValue(deadlineService.findFirstByContractIdOrderByCreatedDesc(contract.getId()));
 
             if (contract.getId() != null) {
@@ -150,7 +216,6 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
             }
             noteForm = null;
         }
-
         binder.readBean(contract);
     }
 

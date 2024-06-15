@@ -12,6 +12,7 @@ import java.util.Set;
 @Repository
 public interface ContractProductRepository extends JpaRepository<ContractProduct, ContractProductKey> {
     Set<ContractProduct> findAllByContractId(Long id);
+
     @NonNull
     Optional<ContractProduct> findById(@NonNull ContractProductKey id);
 

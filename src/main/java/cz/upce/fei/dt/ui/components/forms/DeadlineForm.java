@@ -13,13 +13,13 @@ import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import cz.upce.fei.dt.beckend.entities.Deadline;
-import cz.upce.fei.dt.beckend.entities.State;
+import cz.upce.fei.dt.beckend.entities.Status;
 import cz.upce.fei.dt.beckend.services.DeadlineService;
+import cz.upce.fei.dt.beckend.services.StatusService;
 import cz.upce.fei.dt.beckend.utilities.CzechI18n;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 
@@ -27,14 +27,14 @@ import java.util.Collections;
 @Setter
 public class DeadlineForm extends FormLayout implements IEditForm<Deadline> {
     private final Binder<Deadline> binder = new BeanValidationBinder<>(Deadline.class);
-    private final ComboBox<State> state = new ComboBox<>("Stav");
+    private final ComboBox<Status> state = new ComboBox<>("Stav");
     private final DatePicker deadlineDate = new DatePicker("Deadline");
     private final Button historyButton = new Button("Historie");
     private final Grid<Deadline> historyGrid= new Grid<>();
     private Deadline deadline = new Deadline();
     private final DeadlineService deadlineService;
 
-    public DeadlineForm(DeadlineService deadlineService) {
+    public DeadlineForm(DeadlineService deadlineService, StatusService statusService) {
         this.deadlineService = deadlineService;
         this.setResponsiveSteps(
                 new ResponsiveStep("0", 1),
@@ -44,16 +44,15 @@ public class DeadlineForm extends FormLayout implements IEditForm<Deadline> {
 
         setupGrid();
 
-        state.setItems(State.values());
-        state.setItemLabelGenerator(State::getName);
-        state.setValue(State.CREATED);
+        state.setItems(statusService::findAllByStatus);
+        state.setItemLabelGenerator(Status::getStatus);
         binder.forField(state)
                 .asRequired()
-                .bind(Deadline::getState, Deadline::setState);
+                .bind(Deadline::getStatus, Deadline::setStatus);
 
         deadlineDate.setI18n(CzechI18n.getDatePickerI18n());
         binder.forField(deadlineDate)
-                .withValidator(localDate -> localDate == null || localDate.isAfter(LocalDate.now().minusDays(1)), "Vyberte Deadline v budoucnosti.")
+                //.withValidator(localDate -> localDate == null || localDate.isAfter(LocalDate.now().minusDays(1)), "Vyberte Deadline v budoucnosti.")
                 .bind(Deadline::getDeadline, Deadline::setDeadline);
 
         historyButton.addClickListener(this::showHistory);
@@ -67,7 +66,7 @@ public class DeadlineForm extends FormLayout implements IEditForm<Deadline> {
         historyGrid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
         historyGrid.setVisible(false);
 
-        historyGrid.addColumn(new TextRenderer<>(deadline -> deadline.getState().getName())).setHeader("Stav");
+        historyGrid.addColumn(new TextRenderer<>(deadline -> deadline.getStatus().getStatus())).setHeader("Stav");
         historyGrid.addColumn(new LocalDateRenderer<>(Deadline::getDeadline, "d. M. yyyy")).setHeader("Deadline");
         historyGrid.addColumn(new TextRenderer<>(deadline-> "%s, %s".formatted(
                 deadline.getUser().getFullName(),

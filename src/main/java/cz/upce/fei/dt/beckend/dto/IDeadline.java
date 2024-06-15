@@ -1,6 +1,6 @@
 package cz.upce.fei.dt.beckend.dto;
 
-import cz.upce.fei.dt.beckend.entities.State;
+import cz.upce.fei.dt.beckend.entities.Status;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -8,7 +8,8 @@ import java.time.LocalDateTime;
 public interface IDeadline {
     Long getId();
 
-    State getState();
+    Status getStatus();
+
 
     LocalDate getDeadline();
 

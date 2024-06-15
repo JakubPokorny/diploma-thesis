@@ -22,4 +22,46 @@ public interface DeadlineRepository extends JpaRepository<Deadline, Long> {
     Optional<Deadline> findFirstByContractIdOrderByCreatedDesc(Long contractId);
 
     void deleteAllByContractId(Long contractId);
+
+    @Query(value =
+        """
+        SELECT count(d.contract_id)
+        FROM deadlines d
+            INNER JOIN (
+            SELECT contract_id, MAX(created) AS latest_created
+            FROM deadlines
+            GROUP BY contract_id
+        ) sub ON d.contract_id = sub.contract_id AND d.created = sub.latest_created
+        WHERE deadline IS NOT NULL AND deadline < DATE(now())
+        """
+            , nativeQuery = true)
+    int countAfterDeadline();
+
+    @Query(value =
+            """
+            SELECT count(d.contract_id)
+            FROM deadlines d
+                INNER JOIN (
+                SELECT contract_id, MAX(created) AS latest_created
+                FROM deadlines
+                GROUP BY contract_id
+            ) sub ON d.contract_id = sub.contract_id AND d.created = sub.latest_created
+            WHERE deadline IS NULL
+            """
+            , nativeQuery = true)
+    int countWithoutDeadline();
+
+    @Query(value =
+            """
+            SELECT count(d.contract_id)
+            FROM deadlines d
+                INNER JOIN (
+                SELECT contract_id, MAX(created) AS latest_created
+                FROM deadlines
+                GROUP BY contract_id
+            ) sub ON d.contract_id = sub.contract_id AND d.created = sub.latest_created
+            WHERE deadline IS NOT NULL AND DATE(now()) < deadline
+            """
+            , nativeQuery = true)
+    int countBeforeDeadline();
 }

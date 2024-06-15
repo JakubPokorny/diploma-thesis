@@ -15,4 +15,5 @@ public class TabWithBadge extends Tab {
 
         add(label, badge);
     }
+
 }

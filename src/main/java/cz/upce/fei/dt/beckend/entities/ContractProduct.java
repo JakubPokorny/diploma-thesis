@@ -21,6 +21,9 @@ public class ContractProduct {
     @Column(nullable = false)
     private int amount;
 
+    @Column(nullable = false)
+    private Double pricePerPiece;
+
     @ManyToOne
     @MapsId("contractId")
     @JoinColumn(name = "contract_id")

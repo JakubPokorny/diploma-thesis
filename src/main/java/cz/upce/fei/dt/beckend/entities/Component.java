@@ -71,8 +71,6 @@ public class Component {
     @JoinColumn(name = "user_id")
     private User user;
 
-    //todo cena bez dph
-
     public List<Product> getSelectedProduct() {
         List<Product> selectedProducts = new ArrayList<>();
         productComponents.forEach(productComponent ->

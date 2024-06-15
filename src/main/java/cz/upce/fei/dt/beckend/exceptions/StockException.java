@@ -14,21 +14,27 @@ import cz.upce.fei.dt.beckend.dto.CheckStockDto;
 
 import java.util.Collection;
 
-public class StockException extends RuntimeException{
+public class StockException extends RuntimeException {
     private final Collection<CheckStockDto> missingComponents;
-    public StockException(Collection<CheckStockDto> missingComponents, String message){
+
+    public StockException(Collection<CheckStockDto> missingComponents, String message) {
         super(message);
         this.missingComponents = missingComponents;
     }
 
-    public void showNotification(){
+    public void showNotification() {
         Notification notification = new Notification();
-        notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+        notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
 
         Div missing = new Div();
-        missing.add(new Paragraph("Pro vytvoření objednávky na skladě chybí komponenty:"));
+        missing.add(new Paragraph("Skladem chybí komponenty:"));
         UnorderedList list = new UnorderedList();
-        missingComponents.forEach(component -> list.add(new ListItem("%d, %s, %d kusů".formatted(component.getComponentId(),component.getComponentName(), Math.abs(component.getComponentsInStock())))));
+        missingComponents.forEach(
+                component -> list.add(new ListItem("%s, %d kusů".formatted(
+                        component.getComponentName(),
+                        component.getComponentsInStock())))
+        );
+
         missing.add(list);
 
         Button closeButton = new Button(LumoIcon.CROSS.create());

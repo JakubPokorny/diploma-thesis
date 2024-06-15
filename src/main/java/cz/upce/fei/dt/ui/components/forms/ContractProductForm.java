@@ -1,11 +1,16 @@
 package cz.upce.fei.dt.ui.components.forms;
 
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import cz.upce.fei.dt.beckend.entities.ContractProduct;
+import cz.upce.fei.dt.beckend.utilities.CzechI18n;
+import cz.upce.fei.dt.ui.components.forms.events.UpdateContractPriceEvent;
 
 public class ContractProductForm extends FormLayout implements IEditForm<ContractProduct> {
     private final Binder<ContractProduct> binder = new BeanValidationBinder<>(ContractProduct.class);
@@ -14,15 +19,19 @@ public class ContractProductForm extends FormLayout implements IEditForm<Contrac
 
     public ContractProductForm(ContractProduct contractProduct) {
         amount.setLabel(contractProduct.getProduct().getName());
+        amount.setHelperText(CzechI18n.getCurrency(contractProduct.getPricePerPiece()) +"/ks");
         amount.setMin(1);
         amount.setValue(1);
         amount.setStep(1);
         amount.setMax(Integer.MAX_VALUE);
         amount.setStepButtonsVisible(true);
+        amount.addThemeVariants(TextFieldVariant.LUMO_HELPER_ABOVE_FIELD);
         binder.forField(amount)
                 .withValidationStatusHandler(statusChange -> amount.setErrorMessage("Hodnoty mimo <1; 4 294 967 296>"))
                 .asRequired()
                 .bind(ContractProduct::getAmount, ContractProduct::setAmount);
+
+        amount.addValueChangeListener(event -> ComponentUtil.fireEvent(UI.getCurrent(), new UpdateContractPriceEvent(this, null)));
 
         this.setColspan(amount, 2);
         add(amount);

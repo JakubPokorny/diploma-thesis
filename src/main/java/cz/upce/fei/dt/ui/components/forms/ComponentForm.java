@@ -66,10 +66,11 @@ public class ComponentForm extends FormLayout implements IEditForm<Component> {
 
     private void setupNotify(UserService userService) {
         notify.setItems(userService.findAll());
-        notify.setItemLabelGenerator(User::getFullName);
+        notify.setItemLabelGenerator(user -> user.getFullName() + ", " + user.getEmail());
         notify.setClearButtonVisible(true);
         binder.forField(notify).bind(Component::getUser, Component::setUser);
     }
+
     private void setupPrice() {
         price.setStepButtonsVisible(true);
         price.setMin(0);
@@ -80,19 +81,22 @@ public class ComponentForm extends FormLayout implements IEditForm<Component> {
 
     private void setupMinInStock() {
         minInStock.setStepButtonsVisible(true);
-        minInStock.setMin(0);
+        minInStock.setMin(Integer.MIN_VALUE);
         minInStock.setMax(Integer.MAX_VALUE);
         minInStock.setSuffixComponent(new Span("ks"));
-        binder.forField(minInStock).withValidator(new IntegerRangeValidator("Minimum mimo hodnoty <0;4 294 967 296>", 0, Integer.MAX_VALUE)).bind(Component::getMinInStock, Component::setMinInStock);
+        binder.forField(minInStock).withValidator(new IntegerRangeValidator("Minimum mimo hodnoty <-2 147 483 648; 2 147 483 647>", Integer.MIN_VALUE, Integer.MAX_VALUE)).bind(Component::getMinInStock, Component::setMinInStock);
     }
 
     private void setupInStock() {
         inStock.setStepButtonsVisible(true);
-        inStock.setMin(0);
+        inStock.setMin(Integer.MIN_VALUE);
         inStock.setMax(Integer.MAX_VALUE);
         inStock.setValue(0);
         inStock.setSuffixComponent(new Span("ks"));
-        binder.forField(inStock).withValidator(new IntegerRangeValidator("Skladem mimo hodnoty <0;4 294 967 296>", 0, Integer.MAX_VALUE)).asRequired().bind(Component::getInStock, Component::setInStock);
+        binder.forField(inStock)
+                .withValidator(new IntegerRangeValidator("Skladem mimo hodnoty <-2 147 483 648; 2 147 483 647>", Integer.MIN_VALUE, Integer.MAX_VALUE))
+                .asRequired()
+                .bind(Component::getInStock, Component::setInStock);
     }
 
     private void setupDescription() {
@@ -108,7 +112,13 @@ public class ComponentForm extends FormLayout implements IEditForm<Component> {
     private void setupProductComponentsForms() {
         productComponentsFormLayout.setWidthFull();
         productComponentsFormLayout.setClassName("product-components-layout");
-        productComponentsFormLayout.setResponsiveSteps(new ResponsiveStep("0", 1), new ResponsiveStep("300px", 2), new ResponsiveStep("450px", 3), new ResponsiveStep("600px", 4), new ResponsiveStep("750px", 5), new ResponsiveStep("900px", 6));
+        productComponentsFormLayout.setResponsiveSteps(
+                new ResponsiveStep("0", 1),
+                new ResponsiveStep("300px", 2),
+                new ResponsiveStep("450px", 3),
+                new ResponsiveStep("600px", 4),
+                new ResponsiveStep("750px", 5),
+                new ResponsiveStep("900px", 6));
     }
 
     private void setupProductMSB(ProductService productService) {
@@ -121,7 +131,12 @@ public class ComponentForm extends FormLayout implements IEditForm<Component> {
     private void addProductComponentForm(MultiSelectionEvent<MultiSelectComboBox<Product>, Product> event) {
         event.getAddedSelection().forEach(product -> {
             if (!productComponentForms.containsKey(product.getId())) {
-                ProductComponentForm form = new ProductComponentForm(ProductComponent.builder().id(new ProductComponentKey(product.getId(), component.getId())).amount(1).product(product).component(component).build(), "Počet pro " + product.getName());
+                ProductComponentForm form = new ProductComponentForm(ProductComponent.builder()
+                        .id(new ProductComponentKey(product.getId(), component.getId()))
+                        .componentsPerProduct(1)
+                        .product(product)
+                        .component(component)
+                        .build(), "Počet pro " + product.getName());
                 productComponentForms.put(product.getId(), form);
                 productComponentsFormLayout.add(form);
             } else {

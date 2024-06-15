@@ -1,5 +1,7 @@
 package cz.upce.fei.dt.beckend.services;
 
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import cz.upce.fei.dt.beckend.entities.User;
@@ -18,12 +20,12 @@ import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
-public class UserService{
+public class UserService {
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
 
-    public Stream<User> findAllByFirstnameAndLastname(Query<User, String> query){
+    public Stream<User> findAllByFirstnameAndLastname(Query<User, String> query) {
         String searchTerm = query.getFilter().orElse("");
         return userRepository.findAllByFirstnameAndLastname(VaadinSpringDataHelpers.toSpringPageRequest(query), searchTerm)
                 .stream()
@@ -34,19 +36,21 @@ public class UserService{
                         .build()
                 );
     }
+
     @Transactional
     public List<User> findAll() {
         return userRepository.findAll();
     }
 
     public void saveUser(User user) {
-        if (userRepository.findByEmail(user.getEmail()).isEmpty()){
+        if (userRepository.findByEmail(user.getEmail()).isEmpty()) {
             String resetToken = sendResetToken(user);
             user.setPassword(passwordEncoder.encode(resetToken));
         }
         userRepository.save(user);
     }
-    public void changePassword(User user){
+
+    public void changePassword(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setResetToken("");
         userRepository.save(user);
@@ -57,7 +61,7 @@ public class UserService{
     }
 
     public void generateResetToken(User user) throws InvalidClassException {
-        if (userRepository.findByEmail(user.getEmail()).isPresent()){
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             sendResetToken(user);
             userRepository.save(user);
         } else {
@@ -65,13 +69,17 @@ public class UserService{
         }
     }
 
-    private String sendResetToken(User user){
+    private String sendResetToken(User user) {
         String resetToken = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         user.setResetToken(resetToken);
-        emailService.send(
-                user.getEmail(),
-                "Nastav si heslo.",
-                "Pro nastavení hesla přejdi na http://localhost:8888/password/" + resetToken);
+        try {
+            emailService.send(
+                    user.getEmail(),
+                    "Nastav si heslo.",
+                    "Pro nastavení hesla přejdi na http://localhost:8888/password/" + resetToken);
+        } catch (Exception exception) {
+            Notification.show(exception.getMessage()).addThemeVariants(NotificationVariant.LUMO_ERROR);
+        }
         return resetToken;
     }
 }

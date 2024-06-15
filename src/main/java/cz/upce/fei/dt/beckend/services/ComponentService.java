@@ -1,5 +1,6 @@
 package cz.upce.fei.dt.beckend.services;
 
+import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import cz.upce.fei.dt.beckend.dto.CheckStockDto;
@@ -16,16 +17,35 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
-public class ComponentService {
+public class ComponentService extends AbstractBackEndDataProvider<Component, ComponentFilter> {
     private final ComponentRepository componentRepository;
     private final ProductComponentRepository productComponentRepository;
     private final EmailService emailService;
+
+    @Override
+    public Stream<Component> fetchFromBackEnd(Query<Component, ComponentFilter> query) {
+        Specification<Component> spec = ComponentSpec.filterBy(query.getFilter().orElse(new ComponentFilter()));
+        Stream<Component> stream = componentRepository.findAll(spec, VaadinSpringDataHelpers.toSpringDataSort(query)).stream();
+
+        if (query.getFilter().isPresent()) {
+            stream = stream.filter(contract -> query.getFilter().get().filter(contract));
+        }
+
+        return stream.skip(query.getOffset()).limit(query.getLimit());
+    }
+
+    @Override
+    public int sizeInBackEnd(Query<Component, ComponentFilter> query) {
+        return (int) fetchFromBackEnd(query).count();
+    }
 
     public Stream<Component> findAllByName(int page, int pageSize, String searchTerm) {
         return componentRepository.findAllByName(PageRequest.of(page, pageSize), searchTerm)
@@ -36,16 +56,6 @@ public class ComponentService {
                         .price(iComponent.getPrice())
                         .build()
                 );
-    }
-    public Stream<Component> findAll(Query<Component, ComponentFilter> query) {
-        Specification<Component> spec = ComponentSpec.filterBy(query.getFilter().orElse(new ComponentFilter()));
-        return componentRepository.findAll(spec, VaadinSpringDataHelpers.toSpringPageRequest(query))
-                .stream();
-    }
-
-    public int getCount(Query<Component, ComponentFilter> query) {
-        Specification<Component> spec = ComponentSpec.filterBy(query.getFilter().orElse(new ComponentFilter()));
-        return (int) componentRepository.findAll(spec, VaadinSpringDataHelpers.toSpringPageRequest(query)).stream().count();
     }
 
     @Transactional
@@ -76,32 +86,35 @@ public class ComponentService {
     }
 
     @Transactional
-    public void updateAllInStockAssigned(Collection<CheckStockDto> assigned) {
-        assigned.forEach(stockDto -> {
-            componentRepository.updateAmountById(stockDto.getComponentId(), stockDto.getComponentsInStock());
-            if (stockDto.getMinComponentsInStock() != null && stockDto.getComponentsInStock() < stockDto.getMinComponentsInStock() && stockDto.getEmail() != null) {
-                emailService.sendStockNotification(
-                        stockDto.getEmail(),
-                        stockDto.getComponentName(),
-                        stockDto.getComponentsInStock(),
-                        stockDto.getMinComponentsInStock()
-                );
+    public void updateAll(Collection<CheckStockDto> componentsToUpdate) {
+        List<CheckStockDto> underMinInStockLimit = new ArrayList<>();
+        componentsToUpdate.forEach(checkStockDto -> {
+            componentRepository.updateAmountById(checkStockDto.getComponentID(), checkStockDto.getComponentsInStock());
+
+            if (checkStockDto.getMinComponentsInStock() != null && checkStockDto.getComponentsInStock() < checkStockDto.getMinComponentsInStock() && checkStockDto.getEmail() != null) {
+                underMinInStockLimit.add(checkStockDto);
             }
         });
+
+        emailService.sendStockNotification(underMinInStockLimit);
     }
 
 
-
-    public int getCountAll(){
+    public int getCountAll() {
         return componentRepository.countAll();
     }
-    public int getCountInStock(){
+
+    public int getCountInStock() {
         return componentRepository.countInStock();
     }
-    public int getCountInStockSupply(){
+
+    public int getCountInStockSupply() {
         return componentRepository.countSupply();
     }
-    public int getCountInStockMissing(){
+
+    public int getCountInStockMissing() {
         return componentRepository.countMissing();
     }
+
+
 }

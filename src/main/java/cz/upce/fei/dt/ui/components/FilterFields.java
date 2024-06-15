@@ -12,15 +12,16 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.*;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import cz.upce.fei.dt.beckend.entities.Contact;
 import cz.upce.fei.dt.beckend.entities.Product;
+import cz.upce.fei.dt.beckend.entities.Status;
 import cz.upce.fei.dt.beckend.entities.User;
-import cz.upce.fei.dt.beckend.services.ComponentService;
-import cz.upce.fei.dt.beckend.services.ProductService;
-import cz.upce.fei.dt.beckend.services.UserService;
+import cz.upce.fei.dt.beckend.services.*;
 import cz.upce.fei.dt.beckend.utilities.CzechI18n;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -84,6 +85,31 @@ public class FilterFields {
         return createFilterHeaderLayout(filter);
     }
 
+    public static Component createContactMultiSelectComboBoxFilter(String placeHolder, Consumer<Set<Long>> consumer, ConfigurableFilterDataProvider<?, ?, ?> dataProvider, ContactService contactService){
+        MultiSelectComboBox<Contact> filter = createContactMultiSelectComboBoxField(placeHolder, consumer, dataProvider, contactService);
+        return createFilterHeaderLayout(filter);
+    }
+
+    public static Component createStatusMultiSelectComboBoxFilter(String placeHolder, Consumer<Set<Status>> consumer, ConfigurableFilterDataProvider<?, ?, ?> dataProvider, StatusService statusService){
+        MultiSelectComboBox<Status> filter = createStatusMultiSelectComboBoxField(placeHolder, consumer, dataProvider, statusService);
+        return createFilterHeaderLayout(filter);
+    }
+
+    private static MultiSelectComboBox<Status> createStatusMultiSelectComboBoxField(String placeHolder, Consumer<Set<Status>> consumer, ConfigurableFilterDataProvider<?, ?, ?> dataProvider, StatusService statusService){
+        MultiSelectComboBox<Status> msb = new MultiSelectComboBox<>();
+        setupComboBoxBase(placeHolder, msb);
+
+        msb.addThemeVariants(MultiSelectComboBoxVariant.LUMO_SMALL);
+        msb.setItemLabelGenerator(Status::getStatus);
+        msb.setItems(statusService::findAllByStatus);
+
+        msb.addValueChangeListener(event -> {
+            consumer.accept(new HashSet<>(event.getValue()));
+            dataProvider.refreshAll();
+        });
+        return msb;
+    }
+
     private static MultiSelectComboBox<User> createUserMultiSelectComboBoxField(String placeHolder, Consumer<Set<Long>> consumer, ConfigurableFilterDataProvider<?, ?, ?> dataProvider, UserService userService){
         MultiSelectComboBox<User> msb = new MultiSelectComboBox<>();
         setupComboBoxBase(placeHolder, msb);
@@ -114,6 +140,21 @@ public class FilterFields {
         return msb;
     }
 
+    private static MultiSelectComboBox<Contact> createContactMultiSelectComboBoxField(String placeHolder, Consumer<Set<Long>> consumer, ConfigurableFilterDataProvider<?, ?, ?> dataProvider, ContactService contactService) {
+        MultiSelectComboBox<Contact> msb = new MultiSelectComboBox<>();
+        setupComboBoxBase(placeHolder, msb);
+
+        msb.addThemeVariants(MultiSelectComboBoxVariant.LUMO_SMALL);
+        msb.setItemLabelGenerator(Contact::getClient);
+
+        msb.setItems(query -> contactService.findAllByIcoOrClientOrEmailOrPhone(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
+
+        msb.addValueChangeListener(event -> {
+            consumer.accept(event.getValue().stream().map(Contact::getId).collect(Collectors.toSet()));
+            dataProvider.refreshAll();
+        });
+        return msb;
+    }
     private static MultiSelectComboBox<cz.upce.fei.dt.beckend.entities.Component> createComponentMultiSelectComboBoxField(String placeHolder, Consumer<Set<Long>> consumer, ConfigurableFilterDataProvider<?, ?, ?> dataProvider, ComponentService componentService) {
         MultiSelectComboBox<cz.upce.fei.dt.beckend.entities.Component> msb = new MultiSelectComboBox<>();
         setupComboBoxBase(placeHolder, msb);
@@ -138,7 +179,7 @@ public class FilterFields {
 
     private static DatePicker createDatePickerField(String placeHolder, Consumer<LocalDate> consumer, ConfigurableFilterDataProvider<?, ?, ?> dataProvider) {
         DatePicker datePicker = new DatePicker();
-        datePicker.setPlaceholder(placeHolder);
+        datePicker.setPlaceholder(placeHolder+"...");
         datePicker.setClearButtonVisible(true);
         datePicker.setWidthFull();
         datePicker.addThemeVariants(DatePickerVariant.LUMO_SMALL);
@@ -151,7 +192,6 @@ public class FilterFields {
     }
     private static DateTimePicker createDateTimePickerField(String placeHolder, Consumer<LocalDateTime> consumer, ConfigurableFilterDataProvider<?, ?, ?> dataProvider) {
         DateTimePicker dateTimePicker = new DateTimePicker();
-//        dateTimePicker.setMinWidth("250px");
         dateTimePicker.setDatePlaceholder("datum "+placeHolder+"...");
         dateTimePicker.setTimePlaceholder("čas "+placeHolder+"...");
         dateTimePicker.setWidthFull();

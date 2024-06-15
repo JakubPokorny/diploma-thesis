@@ -1,6 +1,7 @@
 package cz.upce.fei.dt.beckend.services;
 
 import cz.upce.fei.dt.beckend.entities.Contact;
+import cz.upce.fei.dt.beckend.exceptions.ResourceNotFoundException;
 import cz.upce.fei.dt.beckend.repositories.AddressRepository;
 import cz.upce.fei.dt.beckend.repositories.ContactRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,15 +17,19 @@ public class ContactService {
     private final ContactRepository contactRepository;
     private final AddressRepository addressRepository;
 
-    public Stream<Contact> findAllContactsIdAndICOAndName(int page, int pageSize, String searchTerm) {
-        return contactRepository.findAllContactsIDAndICOAndName(PageRequest.of(page, pageSize), searchTerm)
+    public Stream<Contact> findAllByIcoOrClientOrEmailOrPhone(int page, int pageSize, String searchTerm) {
+        return contactRepository.findAllByIcoOrClientOrEmailOrPhone(PageRequest.of(page, pageSize), searchTerm)
                 .stream()
                 .map(iContact -> Contact.builder()
                         .id(iContact.getId())
                         .ICO(iContact.getICO())
-                        .client(iContact.getName())
+                        .client(iContact.getClient())
                         .build()
                 );
+    }
+
+    public Contact findById(Long id) throws ResourceNotFoundException {
+        return contactRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Klient nenalezen."));
     }
 
     public List<Contact> getAll() {

@@ -1,38 +1,35 @@
 package cz.upce.fei.dt.ui.components.forms;
 
+import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.messages.MessageInput;
-import com.vaadin.flow.component.messages.MessageInputI18n;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import cz.upce.fei.dt.beckend.entities.Contract;
 import cz.upce.fei.dt.beckend.entities.Note;
 import cz.upce.fei.dt.beckend.services.NoteService;
+import cz.upce.fei.dt.beckend.utilities.CzechI18n;
 
-public class NoteForm extends VerticalLayout {
+public class NoteForm extends Details {
     private final MessageInput messageInput = new MessageInput();
     Grid<MessageListItem> messageGrid = new Grid<>();
     private final NoteService noteService;
-    private final Span noNote = new Span("0 poznámek.");
-    private final Span title = new Span("Poznámky");
 
 
     public NoteForm(NoteService noteService, Contract contract) {
         this.setClassName("notes-layout");
         this.noteService = noteService;
 
-        add(title, messageInput, messageGrid);
+        setupMessageInput(contract);
+        setupMessageList(contract.getId());
 
-        configureMessageInput(contract);
-        configureMessageList(contract.getId());
+        this.add(messageInput, messageGrid);
     }
 
-    private void configureMessageList(Long contractId) {
+    private void setupMessageList(Long contractId) {
         messageGrid.setClassName("notes-grid-layout");
         messageGrid.addThemeVariants(GridVariant.LUMO_NO_BORDER);
         messageGrid.addComponentColumn(messageListItem -> {
@@ -40,13 +37,14 @@ public class NoteForm extends VerticalLayout {
             messageList.setClassName("message-list");
             return messageList;
         });
+        messageGrid.setAllRowsVisible(true);
         updateMessageList(contractId);
     }
 
-    private void configureMessageInput(Contract contract) {
+    private void setupMessageInput(Contract contract) {
         messageInput.setClassName("message-input");
         messageInput.setWidthFull();
-        messageInput.setI18n(getCzechI18n());
+        messageInput.setI18n(CzechI18n.getMessageInputI18n());
 
         messageInput.getElement().addPropertyChangeListener("value", "change", event -> {
             int length = event.getValue().toString().length();
@@ -72,25 +70,16 @@ public class NoteForm extends VerticalLayout {
             }
         });
     }
-    private static MessageInputI18n getCzechI18n(){
-        MessageInputI18n czech = new MessageInputI18n();
-        czech.setSend("Poslat");
-        czech.setMessage("Poznámka (max %d znaků)".formatted(Note.MAX_NOTE_LENGTH));
-        return czech;
-    }
 
-    private void updateMessageList(Long contractId){
+
+    private void updateMessageList(Long contractId) {
         long count = messageGrid.setItems(query -> noteService.findAllByContractId(contractId, query.getPage(), query.getPageSize()))
                 .getItems()
                 .count();
-        title.setText("Poznámky (%d)".formatted(count));
+        this.setSummaryText("Poznámky (%d)".formatted(count));
 
-        if (count == 0){
-            messageGrid.setVisible(false);
-            this.add(noNote);
-        } else {
-            messageGrid.setVisible(true);
-            remove(noNote);
+        if (count > 0 ){
+            this.setOpened(true);
         }
     }
 }

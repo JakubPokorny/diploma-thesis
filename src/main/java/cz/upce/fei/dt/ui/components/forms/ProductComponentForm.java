@@ -18,25 +18,25 @@ import lombok.Setter;
 public class ProductComponentForm extends FormLayout implements IEditForm<ProductComponent> {
     private final Binder<ProductComponent> binder = new BeanValidationBinder<>(ProductComponent.class);
     private ProductComponent productComponent;
-    private final IntegerField amount = new IntegerField();
+    private final IntegerField componentsPerProduct = new IntegerField();
 
     public ProductComponentForm(ProductComponent productComponent, String label) {
-        amount.setLabel(label);
-        amount.setMin(1);
-        amount.setValue(productComponent.getAmount());
-        amount.setStep(1);
-        amount.setMax(Integer.MAX_VALUE);
-        amount.setStepButtonsVisible(true);
-        binder.forField(amount)
+        componentsPerProduct.setLabel(label);
+        componentsPerProduct.setMin(1);
+        componentsPerProduct.setValue(productComponent.getComponentsPerProduct());
+        componentsPerProduct.setStep(1);
+        componentsPerProduct.setMax(Integer.MAX_VALUE);
+        componentsPerProduct.setStepButtonsVisible(true);
+        binder.forField(componentsPerProduct)
                 .withValidator(new IntegerRangeValidator("Počet dílů " + label + " mimo hodnoty <0; 4 294 967 296>", 0, Integer.MAX_VALUE))
-                .withValidationStatusHandler(statusChange -> amount.setErrorMessage("Hodnoty mimo <1; 4 294 967 296>"))
+                .withValidationStatusHandler(statusChange -> componentsPerProduct.setErrorMessage("Hodnoty mimo <1; 4 294 967 296>"))
                 .asRequired()
-                .bind(ProductComponent::getAmount, ProductComponent::setAmount);
+                .bind(ProductComponent::getComponentsPerProduct, ProductComponent::setComponentsPerProduct);
 
-        amount.addValueChangeListener(event -> ComponentUtil.fireEvent(UI.getCurrent(), new UpdateProductProductionPriceEvent(this, null)));
+        componentsPerProduct.addValueChangeListener(event -> ComponentUtil.fireEvent(UI.getCurrent(), new UpdateProductProductionPriceEvent(this, null)));
 
-        this.setColspan(amount, 2);
-        add(amount);
+        this.setColspan(componentsPerProduct, 2);
+        add(componentsPerProduct);
 
         this.setValue(productComponent);
     }

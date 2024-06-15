@@ -45,7 +45,7 @@ public class ComponentsView extends VerticalLayout {
     private final ComponentFilter componentFilter = new ComponentFilter();
     private final TabWithBadge all = createTabWithBadge("Všechny", "contrast", ComponentTag.ALL);
     private final TabWithBadge inStock = createTabWithBadge("Skladem", "success", ComponentTag.IN_STOCK);
-    private final TabWithBadge supply = createTabWithBadge("Doplnit", "", ComponentTag.SUPPLY);
+    private final TabWithBadge supply = createTabWithBadge("Doplnit", "warning", ComponentTag.SUPPLY);
     private final TabWithBadge missing = createTabWithBadge("Chybí", "error", ComponentTag.MISSING);
     private DataProvider<Component, ComponentFilter> dataProvider;
     private ConfigurableFilterDataProvider<Component, Void, ComponentFilter> configurableFilterDataProvider;
@@ -126,8 +126,8 @@ public class ComponentsView extends VerticalLayout {
         grid.setSizeFull();
 
        dataProvider = DataProvider.fromFilteringCallbacks(
-                componentService::findAll,
-                componentService::getCount
+                componentService::fetchFromBackEnd,
+                componentService::sizeInBackEnd
         );
 
         configurableFilterDataProvider = dataProvider.withConfigurableFilter();
@@ -177,6 +177,8 @@ public class ComponentsView extends VerticalLayout {
             badge.getElement().getThemeList().add("contrast");
         else if (inStock > component.getMinInStock())
             badge.getElement().getThemeList().add("success");
+        else
+            badge.getElement().getThemeList().add("warning");
 
         return badge;
     }

@@ -29,18 +29,15 @@ import jakarta.annotation.security.PermitAll;
 @RouteAlias(value = "produkty",  layout = MainLayout.class)
 @PageTitle("Produkty")
 @PermitAll
-public class ProductView extends VerticalLayout {
+public class ProductsView extends VerticalLayout {
     private final ProductService productService;
     private final ComponentService componentService;
     private final Grid<Product> grid;
     private final GridFormLayout<ProductForm, Product> gridFormLayout;
-
     private final ProductFilter productFilter = new ProductFilter();
-    private DataProvider<Product, ProductFilter> dataProvider;
     private ConfigurableFilterDataProvider<Product, Void, ProductFilter> configurableFilterDataProvider;
-    private Double productionPrice = 0.0;
 
-    public ProductView(
+    public ProductsView(
             ProductService productService,
             ComponentService componentService) {
 
@@ -50,7 +47,7 @@ public class ProductView extends VerticalLayout {
         ProductForm form = new ProductForm(componentService);
         grid = new Grid<>(Product.class, false);
         gridFormLayout = new GridFormLayout<>(form, grid);
-        MainLayout.setPageTitle("Produkty", ProductView.class);
+        MainLayout.setPageTitle("Produkty", ProductsView.class);
         setSizeFull();
 
         configureGrid();
@@ -103,9 +100,9 @@ public class ProductView extends VerticalLayout {
         grid.setClassName("grid-content");
         grid.setSizeFull();
 
-        dataProvider = DataProvider.fromFilteringCallbacks(
-                productService::findAll,
-                productService::getCount
+        DataProvider<Product, ProductFilter> dataProvider = DataProvider.fromFilteringCallbacks(
+                productService::fetchFromBackEnd,
+                productService::sizeInBackEnd
         );
 
         configurableFilterDataProvider = dataProvider.withConfigurableFilter();
@@ -113,7 +110,7 @@ public class ProductView extends VerticalLayout {
 
         Grid.Column<Product> nameColumn = grid.addColumn(Product::getName).setHeader("Název").setKey("name").setWidth("150px");
         Grid.Column<Product> productionPrice = grid.addColumn(this::getProductionPrice).setHeader("Výrobní cena").setKey("productionPrice").setWidth("150px");
-        Grid.Column<Product> profitColumn = grid.addColumn(this::getProfit).setHeader("Profit").setKey("profit").setWidth("150px");
+        Grid.Column<Product> profitColumn = grid.addColumn(this::getProfit).setHeader("Marže").setKey("profit").setWidth("150px");
         Grid.Column<Product> sellingPrice = grid.addColumn(this::getSellingPrice).setHeader("Prodejní cena").setKey("sellingPrice").setWidth("150px");
         Grid.Column<Product> componentsColumn = grid.addComponentColumn(this::createProductsComponent).setHeader("Komponenty").setWidth("150px");
 

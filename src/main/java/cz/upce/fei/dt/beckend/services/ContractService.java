@@ -1,11 +1,16 @@
 package cz.upce.fei.dt.beckend.services;
 
+import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import cz.upce.fei.dt.beckend.entities.Contract;
 import cz.upce.fei.dt.beckend.entities.ContractProduct;
 import cz.upce.fei.dt.beckend.entities.Deadline;
 import cz.upce.fei.dt.beckend.repositories.ContractRepository;
+import cz.upce.fei.dt.beckend.services.filters.ContractFilter;
+import cz.upce.fei.dt.beckend.services.specifications.ContractSpec;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,53 +20,63 @@ import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
-public class ContractService {
+public class ContractService extends AbstractBackEndDataProvider<Contract, ContractFilter> {
     private final ContractRepository contractRepository;
     private final DeadlineService deadlineService;
     private final ContractProductService contractProductService;
     private final FileService fileService;
 
-    public Stream<Contract> findAll(int page, int pageSize) {
-        return contractRepository.findAll(PageRequest.of(page, pageSize)).stream();
+    @Override
+    public Stream<Contract> fetchFromBackEnd(Query<Contract, ContractFilter> query) {
+        Specification<Contract> spec = ContractSpec.filterBy(query.getFilter().orElse(new ContractFilter()));
+        Stream<Contract> stream = contractRepository.findAll(spec, VaadinSpringDataHelpers.toSpringDataSort(query)).stream();
+
+        if (query.getFilter().isPresent()) {
+            stream = stream.filter(contract -> query.getFilter().get().filter(contract));
+        }
+
+        return stream.skip(query.getOffset()).limit(query.getLimit());
+    }
+
+    @Override
+    public int sizeInBackEnd(Query<Contract, ContractFilter> query) {
+        return (int) fetchFromBackEnd(query).count();
     }
 
     @Transactional
     public void saveContract(Contract contract) {
         contract.setUpdated(LocalDateTime.now());
+        Deadline deadline = contract.getCurrentDeadline();
         if (contract.getId() == null) { // new Contract
             Set<ContractProduct> contractProducts = contract.getContractProducts();
 
             contract.setContractProducts(null);
-            Contract savedContract = contractRepository.save(contract);
+            contract = contractRepository.save(contract);
 
             for (ContractProduct contractProduct : contractProducts) {
-                contractProduct.setContract(savedContract);
+                contractProduct.setContract(contract);
             }
-            contractProductService.saveAll(contractProducts);
+            contract.setContractProducts(contractProducts);
+            contractProductService.saveAll(contract);
 
-            Deadline deadline = contract.getCurrentDeadline();
-            deadline.setContract(savedContract);
-            deadlineService.save(deadline);
+            deadline.setContract(contract);
         } else {
-            contractProductService.deleteAllOrphans(contract);
-            contractProductService.saveAll(contract.getContractProducts());
-
-            deadlineService.save(contract.getCurrentDeadline());
-
+            contractProductService.saveAll(contract);
             contractRepository.save(contract);
         }
+        deadlineService.save(deadline);
     }
 
     @Transactional
     public void deleteContract(Contract contract) {
         contract.getFiles().forEach(fileService::delete);
-
         contractProductService.deleteAll(contract);
-
         deadlineService.deleteAll(contract.getId());
-
         contractRepository.delete(contract);
     }
 
+    public int getCountAll() {
+        return contractRepository.countAll();
+    }
 
 }

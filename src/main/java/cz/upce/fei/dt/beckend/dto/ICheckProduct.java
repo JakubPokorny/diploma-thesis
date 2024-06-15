@@ -1,10 +1,13 @@
 package cz.upce.fei.dt.beckend.dto;
 
-public interface ICheckProduct {
+import cz.upce.fei.dt.beckend.entities.keys.ProductComponentKey;
 
-    int getComponentPerProduct();
-    Long getComponentId();
+public interface ICheckProduct {
+    Long getProductID();
+    Long getComponentID();
+    ProductComponentKey getProductComponentKey();
     String getComponentName();
+    int getComponentsPerProduct();
     int getComponentsInStock();
     Integer getMinComponentsInStock();
     String getEmail();

@@ -23,10 +23,6 @@ public class Deadline {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    @Enumerated
-    private State state;
-
     @Column
     private LocalDate deadline;
 
@@ -37,6 +33,10 @@ public class Deadline {
     @Column
     @UpdateTimestamp
     private LocalDateTime updated;
+
+    @ManyToOne
+    @JoinColumn(name = "status_id", nullable = false)
+    private Status status;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -51,11 +51,11 @@ public class Deadline {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Deadline deadline1 = (Deadline) o;
-        return Objects.equals(id, deadline1.id) && state == deadline1.state && Objects.equals(deadline, deadline1.deadline);
+        return Objects.equals(id, deadline1.id) && status == deadline1.status && Objects.equals(deadline, deadline1.deadline);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, state, deadline);
+        return Objects.hash(id, status, deadline);
     }
 }

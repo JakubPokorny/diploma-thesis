@@ -4,8 +4,7 @@ import cz.upce.fei.dt.beckend.entities.keys.ProductComponentKey;
 
 public interface IProductComponent {
     ProductComponentKey getId();
-    int getAmount();
-
+    int getComponentsPerProduct();
     IProduct getProduct();
     IComponent getComponent();
 

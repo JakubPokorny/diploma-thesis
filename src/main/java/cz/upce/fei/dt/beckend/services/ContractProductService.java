@@ -1,26 +1,23 @@
 package cz.upce.fei.dt.beckend.services;
 
 import cz.upce.fei.dt.beckend.dto.CheckStockDto;
-import cz.upce.fei.dt.beckend.dto.ICheckProduct;
 import cz.upce.fei.dt.beckend.entities.Contract;
 import cz.upce.fei.dt.beckend.entities.ContractProduct;
 import cz.upce.fei.dt.beckend.exceptions.StockException;
 import cz.upce.fei.dt.beckend.repositories.ContractProductRepository;
-import cz.upce.fei.dt.beckend.repositories.ProductRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.function.IntBinaryOperator;
 
 @Service
 @AllArgsConstructor
 public class ContractProductService {
     private final ContractProductRepository contractProductRepository;
     private final ComponentService componentService;
-    private final ProductRepository productRepository;
+    private final ProductService productService;
 
     @Transactional
     public void save(ContractProduct contractProduct) {
@@ -28,126 +25,90 @@ public class ContractProductService {
     }
 
     @Transactional
-    public void saveAll(Set<ContractProduct> contractProducts) throws StockException {
-        HashMap<Long, CheckStockDto> toAssign = getComponentsToAssign(contractProducts);
-        HashMap<Long, CheckStockDto> missingComponents = getMissingComponents(toAssign);
-        if (missingComponents.isEmpty()) {
-            contractProductRepository.saveAll(contractProducts);
-            componentService.updateAllInStockAssigned(toAssign.values());
-        } else {
-            throw new StockException(missingComponents.values(), "Objednávku nelze vytvořit, protože některé komponenty nejsou skladem.");
-        }
-    }
+    public void saveAll(Contract contract) {
+        HashMap<Long, CheckStockDto> componentsToUpdate = getComponentsToUpdate(contract);
+        List<CheckStockDto> missingComponents = getMissingComponents(componentsToUpdate);
 
-    @Transactional
-    public void deleteAllOrphans(Contract contract) {
-        Set<ContractProduct> orphans = findAllOrphans(contract);
-        HashMap<Long, CheckStockDto> toUpdate;
-        if (!orphans.isEmpty()) {
-            toUpdate = getComponentsToRelease(orphans);
-            componentService.updateAllInStockAssigned(toUpdate.values());
-            contractProductRepository.deleteAll(orphans);
-        }
+        contractProductRepository.saveAll(contract.getContractProducts());
+        componentService.updateAll(componentsToUpdate.values());
+
+        if (!missingComponents.isEmpty())
+            new StockException(missingComponents, "Chybí skomponenty").showNotification();
+
     }
 
     @Transactional
     public void deleteAll(Contract contract) {
-        HashMap<Long, CheckStockDto> toUpdate = getComponentsToRelease(contract.getContractProducts());
+        HashMap<Long, CheckStockDto> toUpdate = updateHashMap(new HashMap<>(), contract.getContractProducts(), null, Integer::sum);
         if (!toUpdate.isEmpty()) {
-            componentService.updateAllInStockAssigned(toUpdate.values());
+            componentService.updateAll(toUpdate.values());
         }
         contractProductRepository.deleteAll(contract.getContractProducts());
     }
 
-    private Set<ContractProduct> findAllOrphans(Contract contract) {
-        Set<ContractProduct> inDatabase = contractProductRepository.findAllByContractId(contract.getId());
-        inDatabase.removeIf(contract.getContractProducts()::contains);
-        return inDatabase;
+    private HashMap<Long, CheckStockDto> getComponentsToUpdate(Contract contract) {
+        HashMap<Long, CheckStockDto> componentsToUpdate = new HashMap<>();
+
+        HashMap<Long, ContractProduct> persisted = new HashMap<>();
+        contractProductRepository
+                .findAllByContractId(contract.getId())
+                .forEach(contractProduct -> persisted.put(contractProduct.getId().getProductId(), contractProduct));
+
+        updateHashMap(componentsToUpdate, contract.getContractProducts(), persisted, (a, b) -> a - b);
+
+        Set<ContractProduct> orphans = new HashSet<>(persisted.values());
+        updateHashMap(componentsToUpdate, orphans, null, Integer::sum);
+        return componentsToUpdate;
     }
 
-    private HashMap<Long, CheckStockDto> getMissingComponents(HashMap<Long, CheckStockDto> toUpdate) {
-        HashMap<Long, CheckStockDto> missingComponents = new HashMap<>();
-        toUpdate.values().forEach(productDTO -> {
-            if (productDTO.getComponentsInStock() < 0) {
-                missingComponents.put(productDTO.getComponentId(), productDTO);
+
+    private List<CheckStockDto> getMissingComponents(HashMap<Long, CheckStockDto> componentsToUpdate) {
+        List<CheckStockDto> missingComponents = new ArrayList<>();
+        componentsToUpdate.values().forEach(checkStockDto -> {
+            if (checkStockDto.getComponentsInStock() < 0) {
+                missingComponents.add(checkStockDto);
             }
         });
         return missingComponents;
     }
 
-    private HashMap<Long, CheckStockDto> getComponentsToRelease(Set<ContractProduct> orphans) {
-        HashMap<Long, CheckStockDto> toRelease = new HashMap<>();
-        for (ContractProduct cp : orphans) {
-            productRepository.findByProductId(cp.getProduct().getId())
-                    .ifPresent(consumer -> consumer
-                            .stream()
-                            .map(ContractProductService::toCheckStockDto)
-                            .forEach(checker -> {
-                                int componentsForContract = cp.getAmount() * checker.getComponentPerProduct();
-                                int leftInStock;
-                                Long componentId = checker.getComponentId();
+    private HashMap<Long, CheckStockDto> updateHashMap(HashMap<Long, CheckStockDto> hashMap, Set<ContractProduct> contractProducts, HashMap<Long, ContractProduct> persisted, IntBinaryOperator operator) {
+        Iterable<Long> productsID = contractProducts.stream().map(cp -> cp.getId().getProductId()).toList();
+        List<CheckStockDto> checkStockDtos = productService.findAllByID(productsID);
 
-                                if (toRelease.containsKey(componentId)) {
-                                    leftInStock = toRelease.get(componentId).getComponentsInStock() + componentsForContract;
-                                    toRelease.get(componentId).setComponentsInStock(leftInStock);
-                                } else {
-                                    leftInStock = checker.getComponentsInStock() + componentsForContract;
-                                    checker.setComponentsInStock(leftInStock);
-                                    toRelease.put(componentId, checker);
-                                }
-                            }));
-        }
-        return toRelease;
-    }
-
-    private HashMap<Long, CheckStockDto> getComponentsToAssign(Set<ContractProduct> contractProducts) {
-        HashMap<Long, CheckStockDto> toUpdate = new HashMap<>();
-
-        for (ContractProduct cpToSave : contractProducts) {
-
+        for (ContractProduct CP : contractProducts) {
             int orderedProducts;
-            Optional<ContractProduct> cpInDatabase = contractProductRepository.findById(cpToSave.getId());
-            if (cpInDatabase.isPresent()) {
-                if (cpInDatabase.get().getAmount() == cpToSave.getAmount()) {
-                    continue;
+            if (persisted != null && !persisted.isEmpty()) {
+                Long productID = CP.getId().getProductId();
+                ContractProduct persistedCP = persisted.get(productID);
+                if (persistedCP != null) {
+                    persisted.remove(productID);
+                    if (persistedCP.getAmount() == CP.getAmount()) {
+                        continue;
+                    } else {
+                        orderedProducts = CP.getAmount() - persistedCP.getAmount();
+                    }
                 } else {
-                    orderedProducts = cpToSave.getAmount() - cpInDatabase.get().getAmount();
+                    orderedProducts = CP.getAmount();
                 }
             } else {
-                orderedProducts = cpToSave.getAmount();
+                orderedProducts = CP.getAmount();
             }
 
-            productRepository.findByProductId(cpToSave.getProduct().getId())
-                    .ifPresent(consumer -> consumer
-                            .stream()
-                            .map(ContractProductService::toCheckStockDto)
-                            .forEach(checker -> {
-                                int componentsForContract = orderedProducts * checker.getComponentPerProduct();
-                                int leftInStock;
-                                Long componentId = checker.getComponentId();
+            List<CheckStockDto> filtered = checkStockDtos.stream().filter(checkStockDto -> checkStockDto.getProductID().equals(CP.getId().getProductId())).toList();
+            filtered.forEach(checkStockDto -> {
+                int componentsForContract = orderedProducts * checkStockDto.getComponentsPerProduct();
+                Long componentId = checkStockDto.getComponentID();
 
-                                if (toUpdate.containsKey(componentId)) {
-                                    leftInStock = toUpdate.get(componentId).getComponentsInStock() - componentsForContract;
-                                    toUpdate.get(componentId).setComponentsInStock(leftInStock);
-                                } else {
-                                    leftInStock = checker.getComponentsInStock() - componentsForContract;
-                                    checker.setComponentsInStock(leftInStock);
-                                    toUpdate.put(componentId, checker);
-                                }
-                            }));
+                if (hashMap.containsKey(componentId)) {
+                    CheckStockDto componentToUpdate = hashMap.get(componentId);
+                    componentToUpdate.setComponentsInStock(operator.applyAsInt(componentToUpdate.getComponentsInStock(), componentsForContract));
+                } else {
+                    checkStockDto.setComponentsInStock(operator.applyAsInt(checkStockDto.getComponentsInStock(), componentsForContract));
+                    hashMap.put(componentId, checkStockDto);
+                }
+            });
         }
-        return toUpdate;
+        return hashMap;
     }
-
-    private static CheckStockDto toCheckStockDto(ICheckProduct iCheck) {
-        return CheckStockDto.builder()
-                .componentPerProduct(iCheck.getComponentPerProduct())
-                .componentId(iCheck.getComponentId())
-                .componentName(iCheck.getComponentName())
-                .componentsInStock(iCheck.getComponentsInStock())
-                .minComponentsInStock(iCheck.getMinComponentsInStock())
-                .email(iCheck.getEmail())
-                .build();
-    }
-
 }

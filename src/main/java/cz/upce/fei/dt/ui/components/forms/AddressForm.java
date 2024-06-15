@@ -85,7 +85,7 @@ public class AddressForm extends FormLayout implements IEditForm<Address>, HasVa
     private void setupState() {
         binder.forField(state)
                 .asRequired()
-                .bind(Address::getState, Address::setCity);
+                .bind(Address::getState, Address::setState);
     }
 
     private void setupZipCode() {

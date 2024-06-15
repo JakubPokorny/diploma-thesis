@@ -2,6 +2,7 @@ package cz.upce.fei.dt.beckend.services.specifications;
 
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
@@ -41,6 +42,17 @@ public class FilterUtil<T>{
     }
 
     public Specification<T> findAllLocalDateTimeGreaterThanOrEqualTo(LocalDateTime filter, String singularAttribute) {
+        return (root, query, builder) -> filter == null
+                ? null
+                : builder.greaterThanOrEqualTo(root.get(singularAttribute), filter);
+    }
+    public Specification<T> findAllLocalDateLessThanOrEqualTo(LocalDate filter, String singularAttribute) {
+        return (root, query, builder) -> filter == null
+                ? null
+                : builder.lessThanOrEqualTo(root.get(singularAttribute), filter);
+    }
+
+    public Specification<T> findAllLocalDateGreaterThanOrEqualTo(LocalDate filter, String singularAttribute) {
         return (root, query, builder) -> filter == null
                 ? null
                 : builder.greaterThanOrEqualTo(root.get(singularAttribute), filter);

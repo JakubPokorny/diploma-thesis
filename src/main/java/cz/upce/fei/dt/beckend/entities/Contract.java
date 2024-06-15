@@ -7,10 +7,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Builder
 @Getter
@@ -24,15 +22,21 @@ import java.util.Set;
         name = "Contract.eagerlyFetchProductsAndContactAndUser",
         attributeNodes = {
                 @NamedAttributeNode(value = "contact"),
-                @NamedAttributeNode(value = "files"),
-                @NamedAttributeNode(value = "notes"),
-                @NamedAttributeNode(value = "contractProducts", subgraph = "contractProductSubgraph")
+                @NamedAttributeNode(value = "contractProducts", subgraph = "contractProductSubgraph"),
+                @NamedAttributeNode(value = "deadlines", subgraph = "deadlineUserSubgraph")
         },
         subgraphs = {
                 @NamedSubgraph(
                         name = "contractProductSubgraph",
                         attributeNodes = {@NamedAttributeNode("product")}
                 ),
+                @NamedSubgraph(
+                        name = "deadlineUserSubgraph",
+                        attributeNodes = {
+                                @NamedAttributeNode("user"),
+                                @NamedAttributeNode("status")
+                        }
+                )
         }
 )
 public class Contract {
@@ -40,6 +44,12 @@ public class Contract {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
+    private Double price = 0.0;
+
+    @Column(nullable = false)
+    private Boolean ownPrice = false;
 
     @Column
     @CreationTimestamp
@@ -54,7 +64,7 @@ public class Contract {
     @ToString.Exclude
     private Contact contact;
 
-    @OneToMany(mappedBy = "contract")
+    @OneToMany(mappedBy = "contract", orphanRemoval = true)
     @ToString.Exclude
     @JsonIgnore
     private Set<ContractProduct> contractProducts = new HashSet<>();
@@ -72,7 +82,6 @@ public class Contract {
     @ToString.Exclude
     private Set<File> files = new HashSet<>();
 
-
     public List<Product> getSelectedProducts() {
         return contractProducts.stream().map(ContractProduct::getProduct).toList();
     }
@@ -80,8 +89,10 @@ public class Contract {
     public Deadline getCurrentDeadline() {
         if (deadlines.isEmpty())
             return new Deadline();
-        else
+        else{
+            deadlines = deadlines.stream().sorted(Comparator.comparing(Deadline::getCreated).reversed()).collect(Collectors.toCollection(LinkedHashSet::new));
             return deadlines.iterator().next();
+        }
     }
 
     @Override

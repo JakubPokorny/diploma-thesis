@@ -93,7 +93,7 @@ public class MainLayout extends AppLayout implements RouterLayout{
                 new Tab(VaadinIcon.NOTEBOOK.create(), new RouterLink("Kontakty", ContactsView.class)),
                 new Tab(VaadinIcon.CART.create(), new RouterLink("Zakázky", ContractsView.class)),
                 new Tab(VaadinIcon.HOME.create(), new RouterLink("Komponenty", ComponentsView.class)),
-                new Tab(VaadinIcon.CART.create(), new RouterLink("Produkty", ProductView.class))
+                new Tab(VaadinIcon.CART.create(), new RouterLink("Produkty", ProductsView.class))
         );
         tabs.setOrientation(Tabs.Orientation.VERTICAL);
         tabs.setSelectedIndex(0);

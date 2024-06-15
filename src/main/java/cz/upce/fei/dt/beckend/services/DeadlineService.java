@@ -19,10 +19,12 @@ public class DeadlineService {
     private final DeadlineRepository deadlineRepository;
     private final AuthenticationContext authenticationContext;
 
-    public void save(Deadline deadline) throws AuthenticationException{
-        Optional<Deadline> savedDeadline = deadlineRepository.findById(deadline.getId());
-        if (savedDeadline.isPresent() && savedDeadline.get().equals(deadline))
-            return;
+    public void save(Deadline deadline) throws AuthenticationException {
+        if (deadline.getId() != null){
+            Optional<Deadline> savedDeadline = deadlineRepository.findById(deadline.getId());
+            if (savedDeadline.isPresent() && savedDeadline.get().equals(deadline))
+                return;
+        }
 
         if (authenticationContext.getAuthenticatedUser(User.class).isEmpty())
             throw new AuthenticationException("Neznámý uživatel. Přihlašte se prosím.");
@@ -34,15 +36,15 @@ public class DeadlineService {
         deadlineRepository.save(deadline);
     }
 
-    public void deleteAll(Long contractId){
+    public void deleteAll(Long contractId) {
         deadlineRepository.deleteAllByContractId(contractId);
     }
 
-    public Stream<Deadline> findAllByContractId(Long contractId, int page, int pageSize){
+    public Stream<Deadline> findAllByContractId(Long contractId, int page, int pageSize) {
         return deadlineRepository.findAllByContractId(contractId, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "created")))
                 .stream()
                 .map(iDeadline -> Deadline.builder()
-                        .state(iDeadline.getState())
+                        .status(iDeadline.getStatus())
                         .user(User.builder()
                                 .firstName(iDeadline.getUser().getFirstName())
                                 .lastName(iDeadline.getUser().getLastName())
@@ -52,7 +54,19 @@ public class DeadlineService {
                         .build());
     }
 
-    public Deadline findFirstByContractIdOrderByCreatedDesc(Long contractId){
+    public Deadline findFirstByContractIdOrderByCreatedDesc(Long contractId) {
         return deadlineRepository.findFirstByContractIdOrderByCreatedDesc(contractId).orElse(new Deadline());
+    }
+
+    public int countAfterDeadline() {
+        return deadlineRepository.countAfterDeadline();
+    }
+
+    public int countWithoutDeadline() {
+        return deadlineRepository.countWithoutDeadline();
+    }
+
+    public int countBeforeDeadline() {
+        return deadlineRepository.countBeforeDeadline();
     }
 }

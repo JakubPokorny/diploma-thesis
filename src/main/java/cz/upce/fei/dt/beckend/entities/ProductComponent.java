@@ -20,7 +20,7 @@ public class ProductComponent {
     private ProductComponentKey id = new ProductComponentKey();
 
     @Column(nullable = false)
-    private int amount;
+    private int componentsPerProduct;
 
     @ManyToOne
     @MapsId("componentId")

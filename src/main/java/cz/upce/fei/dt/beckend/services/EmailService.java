@@ -1,10 +1,17 @@
 package cz.upce.fei.dt.beckend.services;
 
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
+import cz.upce.fei.dt.beckend.dto.CheckStockDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -12,7 +19,8 @@ public class EmailService {
     private final JavaMailSender sender;
     @Value("${spring.mail.username}")
     private String FROM;
-    public void send(String to, String subject, String text){
+    @Async
+    public void send(String to, String subject, String text) throws MailException, InterruptedException{
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(FROM);
         message.setTo(to);
@@ -21,9 +29,29 @@ public class EmailService {
         sender.send(message);
     }
 
-    public void sendStockNotification(String to, String componentName, int componentsInStock, int minComponentsInStock){
-        String subject = "Sklad: %s na %d pod %d".formatted(componentName, componentsInStock, minComponentsInStock);
-        String text = "Komponenta %s skladem %d, tedy pod nastavenou hranici %d.".formatted(componentName, componentsInStock, minComponentsInStock);
-        send(to, subject, text);
+    @Async
+    public void sendStockNotification(List<CheckStockDto> checkStockDtos) {
+        HashMap<String, List<CheckStockDto>> mailMap = new HashMap<>();
+
+        for (CheckStockDto checkStockDto : checkStockDtos) {
+            String email = checkStockDto.getEmail();
+            mailMap.computeIfAbsent(email, list -> new ArrayList<>()).add(checkStockDto);
+        }
+
+        mailMap.forEach((email, checkStockDtoList ) -> {
+            String subject = "Skladové zásoby pod limitem";
+
+            StringBuilder text = new StringBuilder("Komponenty pod limitem:\n");
+            for (CheckStockDto checkStockDto : checkStockDtoList){
+                text.append("\t '%s' je skladem %d ks tj. pod limitem %d ks.\n".formatted(checkStockDto.getComponentName(), checkStockDto.getComponentsInStock(), checkStockDto.getMinComponentsInStock()));
+            }
+
+            text.append("\n\nZasláno automatem.");
+            try {
+                send(email, subject, text.toString());
+            } catch (Exception e){
+                Notification.show(e.getMessage()).addThemeVariants(NotificationVariant.LUMO_ERROR);
+            }
+        });
     }
 }
