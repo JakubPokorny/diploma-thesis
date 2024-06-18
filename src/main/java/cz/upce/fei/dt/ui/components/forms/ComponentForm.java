@@ -65,7 +65,7 @@ public class ComponentForm extends FormLayout implements IEditForm<Component> {
     //region Setups
 
     private void setupNotify(UserService userService) {
-        notify.setItems(userService.findAll());
+        notify.setItems(userService::findAllByFirstnameAndLastnameAndEmail);
         notify.setItemLabelGenerator(user -> user.getFullName() + ", " + user.getEmail());
         notify.setClearButtonVisible(true);
         binder.forField(notify).bind(Component::getUser, Component::setUser);

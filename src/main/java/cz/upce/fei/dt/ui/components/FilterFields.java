@@ -116,7 +116,7 @@ public class FilterFields {
 
         msb.addThemeVariants(MultiSelectComboBoxVariant.LUMO_SMALL);
         msb.setItemLabelGenerator(User::getFullName);
-        msb.setItems(userService::findAllByFirstnameAndLastname);
+        msb.setItems(userService::findAllByFirstnameAndLastnameAndEmail);
 
         msb.addValueChangeListener(event -> {
             consumer.accept(event.getValue().stream().map(User::getId).collect(Collectors.toSet()));

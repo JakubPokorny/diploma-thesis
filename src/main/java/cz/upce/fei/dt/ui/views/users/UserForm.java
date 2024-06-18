@@ -40,7 +40,7 @@ public class UserForm extends FormLayout implements IEditForm<User>  {
         final ComboBox<Role> role = new ComboBox<>("Oprávnění");
         binder.forField(role)
                 .asRequired()
-                .bind(User::getRoles, User::setRoles);
+                .bind(User::getRole, User::setRole);
         role.setItems(EnumSet.allOf(Role.class));
         role.setItemLabelGenerator(Role::name);
 

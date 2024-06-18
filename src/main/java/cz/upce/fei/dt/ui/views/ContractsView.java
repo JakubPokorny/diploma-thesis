@@ -164,7 +164,6 @@ public class ContractsView extends VerticalLayout {
         headerRow.getCell(createdColumn).setComponent(FilterFields.createFromToDatePickerFilter(contractFilter::setFromCreatedFilter, contractFilter::setToCreatedFilter, configurableFilterDataProvider));
         headerRow.getCell(updatedColumn).setComponent(FilterFields.createFromToDatePickerFilter(contractFilter::setFromUpdatedFilter, contractFilter::setToUpdatedFilter, configurableFilterDataProvider));
 
-
         grid.asSingleSelect().addValueChangeListener(e -> gridFormLayout.showFormLayout(e.getValue()));
         grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
 
