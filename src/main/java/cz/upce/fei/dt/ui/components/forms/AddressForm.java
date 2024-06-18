@@ -2,9 +2,6 @@ package cz.upce.fei.dt.ui.components.forms;
 
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
@@ -19,18 +16,15 @@ import lombok.Setter;
 public class AddressForm extends FormLayout implements IEditForm<Address>, HasValue<HasValue.ValueChangeEvent<Address>, Address> {
     private final Binder<Address> binder = new BeanValidationBinder<>(Address.class);
     private Address address;
-    private final Span divider = new Span();
-    private Icon dividerIcon = new Icon();
     private final TextField street = new TextField("Ulice");
     private final TextField houseNumber = new TextField("Číslo domu");
     private final TextField city = new TextField("Město");
     private final TextField zipCode = new TextField("PSČ");
     private final TextField state = new TextField("Stát");
 
-    public AddressForm(String label, boolean visible) {
+    public AddressForm() {
         addClassName("address-form");
 
-        setupDivider(label, visible);
         setupStreet();
         setupHouseNumber();
         setupCity();
@@ -42,46 +36,14 @@ public class AddressForm extends FormLayout implements IEditForm<Address>, HasVa
                 new ResponsiveStep("300px", 3)
         );
 
-        this.setColspan(divider, 3);
         this.setColspan(street, 2);
         this.setColspan(city, 2);
         this.setColspan(state, 3);
 
-        add(divider, street, houseNumber, city, zipCode, state);
-    }
-
-    public void setVisible(boolean visible) {
-        street.setVisible(visible);
-        houseNumber.setVisible(visible);
-        city.setVisible(visible);
-        zipCode.setVisible(visible);
-        state.setVisible(visible);
-
-        divider.remove(dividerIcon);
-        if (visible) {
-            dividerIcon = new Icon(VaadinIcon.ANGLE_DOWN);
-            divider.setId("active");
-        } else {
-            dividerIcon = new Icon(VaadinIcon.ANGLE_RIGHT);
-            divider.setId("");
-        }
-        dividerIcon.setSize("0.7em");
-        divider.add(dividerIcon);
+        add(street, houseNumber, city, zipCode, state);
     }
 
     //region Setups
-    private void setupDivider(String title, boolean visible) {
-        divider.setClassName("address-form-divider");
-        divider.setText(title + " ");
-
-        this.setVisible(visible);
-        divider.addClickListener(click -> switchVisible());
-    }
-
-    private void switchVisible() {
-        this.setVisible(!street.isVisible() && !city.isVisible() && !zipCode.isVisible() && !state.isVisible());
-    }
-
     private void setupState() {
         binder.forField(state)
                 .asRequired()

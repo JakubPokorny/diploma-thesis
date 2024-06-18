@@ -1,18 +1,27 @@
 package cz.upce.fei.dt.ui.views.customerContacts;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.grid.HeaderRow;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import cz.upce.fei.dt.beckend.entities.Address;
 import cz.upce.fei.dt.beckend.entities.Contact;
-import cz.upce.fei.dt.beckend.services.AddressService;
+import cz.upce.fei.dt.beckend.entities.Contact_;
 import cz.upce.fei.dt.beckend.services.ContactService;
+import cz.upce.fei.dt.beckend.services.filters.ContactFilter;
+import cz.upce.fei.dt.ui.components.FilterFields;
 import cz.upce.fei.dt.ui.components.GridFormLayout;
 import cz.upce.fei.dt.ui.components.forms.ContactForm;
 import cz.upce.fei.dt.ui.components.forms.events.DeleteEvent;
@@ -26,30 +35,37 @@ import jakarta.annotation.security.PermitAll;
 @PermitAll
 public class ContactsView extends VerticalLayout {
     private final ContactService contactService;
-    private final AddressService addressService;
     private final GridFormLayout<ContactForm, Contact> gridFormLayout;
-    private final ContactForm form;
     private final Grid<Contact> grid;
+    private final ContactFilter contactFilter = new ContactFilter();
+    private ConfigurableFilterDataProvider<Contact, Void, ContactFilter> configurableFilterDataProvider;
 
-    public ContactsView(ContactService contactService, AddressService addressService) {
+    public ContactsView(ContactService contactService) {
+
         this.contactService = contactService;
-        this.addressService = addressService;
+
+        ContactForm form = new ContactForm();
+        grid = new Grid<>(Contact.class, false);
+        gridFormLayout = new GridFormLayout<>(form, grid);
         MainLayout.setPageTitle("Kontakty", ContactsView.class);
         setSizeFull();
 
-        //form = new ContactForm();
-        form = new ContactForm();
-        grid = new Grid<>(Contact.class, false);
-        gridFormLayout = new GridFormLayout<>(form, grid);
-
         configureGrid();
         configureForm();
+        configureActions();
+        configureFilters();
 
+        add(gridFormLayout);
+    }
+
+    //region configures: grid, form, actions, filters, events
+    private void configureFilters() {
+    }
+
+    private void configureActions() {
         Button addContact = new Button("Přidat Kontakt");
         addContact.addClickListener(event -> gridFormLayout.addNewValue(new Contact()));
         gridFormLayout.getActionsLayout().add(addContact);
-
-        add(gridFormLayout);
     }
 
     private void configureForm() {
@@ -57,38 +73,83 @@ public class ContactsView extends VerticalLayout {
         ComponentUtil.addListener(gridFormLayout, DeleteEvent.class, this::deleteContact);
     }
 
+    //region events: save, delete
     private void saveContact(SaveEvent saveEvent) {
-        contactService.saveContact((Contact) saveEvent.getValue());
-        grid.setItems(contactService.getAll());
-        gridFormLayout.closeFormLayout();
+        try {
+            Contact contact = (Contact) saveEvent.getValue();
+            contactService.saveContact(contact);
+            updateGrid();
+            gridFormLayout.closeFormLayout();
+            Notification.show("Kontakt " + contact.getClient() + " uložen.").addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        } catch (Exception exception) {
+            Notification.show(exception.getMessage()).addThemeVariants(NotificationVariant.LUMO_ERROR);
+        }
     }
 
     private void deleteContact(DeleteEvent deleteEvent) {
-        contactService.deleteContact((Contact) deleteEvent.getValue());
-        grid.setItems(contactService.getAll());
-        gridFormLayout.closeFormLayout();
+        try {
+            Contact contact = (Contact) deleteEvent.getValue();
+            contactService.deleteContact(contact);
+            updateGrid();
+            gridFormLayout.closeFormLayout();
+            Notification.show("Kontakt " + contact.getClient() + " odstraněn.").addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        } catch (Exception exception) {
+            Notification.show(exception.getMessage()).addThemeVariants(NotificationVariant.LUMO_ERROR);
+        }
     }
 
+    //endregion
     private void configureGrid() {
         grid.setClassName("grid-content");
         grid.setSizeFull();
 
-        grid.addColumn(Contact::getICO).setHeader("IČO");
-        grid.addColumn(Contact::getClient).setHeader("Název");
-        grid.addColumn(Contact::getEmail).setHeader("Email");
-        grid.addColumn(Contact::getPhone).setHeader("Telefon");
-        grid.addColumn(contact -> ContactsView.formatAddress(contact.getInvoiceAddress())).setHeader("Fakturační adresa");
-        grid.addColumn(contact -> ContactsView.formatAddress(contact.getDeliveryAddress())).setHeader("Doručovácí adresa");
-        grid.addColumn(new LocalDateTimeRenderer<>(Contact::getUpdated, "H:m d. M. yyyy")).setHeader("Poslední úprava");
+        DataProvider<Contact, ContactFilter> dataProvider = DataProvider.fromFilteringCallbacks(
+                contactService::fetchFromBackEnd,
+                contactService::sizeInBackEnd
+        );
+
+        configurableFilterDataProvider = dataProvider.withConfigurableFilter();
+        configurableFilterDataProvider.setFilter(contactFilter);
+
+        Grid.Column<Contact> icoColumn = grid.addColumn(Contact::getICO).setHeader("IČO").setKey(Contact_.ICO.getName()).setWidth("150px");
+        Grid.Column<Contact> clientColumn = grid.addColumn(Contact::getClient).setHeader("Klient").setKey(Contact_.CLIENT).setWidth("150px");
+        Grid.Column<Contact> emailColumn = grid.addColumn(Contact::getEmail).setHeader("Email").setKey(Contact_.EMAIL).setWidth("150px");
+        Grid.Column<Contact> phoneColumn = grid.addColumn(Contact::getPhone).setHeader("Telefon").setKey(Contact_.PHONE).setWidth("150px");
+        Grid.Column<Contact> invoiceAddressColumn = grid.addComponentColumn(contact -> createAddressColumn(contact.getInvoiceAddress())).setHeader("Fakturační adresa").setWidth("150px");
+        Grid.Column<Contact> deliveryAddressColumn = grid.addComponentColumn(contact -> createAddressColumn(contact.getDeliveryAddress())).setHeader("Doručovací adresa").setWidth("150px");
+        Grid.Column<Contact> updatedColumn = grid.addColumn(new LocalDateTimeRenderer<>(Contact::getUpdated, "H:mm d. M. yyyy")).setHeader("Upraveno").setWidth("150px");
+
+        HeaderRow headerRow = grid.appendHeaderRow();
+        headerRow.getCell(icoColumn).setComponent(FilterFields.createTextFieldFilter("ičo", contactFilter::setIcoFilter, configurableFilterDataProvider));
+        headerRow.getCell(clientColumn).setComponent(FilterFields.createTextFieldFilter("klient", contactFilter::setClientFilter, configurableFilterDataProvider));
+        headerRow.getCell(emailColumn).setComponent(FilterFields.createTextFieldFilter("email", contactFilter::setEmailFilter, configurableFilterDataProvider));
+        headerRow.getCell(phoneColumn).setComponent(FilterFields.createTextFieldFilter("tel. číslo", contactFilter::setPhoneFilter, configurableFilterDataProvider));
+        headerRow.getCell(invoiceAddressColumn).setComponent(FilterFields.createTextFieldFilter("Fakturační adresa", contactFilter::setInvoiceAddressFilter, configurableFilterDataProvider));
+        headerRow.getCell(deliveryAddressColumn).setComponent(FilterFields.createTextFieldFilter("Doručovací adresa", contactFilter::setDeliveryAddressFilter, configurableFilterDataProvider));
+        headerRow.getCell(updatedColumn).setComponent(FilterFields.createFromToDatePickerFilter(contactFilter::setFromUpdatedFilter, contactFilter::setToUpdatedFilter, configurableFilterDataProvider));
 
         grid.asSingleSelect().addValueChangeListener(e -> gridFormLayout.showFormLayout(e.getValue()));
         grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
 
-        grid.setItems(contactService.getAll());
+        grid.setMultiSort(true, Grid.MultiSortPriority.APPEND);
+        grid.setSortableColumns(Contact_.ICO.getName(), Contact_.CLIENT, Contact_.EMAIL, Contact_.PHONE);
+
+        updateGrid();
     }
 
-    private static String formatAddress(Address address) {
-        return address != null ? String.format("%s %s, %s %s, %s", address.getStreet(), address.getHouseNumber(),
-                address.getCity(), address.getZipCode(), address.getState()) : "";
+    private Component createAddressColumn(Address address) {
+        if (address == null)
+            return null;
+        Span streetAndHouseNumber = new Span(String.format("%s %s,", address.getStreet(), address.getHouseNumber()));
+        Span cityAndZipCode = new Span(String.format("%s %s,", address.getCity(), address.getZipCode()));
+        Span state = new Span(String.format("%s", address.getState()));
+        VerticalLayout layout = new VerticalLayout(streetAndHouseNumber, cityAndZipCode, state);
+        layout.setSpacing(false);
+        layout.setPadding(false);
+        return layout;
+    }
+    //endregion
+    private void updateGrid() {
+        grid.setItems(configurableFilterDataProvider);
     }
 }

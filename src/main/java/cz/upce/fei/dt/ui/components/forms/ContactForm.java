@@ -1,5 +1,6 @@
 package cz.upce.fei.dt.ui.components.forms;
 
+import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -18,8 +19,10 @@ import cz.upce.fei.dt.beckend.services.AresService;
 public class ContactForm extends FormLayout implements IEditForm<Contact> {
     private final Binder<Contact> customerBinder = new BeanValidationBinder<>(Contact.class);
     private Contact contact;
-    private final AddressForm invoiceAddressForm = new AddressForm("Fakturační adresa", true);
-    private final AddressForm deliveryAddressForm = new AddressForm("Doručovací adresa", false);
+    private final AddressForm invoiceAddressForm = new AddressForm();
+    Details invoiceAddressDetail = new Details("Fakturační adresa", invoiceAddressForm);
+    private final AddressForm deliveryAddressForm = new AddressForm();
+    Details deliveryAddressDetail = new Details("Doručovací adresa", deliveryAddressForm);
     private final TextField ico = new TextField("IČO");
     private final TextField dic = new TextField("DIČ");
     private final TextField client = new TextField("Společnost");
@@ -37,7 +40,7 @@ public class ContactForm extends FormLayout implements IEditForm<Contact> {
         setupInvoiceAddressForm();
         setupDeliveryAddressForm();
 
-        add(ico, dic, client, email, phone, invoiceAddressForm, deliveryAddressForm);
+        add(ico, dic, client, email, phone, invoiceAddressDetail, deliveryAddressDetail);
     }
 
     //region Setups
@@ -48,6 +51,7 @@ public class ContactForm extends FormLayout implements IEditForm<Contact> {
     }
 
     private void setupInvoiceAddressForm() {
+        invoiceAddressDetail.setOpened(true);
         customerBinder.forField(invoiceAddressForm)
                 .asRequired()
                 .bind(Contact::getInvoiceAddress, Contact::setInvoiceAddress);
@@ -141,9 +145,10 @@ public class ContactForm extends FormLayout implements IEditForm<Contact> {
             deliveryAddressForm.setValue(null);
         } else {
             if (contact.hasDeliveryAddress()) {
-                deliveryAddressForm.setVisible(true);
+                deliveryAddressDetail.setOpened(true);
             } else {
                 contact.setDeliveryAddress(new Address());
+                deliveryAddressDetail.setOpened(false);
             }
         }
         customerBinder.readBean(contact);
