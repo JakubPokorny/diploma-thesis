@@ -16,6 +16,18 @@ import java.util.Set;
 @Entity
 @Table(name = "statuses")
 public class Status {
+    @AllArgsConstructor
+    @Getter
+    public enum Theme{
+        SUCCESS("success", "hotovo"),
+        CONTRAST("contrast", "čeká na akci"),
+        PENDING("", "v procesu"),
+        WARNING("warning", "varování"),
+        ERROR("error", "chyba");
+
+        private final String theme;
+        private final String meaning;
+    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,7 +36,8 @@ public class Status {
     private String status;
 
     @Column()
-    private String theme = "";
+    @Enumerated(EnumType.STRING)
+    private Theme theme ;
 
     @OneToMany(mappedBy = "status")
     @JsonIgnore

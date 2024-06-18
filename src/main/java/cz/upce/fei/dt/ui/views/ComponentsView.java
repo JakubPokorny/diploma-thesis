@@ -23,6 +23,7 @@ import cz.upce.fei.dt.beckend.services.ProductService;
 import cz.upce.fei.dt.beckend.services.UserService;
 import cz.upce.fei.dt.beckend.services.filters.ComponentFilter;
 import cz.upce.fei.dt.beckend.services.filters.ComponentTag;
+import cz.upce.fei.dt.ui.components.Badge;
 import cz.upce.fei.dt.ui.components.FilterFields;
 import cz.upce.fei.dt.ui.components.GridFormLayout;
 import cz.upce.fei.dt.ui.components.TabWithBadge;
@@ -199,7 +200,7 @@ public class ComponentsView extends VerticalLayout {
     }
 
     private TabWithBadge createTabWithBadge(String labelText, String style, ComponentTag tag){
-        TabWithBadge tabWithBadge = new TabWithBadge(labelText, "", style);
+        TabWithBadge tabWithBadge = new TabWithBadge(labelText, new Badge("", style));
 
         tabWithBadge.getElement().addEventListener("click", event -> {
             componentFilter.setTagFilter(tag);

@@ -26,6 +26,7 @@ import cz.upce.fei.dt.beckend.entities.Status;
 import cz.upce.fei.dt.beckend.services.*;
 import cz.upce.fei.dt.beckend.services.filters.ContractFilter;
 import cz.upce.fei.dt.beckend.services.filters.DeadlineFilterTag;
+import cz.upce.fei.dt.ui.components.Badge;
 import cz.upce.fei.dt.ui.components.FilterFields;
 import cz.upce.fei.dt.ui.components.GridFormLayout;
 import cz.upce.fei.dt.ui.components.TabWithBadge;
@@ -176,11 +177,7 @@ public class ContractsView extends VerticalLayout {
 
     private Component getState(Contract contract) {
         Status status = contract.getCurrentDeadline().getStatus();
-
-        Span badge = new Span(status.getStatus());
-        badge.getElement().getThemeList().add("badge pill " + status.getTheme());
-
-        return badge;
+        return new Badge(status.getStatus(), status.getTheme().getTheme());
     }
 
     private Component getDeadline(Contract contract) {
@@ -218,7 +215,7 @@ public class ContractsView extends VerticalLayout {
     //endregion
 
     private TabWithBadge createTabWithBadge(String labelText, String style, DeadlineFilterTag tag) {
-        TabWithBadge tabWithBadge = new TabWithBadge(labelText, "", style);
+        TabWithBadge tabWithBadge = new TabWithBadge(labelText, new Badge("", style));
 
         tabWithBadge.getElement().addEventListener("click", event -> {
             contractFilter.setTagsFilter(tag);
