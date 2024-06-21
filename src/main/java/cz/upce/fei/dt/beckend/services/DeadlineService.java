@@ -26,10 +26,8 @@ public class DeadlineService {
                 return;
         }
 
-        if (authenticationContext.getAuthenticatedUser(User.class).isEmpty())
-            throw new AuthenticationException("Neznámý uživatel. Přihlašte se prosím.");
-        User user = authenticationContext.getAuthenticatedUser(User.class).get();
-
+        User user = authenticationContext.getAuthenticatedUser(User.class)
+                .orElseThrow(() -> new AuthenticationException("Neznámý uživatel. Přihlašte se prosím."));
 
         deadline.setUser(user);
         deadline.setId(null); // save as new deadline

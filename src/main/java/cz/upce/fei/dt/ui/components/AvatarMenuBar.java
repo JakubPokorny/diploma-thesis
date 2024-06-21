@@ -1,5 +1,6 @@
 package cz.upce.fei.dt.ui.components;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.SubMenu;
@@ -12,8 +13,9 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import cz.upce.fei.dt.beckend.entities.User;
+import cz.upce.fei.dt.ui.views.users.ProfileView;
 
-public class AvatarMenuBar extends HorizontalLayout{
+public class AvatarMenuBar extends HorizontalLayout {
     public AvatarMenuBar(AuthenticationContext authContext) {
         if (authContext.getAuthenticatedUser(User.class).isEmpty())
             return;
@@ -25,8 +27,8 @@ public class AvatarMenuBar extends HorizontalLayout{
         HorizontalLayout userMenuItem = createUserMenuItem(user);
         MenuItem menuItem = menuBar.addItem(userMenuItem);
         SubMenu subMenu = menuItem.getSubMenu();
-        subMenu.addItem("Profil");
-        subMenu.addItem("Odhlásit", click -> authContext.logout());
+        subMenu.addItem("Profil", _ -> UI.getCurrent().navigate(ProfileView.class));
+        subMenu.addItem("Odhlásit", _ -> authContext.logout());
 
         add(menuBar);
     }

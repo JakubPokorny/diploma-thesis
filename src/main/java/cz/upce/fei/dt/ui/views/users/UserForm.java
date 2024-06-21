@@ -14,9 +14,11 @@ import cz.upce.fei.dt.ui.components.forms.IEditForm;
 
 import java.util.EnumSet;
 
-public class UserForm extends FormLayout implements IEditForm<User>  {
+public class UserForm extends FormLayout implements IEditForm<User> {
     private final Binder<User> binder;
+    public final EmailField emailField = new EmailField("Email");
     private User user;
+
     public UserForm() {
         addClassName("user-form");
         binder = new BeanValidationBinder<>(User.class);
@@ -31,8 +33,7 @@ public class UserForm extends FormLayout implements IEditForm<User>  {
                 .asRequired()
                 .bind(User::getLastName, User::setLastName);
 
-        final EmailField email = new EmailField("Email");
-        binder.forField(email)
+        binder.forField(emailField)
                 .withValidator(new EmailValidator("Toto není validní email."))
                 .asRequired()
                 .bind(User::getEmail, User::setEmail);
@@ -44,12 +45,10 @@ public class UserForm extends FormLayout implements IEditForm<User>  {
         role.setItems(EnumSet.allOf(Role.class));
         role.setItemLabelGenerator(Role::name);
 
-//        binder.bindInstanceFields(this);
-
-        add(firstName,lastName, email, role);
+        add(firstName, lastName, emailField, role);
     }
 
-    public void setUser(User user){
+    public void setUser(User user) {
         setValue(user);
     }
 
