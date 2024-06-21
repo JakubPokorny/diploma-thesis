@@ -58,7 +58,7 @@ public class Product {
     @UpdateTimestamp
     private LocalDateTime updated;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.MERGE, orphanRemoval = true)
     @ToString.Exclude
     @JsonIgnore
     private Set<ProductComponent> productComponents = new HashSet<>();
@@ -70,16 +70,6 @@ public class Product {
         );
         return selectedComponents;
     }
-
-    public List<ProductComponent> getDifference(List<ProductComponent> inDatabase) {
-        productComponents.forEach(
-                toPersist -> inDatabase.removeIf(alreadySaved ->
-                        toPersist.getId().equals(alreadySaved.getId())
-                )
-        );
-        return inDatabase;
-    }
-
 
     @Override
     public boolean equals(Object o) {

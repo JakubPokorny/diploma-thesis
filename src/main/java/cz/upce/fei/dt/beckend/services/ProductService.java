@@ -6,7 +6,6 @@ import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import cz.upce.fei.dt.beckend.dto.CheckStockDto;
 import cz.upce.fei.dt.beckend.entities.Product;
 import cz.upce.fei.dt.beckend.entities.ProductComponent;
-import cz.upce.fei.dt.beckend.repositories.ProductComponentRepository;
 import cz.upce.fei.dt.beckend.repositories.ProductRepository;
 import cz.upce.fei.dt.beckend.services.filters.ProductFilter;
 import cz.upce.fei.dt.beckend.services.specifications.ProductSpec;
@@ -25,7 +24,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class ProductService extends AbstractBackEndDataProvider<Product, ProductFilter> {
     private final ProductRepository productRepository;
-    private final ProductComponentRepository productComponentRepository;
+    private final ProductComponentService productComponentService;
 
     @Override
     public Stream<Product> fetchFromBackEnd(Query<Product, ProductFilter> query) {
@@ -68,19 +67,16 @@ public class ProductService extends AbstractBackEndDataProvider<Product, Product
         if (product.getId() == null) {
             Set<ProductComponent> productComponents = product.getProductComponents();
             product.setProductComponents(null);
-            Product savedProduct = productRepository.save(product);
+            product = productRepository.save(product);
             for (ProductComponent productComponent : productComponents) {
-                productComponent.setProduct(savedProduct);
-                productComponentRepository.save(productComponent);
+                productComponent.setProduct(product);
             }
-        } else {
-            productComponentRepository.deleteAll(
-                    product.getDifference(
-                            productComponentRepository.findAllByProductId(product.getId())
-                    )
-            );
-            productRepository.save(product);
+            product.setProductComponents(productComponents);
         }
+        List<ProductComponent> orphans = productComponentService.findAllByProductId(product.getId());
+        productComponentService.deleteAll(orphans);
+
+        productRepository.save(product);
     }
 
     public void deleteProduct(Product product) throws Exception {
@@ -90,4 +86,19 @@ public class ProductService extends AbstractBackEndDataProvider<Product, Product
     }
 
 
+    public void updatePrices(Iterable<Long> productIDs) {
+        List<Product> products = productRepository.findAllById(productIDs);
+        for (Product product : products) {
+            double productionPrice = 0;
+            for (ProductComponent pc : product.getProductComponents()) {
+                productionPrice += pc.getComponentsPerProduct() * pc.getComponent().getPrice();
+            }
+            product.setProductionPrice(productionPrice);
+            if (!product.getOwnSellingPrice()) {
+                double sellingPrice = product.getProductionPrice() * (1 + (product.getProfit() / 100));
+                product.setSellingPrice(sellingPrice);
+            }
+        }
+        productRepository.saveAll(products);
+    }
 }

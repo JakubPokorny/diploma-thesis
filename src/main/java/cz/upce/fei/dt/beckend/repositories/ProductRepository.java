@@ -42,9 +42,11 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
             join ProductComponent pc on pc.product.id = p.id
             left join Component c on c.id = pc.component.id
             left join User u on u.id = c.user.id
-            where p.id in :productsID
+            where p.id in :productIDs
             """)
-    List<ICheckProduct> findAllByID(@Param("productsID") Iterable<Long> productsID);
+    List<ICheckProduct> findAllByID(@Param("productIDs") Iterable<Long> productIDs);
 
-
+    @EntityGraph(value = "Product.eagerlyFetchComponent")
+    @NonNull
+    List<Product> findAllById(@NonNull @Param("productIDs") Iterable<Long> productIDs);
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -17,7 +18,20 @@ public class ProductComponentService {
         return productComponentRepository.findAll();
     }
 
-    public void saveProductComponent(ProductComponent productComponent){
-        productComponentRepository.save(productComponent);
+    @Transactional
+    public List<ProductComponent> saveAll(Iterable<ProductComponent> productComponents){
+        return productComponentRepository.saveAll(productComponents);
+    }
+    @Transactional
+    public void deleteAll(Iterable<ProductComponent> productComponents){
+        productComponentRepository.deleteAll(productComponents);
+    }
+
+    public List<ProductComponent> findAllByComponentId(Long componentID){
+        return productComponentRepository.findAllByComponentId(componentID);
+    }
+
+    public List<ProductComponent> findAllByProductId(Long productId){
+        return productComponentRepository.findAllByProductId(productId);
     }
 }

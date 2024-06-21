@@ -62,7 +62,7 @@ public class Component {
     @UpdateTimestamp
     private LocalDateTime updated;
 
-    @OneToMany(mappedBy = "component", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "component", cascade = CascadeType.MERGE, orphanRemoval = true)
     @ToString.Exclude
     @JsonIgnore
     private Set<ProductComponent> productComponents = new HashSet<>();
@@ -77,15 +77,6 @@ public class Component {
                 selectedProducts.add(productComponent.getProduct())
         );
         return selectedProducts;
-    }
-
-    public List<ProductComponent> getDifference(List<ProductComponent> inDatabase) {
-        productComponents.forEach(
-                toPersist -> inDatabase.removeIf(alreadySaved ->
-                        toPersist.getId().equals(alreadySaved.getId())
-                )
-        );
-        return inDatabase;
     }
 
     @Override
