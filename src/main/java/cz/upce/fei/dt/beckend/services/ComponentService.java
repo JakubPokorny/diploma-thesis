@@ -104,6 +104,8 @@ public class ComponentService extends AbstractBackEndDataProvider<Component, Com
         return componentRepository.countAll();
     }
 
+    public int getCountWithoutMinInStock(){ return componentRepository.countWithoutMinInStock();}
+
     public int getCountInStock() {
         return componentRepository.countInStock();
     }

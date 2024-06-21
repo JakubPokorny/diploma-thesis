@@ -46,6 +46,12 @@ public class Deadline {
     @JoinColumn(name = "contract_id", nullable = false)
     private Contract contract;
 
+    public Boolean isBeforeOrNowDeadline(){
+        if (deadline == null)
+            return null;
+        return deadline.isBefore(LocalDate.now()) || deadline.isEqual(LocalDate.now());
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

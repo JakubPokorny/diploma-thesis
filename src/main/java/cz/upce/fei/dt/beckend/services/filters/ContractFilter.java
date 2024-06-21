@@ -41,7 +41,7 @@ public class ContractFilter {
             case null -> true;
             case DeadlineFilterTag.ALL -> true;
             case DeadlineFilterTag.WITHOUT_DEADLINE -> deadline.getDeadline() == null;
-            case DeadlineFilterTag.BEFORE_DEADLINE -> deadline.getDeadline() != null && LocalDate.now().isBefore(deadline.getDeadline());
+            case DeadlineFilterTag.BEFORE_DEADLINE -> deadline.getDeadline() != null && (LocalDate.now().isBefore(deadline.getDeadline()) || LocalDate.now().isEqual(deadline.getDeadline()));
             case DeadlineFilterTag.AFTER_DEADLINE -> deadline.getDeadline() != null && LocalDate.now().isAfter(deadline.getDeadline());
             default -> false;
         };

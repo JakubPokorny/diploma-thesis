@@ -26,12 +26,13 @@ public class ComponentSpec {
 
     private static Specification<Component> findAllTaggedAs(Enum<ComponentTag> tagFilter) {
         return switch (tagFilter) {
+            case ComponentTag.WITHOUT_LIMIT -> ((root, _, builder) -> builder.isNull(root.get(Component_.minInStock)));
             case ComponentTag.IN_STOCK ->
-                    (root, query, builder) -> builder.greaterThan(root.get(Component_.inStock), root.get(Component_.minInStock));
-            case ComponentTag.SUPPLY -> (root, query, builder) -> builder.and(
+                    (root, _, builder) -> builder.greaterThan(root.get(Component_.inStock), root.get(Component_.minInStock));
+            case ComponentTag.SUPPLY -> (root, _, builder) -> builder.and(
                     builder.greaterThanOrEqualTo(root.get(Component_.inStock), 0),
                     builder.lessThanOrEqualTo(root.get(Component_.inStock), root.get(Component_.minInStock)));
-            case ComponentTag.MISSING -> (root, query, builder) -> builder.lessThan(root.get(Component_.inStock), 0);
+            case ComponentTag.MISSING -> (root, _, builder) -> builder.lessThan(root.get(Component_.inStock), 0);
             default -> null;
         };
     }

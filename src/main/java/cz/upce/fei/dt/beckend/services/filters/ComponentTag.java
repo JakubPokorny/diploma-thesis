@@ -4,5 +4,6 @@ public enum ComponentTag {
     ALL,
     IN_STOCK,
     SUPPLY,
-    MISSING
+    MISSING,
+    WITHOUT_LIMIT
 }

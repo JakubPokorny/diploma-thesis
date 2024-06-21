@@ -1,0 +1,28 @@
+.cell{
+}
+.cell[theme~='pending']{
+    color: var(--lumo-primary-text-color);
+    background-color: var(--lumo-primary-color-10pct);
+}
+.cell[theme~='contrast']{
+    background-color: var(--lumo-contrast-10pct);
+}
+.cell[theme~='success']{
+    color: var(--lumo-success-text-color);
+    background-color: var(--lumo-success-color-10pct);
+}
+.cell[theme~='warning']{
+    color: var(--lumo-warning-text-color);
+    background-color: var(--lumo-warning-color-10pct);
+}
+.cell[theme~='error']{
+    color: var(--lumo-error-text-color);
+    background-color: var(--lumo-error-color-10pct);
+}
+.cell-title{
+    font-size: var(--lumo-font-size-m);
+    text-transform: uppercase;
+}
+.cell-value{
+    font-size: var(--lumo-font-size-xl);
+}

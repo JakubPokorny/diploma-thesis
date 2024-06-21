@@ -32,6 +32,8 @@ public interface ComponentRepository extends JpaRepository<Component, Long>, Jpa
 
     @Query(value = "select count(id) from Component")
     int countAll();
+    @Query(value = "select count(id) from Component where minInStock is NULL")
+    int countWithoutMinInStock();
     @Query(value = "select count(id) from Component where inStock > minInStock")
     int countInStock();
     @Query(value = "select count(id) from Component where inStock < 0")

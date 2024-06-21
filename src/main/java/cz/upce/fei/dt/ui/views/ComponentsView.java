@@ -48,6 +48,7 @@ public class ComponentsView extends VerticalLayout {
     private final TabWithBadge inStock = createTabWithBadge("Skladem", "success", ComponentTag.IN_STOCK);
     private final TabWithBadge supply = createTabWithBadge("Doplnit", "warning", ComponentTag.SUPPLY);
     private final TabWithBadge missing = createTabWithBadge("Chybí", "error", ComponentTag.MISSING);
+    private final TabWithBadge withoutLimit = createTabWithBadge("Bez limitu", "", ComponentTag.WITHOUT_LIMIT);
     private DataProvider<Component, ComponentFilter> dataProvider;
     private ConfigurableFilterDataProvider<Component, Void, ComponentFilter> configurableFilterDataProvider;
 
@@ -76,7 +77,7 @@ public class ComponentsView extends VerticalLayout {
 
     //region configures: grid, form, actions, filters, events
     private void configureFilters() {
-        Tabs tabs = new Tabs(all, inStock, supply, missing);
+        Tabs tabs = new Tabs(all, withoutLimit, inStock, supply, missing);
         tabs.setClassName("tabs");
         tabs.setMaxWidth("100%");
         tabs.setSelectedIndex(0);
@@ -86,7 +87,7 @@ public class ComponentsView extends VerticalLayout {
 
     private void configureActions() {
         Button addContact = new Button("Přidat komponentu");
-        addContact.addClickListener(event -> gridFormLayout.addNewValue(new Component()));
+        addContact.addClickListener(_ -> gridFormLayout.addNewValue(new Component()));
         gridFormLayout.getActionsLayout().add(addContact);
 
     }
@@ -202,7 +203,7 @@ public class ComponentsView extends VerticalLayout {
     private TabWithBadge createTabWithBadge(String labelText, String style, ComponentTag tag){
         TabWithBadge tabWithBadge = new TabWithBadge(labelText, new Badge("", style));
 
-        tabWithBadge.getElement().addEventListener("click", event -> {
+        tabWithBadge.getElement().addEventListener("click", _ -> {
             componentFilter.setTagFilter(tag);
             dataProvider.refreshAll();
         });
@@ -216,6 +217,7 @@ public class ComponentsView extends VerticalLayout {
         grid.setItems(configurableFilterDataProvider);
 
         all.badge.setText(String.valueOf(componentService.getCountAll()));
+        withoutLimit.badge.setText(String.valueOf(componentService.getCountWithoutMinInStock()));
         inStock.badge.setText(String.valueOf(componentService.getCountInStock()));
         supply.badge.setText(String.valueOf(componentService.getCountInStockSupply()));
         missing.badge.setText(String.valueOf(componentService.getCountInStockMissing()));
