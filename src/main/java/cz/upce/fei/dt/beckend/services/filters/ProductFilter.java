@@ -3,6 +3,7 @@ package cz.upce.fei.dt.beckend.services.filters;
 import cz.upce.fei.dt.beckend.entities.Product;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,6 +18,10 @@ public class ProductFilter {
     private Double toSellingPriceFilter;
     private Boolean ownPriceFilter;
     private Set<Long> componentsFilter;
+    private LocalDate fromCreatedFilter;
+    private LocalDate toCreatedFilter;
+    private LocalDate fromUpdatedFilter;
+    private LocalDate toUpdatedFilter;
 
     public boolean filter(Product product) {
         return componentsFilter == null || componentsFilter.isEmpty() ||  filterComponents(product);

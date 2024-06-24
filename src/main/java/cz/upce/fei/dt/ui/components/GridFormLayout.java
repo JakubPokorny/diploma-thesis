@@ -8,11 +8,13 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 import cz.upce.fei.dt.ui.components.forms.IEditForm;
@@ -28,10 +30,14 @@ import lombok.Setter;
 public class GridFormLayout<F extends FormLayout & IEditForm<T>, T> extends HorizontalLayout {
     private final VerticalLayout formLayout;
     private final VerticalLayout contentLayout;
-    private HorizontalLayout actionsLayout;
-    private HorizontalLayout filtersLayout;
     private final F form;
     private final Grid<T> content;
+
+    public Tabs filterTabs = new Tabs();
+    public final Button addButton = new Button(LumoIcon.PLUS.create());
+    public final Button showHideButton = new Button(LumoIcon.EYE.create());
+    public ColumnToggleContextMenu<T> showHideMenu = new ColumnToggleContextMenu<>(showHideButton);
+    public final Div filtersAndActionsContainer = new Div(filterTabs, addButton, showHideButton);
 
     public GridFormLayout(F form, Grid<T> content) {
         this.form = form;
@@ -66,7 +72,7 @@ public class GridFormLayout<F extends FormLayout & IEditForm<T>, T> extends Hori
         dialog.setCancelable(true);
         dialog.setConfirmText("Odstranit");
         dialog.setConfirmButtonTheme("error primary");
-        dialog.addConfirmListener(confirmEvent -> fireEvent(new DeleteEvent(this, form.getValue())));
+        dialog.addConfirmListener(_ -> fireEvent(new DeleteEvent(this, form.getValue())));
         dialog.open();
     }
 
@@ -105,17 +111,18 @@ public class GridFormLayout<F extends FormLayout & IEditForm<T>, T> extends Hori
     }
 
     private void configureContentLayout(Grid<T> content) {
-        actionsLayout = new HorizontalLayout();
-        actionsLayout.setClassName("content-actions");
-        filtersLayout = new HorizontalLayout();
-        filtersLayout.setClassName("content-filters");
+        filtersAndActionsContainer.setClassName("filters-and-action-container");
+        filterTabs.addClassName("filter-tabs");
+
+        addButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        showHideButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
         contentLayout.setClassName("content-layout");
         contentLayout.setSpacing(false);
         contentLayout.setMargin(false);
         contentLayout.setPadding(false);
 
-        contentLayout.add(actionsLayout, filtersLayout, content);
+        contentLayout.add(filtersAndActionsContainer, content);
     }
 
     private void configureFormLayout(F form) {
@@ -126,8 +133,8 @@ public class GridFormLayout<F extends FormLayout & IEditForm<T>, T> extends Hori
         formLayout.setSpacing(false);
         formLayout.setMargin(false);
 
-        ComponentUtil.addListener(this, CloseEvent.class, event -> closeFormLayout());
-        ComponentUtil.addListener(this, ExpandEvent.class, event -> expandFormLayout());
+        ComponentUtil.addListener(this, CloseEvent.class, _ -> closeFormLayout());
+        ComponentUtil.addListener(this, ExpandEvent.class, _ -> expandFormLayout());
 
         formLayout.add(createFormTopActions(), form, createFormBottomActions());
     }
@@ -149,10 +156,10 @@ public class GridFormLayout<F extends FormLayout & IEditForm<T>, T> extends Hori
         close.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
         expand.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
 
-        save.addClickListener(event -> validateAndSave());
-        delete.addClickListener(event -> showConfirmDeleteDialog());
-        close.addClickListener(event -> fireEvent(new CloseEvent(this)));
-        expand.addClickListener(event -> fireEvent(new ExpandEvent(this)));
+        save.addClickListener(_ -> validateAndSave());
+        delete.addClickListener(_ -> showConfirmDeleteDialog());
+        close.addClickListener(_ -> fireEvent(new CloseEvent(this)));
+        expand.addClickListener(_ -> fireEvent(new ExpandEvent(this)));
 
         save.addClickShortcut(Key.ENTER);
         close.addClickShortcut(Key.ESCAPE);
@@ -170,13 +177,13 @@ public class GridFormLayout<F extends FormLayout & IEditForm<T>, T> extends Hori
         final Button save = new Button("Uložit");
         save.setPrefixComponent(LumoIcon.CHECKMARK.create());
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        save.addClickListener(event -> validateAndSave());
+        save.addClickListener(_ -> validateAndSave());
         save.setWidthFull();
 
         final Button delete = new Button("Smazat");
         delete.setPrefixComponent(VaadinIcon.TRASH.create());
         delete.addThemeVariants(ButtonVariant.LUMO_ERROR);
-        delete.addClickListener(event -> showConfirmDeleteDialog());
+        delete.addClickListener(_ -> showConfirmDeleteDialog());
         delete.setWidthFull();
 
         bottomActions.add(save, delete);

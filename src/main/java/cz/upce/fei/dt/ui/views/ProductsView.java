@@ -1,7 +1,6 @@
 package cz.upce.fei.dt.ui.views;
 
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
@@ -15,11 +14,13 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import cz.upce.fei.dt.beckend.entities.Component;
 import cz.upce.fei.dt.beckend.entities.Product;
+import cz.upce.fei.dt.beckend.entities.Product_;
 import cz.upce.fei.dt.beckend.services.ComponentService;
 import cz.upce.fei.dt.beckend.services.ProductService;
 import cz.upce.fei.dt.beckend.services.filters.ProductFilter;
-import cz.upce.fei.dt.ui.components.FilterFields;
+import cz.upce.fei.dt.ui.components.filters.FilterFields;
 import cz.upce.fei.dt.ui.components.GridFormLayout;
+import cz.upce.fei.dt.ui.components.filters.FromToLocalDateFilterFields;
 import cz.upce.fei.dt.ui.components.forms.ProductForm;
 import cz.upce.fei.dt.ui.components.forms.events.DeleteEvent;
 import cz.upce.fei.dt.ui.components.forms.events.SaveEvent;
@@ -62,9 +63,7 @@ public class ProductsView extends VerticalLayout {
     }
 
     private void configureActions() {
-        Button addContact = new Button("Přidat Produkt");
-        addContact.addClickListener(event -> gridFormLayout.addNewValue(new Product()));
-        gridFormLayout.getActionsLayout().add(addContact);
+        gridFormLayout.addButton.addClickListener(_ -> gridFormLayout.addNewValue(new Product()));
     }
 
     private void configureForm() {
@@ -108,11 +107,13 @@ public class ProductsView extends VerticalLayout {
         configurableFilterDataProvider = dataProvider.withConfigurableFilter();
         configurableFilterDataProvider.setFilter(productFilter);
 
-        Grid.Column<Product> nameColumn = grid.addColumn(Product::getName).setHeader("Název").setKey("name").setWidth("150px");
-        Grid.Column<Product> productionPrice = grid.addColumn(this::getProductionPrice).setHeader("Výrobní cena").setKey("productionPrice").setWidth("150px");
-        Grid.Column<Product> profitColumn = grid.addColumn(this::getProfit).setHeader("Marže").setKey("profit").setWidth("150px");
-        Grid.Column<Product> sellingPrice = grid.addColumn(this::getSellingPrice).setHeader("Prodejní cena").setKey("sellingPrice").setWidth("150px");
+        Grid.Column<Product> nameColumn = grid.addColumn(Product::getName).setHeader("Název").setKey(Product_.NAME).setWidth("150px");
+        Grid.Column<Product> productionPrice = grid.addColumn(this::getProductionPrice).setHeader("Výrobní cena").setKey(Product_.PRODUCTION_PRICE).setWidth("150px");
+        Grid.Column<Product> profitColumn = grid.addColumn(this::getProfit).setHeader("Marže").setKey(Product_.PROFIT).setWidth("150px");
+        Grid.Column<Product> sellingPrice = grid.addColumn(this::getSellingPrice).setHeader("Prodejní cena").setKey(Product_.SELLING_PRICE).setWidth("150px");
         Grid.Column<Product> componentsColumn = grid.addComponentColumn(this::createProductsComponent).setHeader("Komponenty").setWidth("150px");
+        Grid.Column<Product> createdColumn = grid.addComponentColumn(this::createProductsComponent).setHeader("Vytvořeno").setKey(Product_.CREATED).setWidth("150px");
+        Grid.Column<Product> updatedColumn = grid.addComponentColumn(this::createProductsComponent).setHeader("Upraveno").setKey(Product_.UPDATED).setWidth("150px");
 
         HeaderRow headerRow = grid.appendHeaderRow();
         headerRow.getCell(nameColumn).setComponent(FilterFields.createTextFieldFilter("název", productFilter::setNameFilter, configurableFilterDataProvider));
@@ -120,12 +121,24 @@ public class ProductsView extends VerticalLayout {
         headerRow.getCell(profitColumn).setComponent(FilterFields.createFromToNumberFilter(productFilter::setFromProfitFilter, productFilter::setToProfitFilter, configurableFilterDataProvider));
         headerRow.getCell(sellingPrice).setComponent(FilterFields.createFromToNumberFilter(productFilter::setFromSellingPriceFilter, productFilter::setToSellingPriceFilter, configurableFilterDataProvider));
         headerRow.getCell(componentsColumn).setComponent(FilterFields.createComponentMultiSelectComboBoxFilter("komponenty", productFilter::setComponentsFilter, configurableFilterDataProvider, componentService));
+        headerRow.getCell(createdColumn).setComponent(new FromToLocalDateFilterFields(productFilter::setFromCreatedFilter, productFilter::setToCreatedFilter, configurableFilterDataProvider).getFilterHeaderLayout());
+        headerRow.getCell(updatedColumn).setComponent(new FromToLocalDateFilterFields(productFilter::setFromUpdatedFilter, productFilter::setToUpdatedFilter, configurableFilterDataProvider).getFilterHeaderLayout());
 
         grid.asSingleSelect().addValueChangeListener(e-> gridFormLayout.showFormLayout(e.getValue()));
 //        grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
 
         grid.setMultiSort(true, Grid.MultiSortPriority.APPEND);
-        grid.setSortableColumns("name", "productionPrice", "profit", "sellingPrice");
+        grid.setSortableColumns(Product_.NAME, Product_.PRODUCTION_PRICE, Product_.PROFIT, Product_.SELLING_PRICE, Product_.CREATED, Product_.UPDATED);
+
+        createdColumn.setVisible(false);
+        updatedColumn.setVisible(false);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Název", nameColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Výrobní cena", productionPrice);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Marže", profitColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Prodejní cena", sellingPrice);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Komponenty", componentsColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Vytvořeno", createdColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Upraveno", updatedColumn);
 
         updateGrid();
     }

@@ -1,7 +1,6 @@
 package cz.upce.fei.dt.ui.views;
 
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
@@ -9,7 +8,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
@@ -17,6 +15,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import cz.upce.fei.dt.beckend.entities.Component;
+import cz.upce.fei.dt.beckend.entities.Component_;
 import cz.upce.fei.dt.beckend.entities.Product;
 import cz.upce.fei.dt.beckend.services.ComponentService;
 import cz.upce.fei.dt.beckend.services.ProductService;
@@ -24,9 +23,10 @@ import cz.upce.fei.dt.beckend.services.UserService;
 import cz.upce.fei.dt.beckend.services.filters.ComponentFilter;
 import cz.upce.fei.dt.beckend.services.filters.ComponentTag;
 import cz.upce.fei.dt.ui.components.Badge;
-import cz.upce.fei.dt.ui.components.FilterFields;
+import cz.upce.fei.dt.ui.components.filters.FilterFields;
 import cz.upce.fei.dt.ui.components.GridFormLayout;
 import cz.upce.fei.dt.ui.components.TabWithBadge;
+import cz.upce.fei.dt.ui.components.filters.FromToLocalDateFilterFields;
 import cz.upce.fei.dt.ui.components.forms.ComponentForm;
 import cz.upce.fei.dt.ui.components.forms.events.DeleteEvent;
 import cz.upce.fei.dt.ui.components.forms.events.SaveEvent;
@@ -77,19 +77,12 @@ public class ComponentsView extends VerticalLayout {
 
     //region configures: grid, form, actions, filters, events
     private void configureFilters() {
-        Tabs tabs = new Tabs(all, withoutLimit, inStock, supply, missing);
-        tabs.setClassName("tabs");
-        tabs.setMaxWidth("100%");
-        tabs.setSelectedIndex(0);
-
-        gridFormLayout.getFiltersLayout().add(tabs);
+        gridFormLayout.filterTabs.add(all, withoutLimit, inStock, supply, missing);
+        gridFormLayout.filterTabs.setSelectedIndex(0);
     }
 
     private void configureActions() {
-        Button addContact = new Button("Přidat komponentu");
-        addContact.addClickListener(_ -> gridFormLayout.addNewValue(new Component()));
-        gridFormLayout.getActionsLayout().add(addContact);
-
+        gridFormLayout.addButton.addClickListener(_ -> gridFormLayout.addNewValue(new Component()));
     }
 
     private void configureForm() {
@@ -118,16 +111,17 @@ public class ComponentsView extends VerticalLayout {
             updateGrid();
             gridFormLayout.closeFormLayout();
             Notification.show("Komponenta " + component.getName() + " uložena.").addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-        } catch (Exception exception){
+        } catch (Exception exception) {
             Notification.show(exception.getMessage()).addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }
+
     //endregion
     private void configureGrid() {
         grid.setClassName("grid-content");
         grid.setSizeFull();
 
-       dataProvider = DataProvider.fromFilteringCallbacks(
+        dataProvider = DataProvider.fromFilteringCallbacks(
                 componentService::fetchFromBackEnd,
                 componentService::sizeInBackEnd
         );
@@ -135,31 +129,44 @@ public class ComponentsView extends VerticalLayout {
         configurableFilterDataProvider = dataProvider.withConfigurableFilter();
         configurableFilterDataProvider.setFilter(componentFilter);
 
-        Grid.Column<Component> nameColumn = grid.addColumn(Component::getName).setHeader("Název").setKey("name").setWidth("150px");
-        Grid.Column<Component> descriptionColumn = grid.addColumn(Component::getDescription).setHeader("Popis").setKey("description").setWidth("150px");
-        Grid.Column<Component> inStockColumn = grid.addComponentColumn(this::createInStockBadge).setHeader("Skladem").setKey("inStock").setWidth("150px");
-        Grid.Column<Component> minInStockColumn = grid.addColumn(Component::getMinInStock).setHeader("Minimum pro notifikaci").setKey("minInStock").setWidth("150px");
-        Grid.Column<Component> priceColumn = grid.addColumn(this::getPrice).setHeader("Cena").setKey("price").setWidth("150px");
+        Grid.Column<Component> nameColumn = grid.addColumn(Component::getName).setHeader("Název").setKey(Component_.NAME).setWidth("150px");
+        Grid.Column<Component> descriptionColumn = grid.addColumn(Component::getDescription).setHeader("Popis").setKey(Component_.DESCRIPTION).setWidth("150px");
+        Grid.Column<Component> inStockColumn = grid.addComponentColumn(this::createInStockBadge).setHeader("Skladem").setKey(Component_.IN_STOCK).setWidth("150px");
+        Grid.Column<Component> minInStockColumn = grid.addColumn(Component::getMinInStock).setHeader("Minimum pro notifikaci").setKey(Component_.MIN_IN_STOCK).setWidth("150px");
+        Grid.Column<Component> priceColumn = grid.addColumn(this::getPrice).setHeader("Cena").setKey(Component_.PRICE).setWidth("150px");
         Grid.Column<Component> userColumn = grid.addColumn(this::getFullName).setHeader("Notifikovat").setWidth("150px");
         Grid.Column<Component> productsColumn = grid.addComponentColumn(this::createProductsComponent).setHeader("Produkty").setWidth("150px");
-        Grid.Column<Component> updatedColumn = grid.addColumn(new LocalDateTimeRenderer<>(Component::getUpdated, "H:mm d. M. yyyy")).setHeader("Naposledy upraveno").setKey("updated").setWidth("200px");
+        Grid.Column<Component> createdColumn = grid.addColumn(new LocalDateTimeRenderer<>(Component::getCreated, "H:mm d. M. yyyy")).setHeader("Vytvořeno").setKey(Component_.CREATED).setWidth("150px");
+        Grid.Column<Component> updatedColumn = grid.addColumn(new LocalDateTimeRenderer<>(Component::getUpdated, "H:mm d. M. yyyy")).setHeader("Upraveno").setKey(Component_.UPDATED).setWidth("150px");
 
 
         HeaderRow headerRow = grid.appendHeaderRow();
-        headerRow.getCell(nameColumn).setComponent(FilterFields.createTextFieldFilter( "název", componentFilter::setNameFilter,configurableFilterDataProvider));
-        headerRow.getCell(descriptionColumn).setComponent(FilterFields.createTextFieldFilter( "popis", componentFilter::setDescriptionFilter,configurableFilterDataProvider));
+        headerRow.getCell(nameColumn).setComponent(FilterFields.createTextFieldFilter("název", componentFilter::setNameFilter, configurableFilterDataProvider));
+        headerRow.getCell(descriptionColumn).setComponent(FilterFields.createTextFieldFilter("popis", componentFilter::setDescriptionFilter, configurableFilterDataProvider));
         headerRow.getCell(inStockColumn).setComponent(FilterFields.createFromToIntegerFilter(componentFilter::setFromInStockFilter, componentFilter::setToInStockFilter, configurableFilterDataProvider));
         headerRow.getCell(minInStockColumn).setComponent(FilterFields.createFromToIntegerFilter(componentFilter::setFromMinInStockFilter, componentFilter::setToMinInStockFilter, configurableFilterDataProvider));
         headerRow.getCell(priceColumn).setComponent(FilterFields.createFromToNumberFilter(componentFilter::setFromPriceFilter, componentFilter::setToPriceFilter, configurableFilterDataProvider));
         headerRow.getCell(productsColumn).setComponent(FilterFields.createProductMultiSelectComboBoxFilter("produkty", componentFilter::setProductsFilter, configurableFilterDataProvider, productService));
         headerRow.getCell(userColumn).setComponent(FilterFields.createUserMultiSelectComboBoxFilter("uživatelé", componentFilter::setUsersFilter, configurableFilterDataProvider, userService));
-        headerRow.getCell(updatedColumn).setComponent(FilterFields.createFromToDateTimePickerFilter(componentFilter::setFromUpdatedFilter, componentFilter::setToUpdatedFilter, configurableFilterDataProvider));
+        headerRow.getCell(createdColumn).setComponent(new FromToLocalDateFilterFields(componentFilter::setFromCreatedFilter, componentFilter::setToCreatedFilter, configurableFilterDataProvider).getFilterHeaderLayout());
+        headerRow.getCell(updatedColumn).setComponent(new FromToLocalDateFilterFields(componentFilter::setFromUpdatedFilter, componentFilter::setToUpdatedFilter, configurableFilterDataProvider).getFilterHeaderLayout());
 
-        grid.asSingleSelect().addValueChangeListener(e-> gridFormLayout.showFormLayout(e.getValue()));
+        grid.asSingleSelect().addValueChangeListener(e -> gridFormLayout.showFormLayout(e.getValue()));
         //grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
 
         grid.setMultiSort(true, Grid.MultiSortPriority.APPEND);
-        grid.setSortableColumns("name", "description", "inStock", "minInStock", "price", "updated");
+        grid.setSortableColumns(Component_.NAME, Component_.DESCRIPTION, Component_.IN_STOCK, Component_.MIN_IN_STOCK, Component_.PRICE, Component_.CREATED, Component_.UPDATED);
+
+        createdColumn.setVisible(false);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Název", nameColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Popis", descriptionColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Skladem", inStockColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Minimum pro notifikaci", minInStockColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Cena", priceColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Notifikovat", userColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Produkty", productsColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Vytvořeno", createdColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Upraveno", updatedColumn);
 
         updateGrid();
     }
@@ -200,7 +207,7 @@ public class ComponentsView extends VerticalLayout {
         return comboBox;
     }
 
-    private TabWithBadge createTabWithBadge(String labelText, String style, ComponentTag tag){
+    private TabWithBadge createTabWithBadge(String labelText, String style, ComponentTag tag) {
         TabWithBadge tabWithBadge = new TabWithBadge(labelText, new Badge("", style));
 
         tabWithBadge.getElement().addEventListener("click", _ -> {
@@ -213,7 +220,7 @@ public class ComponentsView extends VerticalLayout {
 
     //endregion
 
-    private void updateGrid(){
+    private void updateGrid() {
         grid.setItems(configurableFilterDataProvider);
 
         all.badge.setText(String.valueOf(componentService.getCountAll()));

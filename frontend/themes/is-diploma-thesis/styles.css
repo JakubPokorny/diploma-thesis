@@ -115,6 +115,17 @@ vaadin-message {
 
 }
 
+.filters-and-action-container{
+    display: flex;
+    width: 100%;
+    overflow: hidden;
+}
+
+.filter-tabs{
+    flex-grow: 1;
+    min-width: 0;
+}
+
 @media only screen and (max-width: 550px) {
     .user-name, .user-name-angle-down {
         display: none;

@@ -2,7 +2,6 @@ package cz.upce.fei.dt.ui.views;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSortOrder;
@@ -12,7 +11,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.SortDirection;
@@ -26,10 +24,9 @@ import cz.upce.fei.dt.beckend.entities.Status;
 import cz.upce.fei.dt.beckend.services.*;
 import cz.upce.fei.dt.beckend.services.filters.ContractFilter;
 import cz.upce.fei.dt.beckend.services.filters.DeadlineFilterTag;
-import cz.upce.fei.dt.ui.components.Badge;
-import cz.upce.fei.dt.ui.components.FilterFields;
-import cz.upce.fei.dt.ui.components.GridFormLayout;
-import cz.upce.fei.dt.ui.components.TabWithBadge;
+import cz.upce.fei.dt.ui.components.*;
+import cz.upce.fei.dt.ui.components.filters.FilterFields;
+import cz.upce.fei.dt.ui.components.filters.FromToLocalDateFilterFields;
 import cz.upce.fei.dt.ui.components.forms.ContractForm;
 import cz.upce.fei.dt.ui.components.forms.events.DeleteEvent;
 import cz.upce.fei.dt.ui.components.forms.events.SaveEvent;
@@ -89,19 +86,12 @@ public class ContractsView extends VerticalLayout {
 
     //region configures
     private void configureFilters() {
-        Tabs tabs = new Tabs(all, withoutDeadline, beforeDeadline, afterDeadline);
-        tabs.setClassName("tabs");
-        tabs.setMaxWidth("100%");
-        tabs.setSelectedIndex(0);
-
-        gridFormLayout.getFiltersLayout().add(tabs);
-
+        gridFormLayout.filterTabs.add(all, withoutDeadline, beforeDeadline, afterDeadline);
+        gridFormLayout.filterTabs.setSelectedIndex(0);
     }
 
     private void configureActions() {
-        Button addContract = new Button("Přidat Zakázku");
-        addContract.addClickListener(event -> gridFormLayout.addNewValue(new Contract()));
-        gridFormLayout.getActionsLayout().add(addContract);
+        gridFormLayout.addButton.addClickListener(_ -> gridFormLayout.addNewValue(new Contract()));
     }
 
     private void configureForm() {
@@ -145,6 +135,7 @@ public class ContractsView extends VerticalLayout {
         );
 
         configurableFilterDataProvider = dataProvider.withConfigurableFilter();
+//        contractFilter.setFromCreatedFilter(LocalDate.of(LocalDate.now().getYear(), 1,1));
         configurableFilterDataProvider.setFilter(contractFilter);
 
         Grid.Column<Contract> idColumn = grid.addColumn(Contract::getId).setHeader("ID").setKey("id").setWidth("50px");
@@ -159,11 +150,15 @@ public class ContractsView extends VerticalLayout {
         HeaderRow headerRow = grid.appendHeaderRow();
         headerRow.getCell(clientColumn).setComponent(FilterFields.createContactMultiSelectComboBoxFilter("klienti", contractFilter::setClientsFilter, configurableFilterDataProvider, contactService));
         headerRow.getCell(stateColumn).setComponent(FilterFields.createStatusMultiSelectComboBoxFilter("stavy", contractFilter::setStatusFilter, configurableFilterDataProvider, statusService));
-        headerRow.getCell(deadlineColumn).setComponent(FilterFields.createFromToDatePickerFilter(contractFilter::setFromDeadlineFilter, contractFilter::setToDeadlineFilter, configurableFilterDataProvider));
+        headerRow.getCell(deadlineColumn).setComponent(new FromToLocalDateFilterFields(contractFilter::setFromDeadlineFilter, contractFilter::setToDeadlineFilter, configurableFilterDataProvider).getFilterHeaderLayout());
         headerRow.getCell(priceColumn).setComponent(FilterFields.createFromToNumberFilter(contractFilter::setFromPriceFilter, contractFilter::setToPriceFilter, configurableFilterDataProvider));
         headerRow.getCell(productsColumn).setComponent(FilterFields.createProductMultiSelectComboBoxFilter("produkty", contractFilter::setProductsFilter, configurableFilterDataProvider, productService));
-        headerRow.getCell(createdColumn).setComponent(FilterFields.createFromToDatePickerFilter(contractFilter::setFromCreatedFilter, contractFilter::setToCreatedFilter, configurableFilterDataProvider));
-        headerRow.getCell(updatedColumn).setComponent(FilterFields.createFromToDatePickerFilter(contractFilter::setFromUpdatedFilter, contractFilter::setToUpdatedFilter, configurableFilterDataProvider));
+
+        FromToLocalDateFilterFields createdFromToDatePicker = new FromToLocalDateFilterFields(contractFilter::setFromCreatedFilter, contractFilter::setToCreatedFilter, configurableFilterDataProvider);
+        createdFromToDatePicker.fromDatePicker.setValue(LocalDate.of(LocalDate.now().getYear(), 1,1));
+        headerRow.getCell(createdColumn).setComponent(createdFromToDatePicker.getFilterHeaderLayout());
+
+        headerRow.getCell(updatedColumn).setComponent(new FromToLocalDateFilterFields(contractFilter::setFromUpdatedFilter, contractFilter::setToUpdatedFilter, configurableFilterDataProvider).getFilterHeaderLayout());
 
         grid.asSingleSelect().addValueChangeListener(e -> gridFormLayout.showFormLayout(e.getValue()));
         grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
@@ -171,6 +166,17 @@ public class ContractsView extends VerticalLayout {
         grid.setMultiSort(true, Grid.MultiSortPriority.APPEND);
         grid.setSortableColumns("id", "price", "created", "updated");
         grid.sort(List.of(new GridSortOrder<>(createdColumn, SortDirection.DESCENDING)));
+
+        idColumn.setVisible(false);
+        updatedColumn.setVisible(false);
+        gridFormLayout.showHideMenu.addColumnToggleItem("ID", idColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Klient", clientColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Stav", stateColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Termín", deadlineColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Cena s marží", priceColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Objednané produkty", productsColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Vytvořeno", createdColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Upraveno", updatedColumn);
 
         updateGrid();
     }
@@ -217,7 +223,7 @@ public class ContractsView extends VerticalLayout {
     private TabWithBadge createTabWithBadge(String labelText, String style, DeadlineFilterTag tag) {
         TabWithBadge tabWithBadge = new TabWithBadge(labelText, new Badge("", style));
 
-        tabWithBadge.getElement().addEventListener("click", event -> {
+        tabWithBadge.getElement().addEventListener("click", _ -> {
             contractFilter.setTagsFilter(tag);
             dataProvider.refreshAll();
         });

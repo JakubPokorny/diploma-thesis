@@ -153,7 +153,7 @@ public class ComponentForm extends FormLayout implements IEditForm<Component> {
     @Override
     public Component getValue() {
         component.getProductComponents().clear();
-        productComponentForms.forEach((key, form) -> component.getProductComponents().add(form.getValue()));
+        productComponentForms.forEach((_, form) -> component.getProductComponents().add(form.getValue()));
         return component;
     }
 

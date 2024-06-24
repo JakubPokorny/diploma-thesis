@@ -27,11 +27,11 @@ public class ContractProductForm extends FormLayout implements IEditForm<Contrac
         amount.setStepButtonsVisible(true);
         amount.addThemeVariants(TextFieldVariant.LUMO_HELPER_ABOVE_FIELD);
         binder.forField(amount)
-                .withValidationStatusHandler(statusChange -> amount.setErrorMessage("Hodnoty mimo <1; 4 294 967 296>"))
+                .withValidationStatusHandler(_ -> amount.setErrorMessage("Hodnoty mimo <1; 4 294 967 296>"))
                 .asRequired()
                 .bind(ContractProduct::getAmount, ContractProduct::setAmount);
 
-        amount.addValueChangeListener(event -> ComponentUtil.fireEvent(UI.getCurrent(), new UpdateContractPriceEvent(this, null)));
+        amount.addValueChangeListener(_ -> ComponentUtil.fireEvent(UI.getCurrent(), new UpdateContractPriceEvent(this)));
 
         this.setColspan(amount, 2);
         add(amount);
@@ -49,6 +49,7 @@ public class ContractProductForm extends FormLayout implements IEditForm<Contrac
     @Override
     public void setValue(ContractProduct value) {
         contractProduct = value;
+        amount.setHelperText(CzechI18n.getCurrency(contractProduct.getPricePerPiece()) +"/ks");
         binder.readBean(contractProduct);
     }
 

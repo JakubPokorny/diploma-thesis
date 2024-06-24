@@ -20,8 +20,9 @@ import cz.upce.fei.dt.beckend.entities.User;
 import cz.upce.fei.dt.beckend.entities.User_;
 import cz.upce.fei.dt.beckend.services.UserService;
 import cz.upce.fei.dt.beckend.services.filters.UserFilter;
-import cz.upce.fei.dt.ui.components.FilterFields;
+import cz.upce.fei.dt.ui.components.filters.FilterFields;
 import cz.upce.fei.dt.ui.components.GridFormLayout;
+import cz.upce.fei.dt.ui.components.filters.FromToLocalDateFilterFields;
 import cz.upce.fei.dt.ui.components.forms.events.DeleteEvent;
 import cz.upce.fei.dt.ui.components.forms.events.SaveEvent;
 import cz.upce.fei.dt.ui.views.MainLayout;
@@ -61,9 +62,7 @@ public class UsersView extends VerticalLayout {
     }
 
     private void configureActions() {
-        Button addUser = new Button("Přidat uživatele");
-        addUser.addClickListener(event -> gridFormLayout.addNewValue(new User()));
-        gridFormLayout.getActionsLayout().add(addUser);
+        gridFormLayout.addButton.addClickListener(_ -> gridFormLayout.addNewValue(new User()));
     }
 
     private void configureForm() {
@@ -112,8 +111,8 @@ public class UsersView extends VerticalLayout {
         Grid.Column<User> emailColumn = grid.addColumn(User::getEmail).setHeader("Email").setKey(User_.EMAIL).setWidth("150px");
         Grid.Column<User> roleColumn = grid.addColumn(User::getRole).setHeader("Role").setKey(User_.ROLE).setWidth("150px");
         Grid.Column<User> tokenColumn = grid.addComponentColumn(this::createTokenComponent).setHeader("Token pro obnovení").setWidth("150px");
-        Grid.Column<User> createdColumn = grid.addColumn(new LocalDateTimeRenderer<>(User::getCreated, "H:mm d. M. yyyy")).setHeader("Vytvořen").setKey(User_.CREATED).setWidth("150px");
-        Grid.Column<User> updatedColumn = grid.addColumn(new LocalDateTimeRenderer<>(User::getUpdated, "H:mm d. M. yyyy")).setHeader("Upraven").setKey(User_.UPDATED).setWidth("150px");
+        Grid.Column<User> createdColumn = grid.addColumn(new LocalDateTimeRenderer<>(User::getCreated, "H:mm d. M. yyyy")).setHeader("Vytvořeno").setKey(User_.CREATED).setWidth("150px");
+        Grid.Column<User> updatedColumn = grid.addColumn(new LocalDateTimeRenderer<>(User::getUpdated, "H:mm d. M. yyyy")).setHeader("Upraveno").setKey(User_.UPDATED).setWidth("150px");
 
         HeaderRow headerRow = grid.appendHeaderRow();
         headerRow.getCell(firstNameColumn).setComponent(FilterFields.createTextFieldFilter("jméno", userFilter::setFirstNameFilter, configurableFilterDataProvider));
@@ -121,8 +120,8 @@ public class UsersView extends VerticalLayout {
         headerRow.getCell(emailColumn).setComponent(FilterFields.createTextFieldFilter("email", userFilter::setEmailFilter, configurableFilterDataProvider));
         headerRow.getCell(roleColumn).setComponent(FilterFields.createTextFieldFilter("role", userFilter::setRoleFilter, configurableFilterDataProvider));
         headerRow.getCell(tokenColumn).setComponent(FilterFields.createTextFieldFilter("token", userFilter::setTokenFilter, configurableFilterDataProvider));
-        headerRow.getCell(createdColumn).setComponent(FilterFields.createFromToDatePickerFilter(userFilter::setFromCreatedFilter, userFilter::setToCreatedFilter, configurableFilterDataProvider));
-        headerRow.getCell(updatedColumn).setComponent(FilterFields.createFromToDatePickerFilter(userFilter::setFromUpdatedFilter, userFilter::setToUpdatedFilter, configurableFilterDataProvider));
+        headerRow.getCell(createdColumn).setComponent(new FromToLocalDateFilterFields(userFilter::setFromCreatedFilter, userFilter::setToCreatedFilter, configurableFilterDataProvider).getFilterHeaderLayout());
+        headerRow.getCell(updatedColumn).setComponent(new FromToLocalDateFilterFields(userFilter::setFromUpdatedFilter, userFilter::setToUpdatedFilter, configurableFilterDataProvider).getFilterHeaderLayout());
 
         grid.asSingleSelect().addValueChangeListener(e -> gridFormLayout.showFormLayout(e.getValue()));
         grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
@@ -130,13 +129,23 @@ public class UsersView extends VerticalLayout {
         grid.setMultiSort(true, Grid.MultiSortPriority.APPEND);
         grid.setSortableColumns(User_.FIRST_NAME, User_.LAST_NAME, User_.EMAIL, User_.ROLE, User_.CREATED, User_.UPDATED);
 
+        createdColumn.setVisible(false);
+        updatedColumn.setVisible(false);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Křestní jméno", firstNameColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Příjmení", lastNameColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Email", emailColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Role", roleColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Token pro obnovení", tokenColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Vytvořeno", createdColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Upraveno", updatedColumn);
+
         updateGrid();
     }
 
     private Component createTokenComponent(User user) {
         if (user.getResetToken() == null || user.getResetToken().isEmpty()) {
             Button generate = new Button("Generovat");
-            generate.addClickListener(click -> {
+            generate.addClickListener(_ -> {
                 try {
                     userService.generateResetToken(user);
                     updateGrid();

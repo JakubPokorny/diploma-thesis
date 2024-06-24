@@ -16,6 +16,10 @@ public class ProductSpec {
                 .and(FILTER_UTIL.findAllDoubleGreaterThanOrEqualTo(productFilter.getFromProfitFilter(), Product_.profit.getName()))
                 .and(FILTER_UTIL.findAllDoubleLessThanOrEqualTo(productFilter.getToProfitFilter(), Product_.profit.getName()))
                 .and(FILTER_UTIL.findAllDoubleGreaterThanOrEqualTo(productFilter.getFromSellingPriceFilter(), Product_.sellingPrice.getName()))
-                .and(FILTER_UTIL.findAllDoubleLessThanOrEqualTo(productFilter.getToSellingPriceFilter(), Product_.sellingPrice.getName()));
+                .and(FILTER_UTIL.findAllDoubleLessThanOrEqualTo(productFilter.getToSellingPriceFilter(), Product_.sellingPrice.getName()))
+                .and(FILTER_UTIL.findAllLocalDateLessThanOrEqualTo(productFilter.getFromCreatedFilter(), Product_.CREATED))
+                .and(FILTER_UTIL.findAllLocalDateGreaterThanOrEqualTo(productFilter.getToCreatedFilter(), Product_.CREATED))
+                .and(FILTER_UTIL.findAllLocalDateLessThanOrEqualTo(productFilter.getToUpdatedFilter(), Product_.UPDATED))
+                .and(FILTER_UTIL.findAllLocalDateGreaterThanOrEqualTo(productFilter.getFromUpdatedFilter(), Product_.UPDATED));
     }
 }

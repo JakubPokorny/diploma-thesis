@@ -2,6 +2,8 @@ package cz.upce.fei.dt.ui.components.forms;
 
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -12,6 +14,7 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.validator.DoubleRangeValidator;
+import com.vaadin.flow.theme.lumo.LumoIcon;
 import cz.upce.fei.dt.beckend.entities.Contact;
 import cz.upce.fei.dt.beckend.entities.Contract;
 import cz.upce.fei.dt.beckend.entities.ContractProduct;
@@ -42,6 +45,7 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
     private final FileService fileService;
     private FileForm fileForm;
     private Contract contract;
+    private final Button reloadProducts = new Button(LumoIcon.RELOAD.create());
 
     public ContractForm(
             ContactService contactService,
@@ -61,16 +65,32 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
         setupProductMSB(productService);
         setupContractProductsForms();
         setupPriceField();
+        setupReloadProducts();
 
         ComponentUtil.addListener(UI.getCurrent(), UpdateContractPriceEvent.class, this::updatePrice);
 
-        this.setColspan(contactCB, 3);
-        this.setColspan(contactAccordion, 3);
-        this.setColspan(productsMSB, 3);
-        this.setColspan(priceField, 3);
-        this.setColspan(deadlineForm, 6);
-        this.setColspan(contractProductFormsLayout, 3);
+        this.setColspan(contactCB, 2);
+        this.setColspan(contactAccordion, 2);
+        this.setColspan(productsMSB, 2);
+        this.setColspan(priceField, 2);
+        this.setColspan(deadlineForm, 2);
+        this.setColspan(contractProductFormsLayout, 2);
         add(contactCB, contactAccordion, productsMSB, contractProductFormsLayout, priceField, deadlineForm);
+    }
+
+    private void setupReloadProducts() {
+        reloadProducts.addThemeVariants(ButtonVariant.LUMO_SMALL);
+        reloadProducts.addClickListener(_ -> {
+            Set<Product> selectedProducts = productsMSB.getSelectedItems();
+            HashMap<Long, Double> productionPriceMap = new HashMap<>();
+            selectedProducts.forEach(product -> productionPriceMap.put(product.getId(), product.getProductionPrice()));
+            contractProductForms.forEach((key, form) -> {
+                ContractProduct contractProduct = form.getValue();
+                contractProduct.setPricePerPiece(productionPriceMap.get(key));
+                form.setValue(contractProduct);
+            });
+            updatePrice(null);
+        });
     }
 
 
@@ -89,8 +109,9 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
     }
 
     private void setupPriceField() {
+        priceField.setPrefixComponent(reloadProducts);
         priceField.setReadOnly(true);
-        priceField.button.addClickListener(event -> {
+        priceField.button.addClickListener(_ -> {
             contract.setOwnPrice(priceField.isReadOnly());
             priceField.setReadOnly(!priceField.isReadOnly());
             updatePrice(null);
@@ -179,7 +200,7 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
     @Override
     public Contract getValue() {
         contract.getContractProducts().clear();
-        contractProductForms.forEach((key, form) ->
+        contractProductForms.forEach((_, form) ->
                 contract.getContractProducts().add(form.getValue()));
         contract.setDeadlines(Set.of(deadlineForm.getDeadline()));
 

@@ -1,7 +1,6 @@
 package cz.upce.fei.dt.ui.views;
 
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
@@ -18,7 +17,7 @@ import cz.upce.fei.dt.beckend.entities.Status_;
 import cz.upce.fei.dt.beckend.services.StatusService;
 import cz.upce.fei.dt.beckend.services.filters.StatusFilter;
 import cz.upce.fei.dt.ui.components.Badge;
-import cz.upce.fei.dt.ui.components.FilterFields;
+import cz.upce.fei.dt.ui.components.filters.FilterFields;
 import cz.upce.fei.dt.ui.components.GridFormLayout;
 import cz.upce.fei.dt.ui.components.forms.StatusForm;
 import cz.upce.fei.dt.ui.components.forms.events.DeleteEvent;
@@ -58,9 +57,7 @@ public class StatusView extends VerticalLayout {
     }
 
     private void configureActions() {
-        Button addStatus = new Button("Přidat status");
-        addStatus.addClickListener(event -> gridFormLayout.addNewValue(new Status()));
-        gridFormLayout.getActionsLayout().add(addStatus);
+        gridFormLayout.addButton.addClickListener(_ -> gridFormLayout.addNewValue(new Status()));
     }
 
     private void configureForm() {
@@ -113,6 +110,9 @@ public class StatusView extends VerticalLayout {
 
         grid.setMultiSort(true, Grid.MultiSortPriority.APPEND);
         grid.setSortableColumns(Status_.STATUS, Status_.THEME);
+
+        gridFormLayout.showHideMenu.addColumnToggleItem("Stav", statusColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Motiv", themeColumn);
 
         updateGrid();
     }

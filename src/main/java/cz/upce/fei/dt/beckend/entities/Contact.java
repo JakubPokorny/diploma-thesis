@@ -2,6 +2,7 @@ package cz.upce.fei.dt.beckend.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
@@ -40,6 +41,10 @@ public class Contact {
 
     @Column(length = 20, nullable = false)
     private String phone;
+
+    @Column
+    @CreationTimestamp
+    private LocalDateTime created;
 
     @Column
     @UpdateTimestamp

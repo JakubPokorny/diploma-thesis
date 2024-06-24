@@ -2,7 +2,6 @@ package cz.upce.fei.dt.ui.views.customerContacts;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
@@ -21,8 +20,9 @@ import cz.upce.fei.dt.beckend.entities.Contact;
 import cz.upce.fei.dt.beckend.entities.Contact_;
 import cz.upce.fei.dt.beckend.services.ContactService;
 import cz.upce.fei.dt.beckend.services.filters.ContactFilter;
-import cz.upce.fei.dt.ui.components.FilterFields;
+import cz.upce.fei.dt.ui.components.filters.FilterFields;
 import cz.upce.fei.dt.ui.components.GridFormLayout;
+import cz.upce.fei.dt.ui.components.filters.FromToLocalDateFilterFields;
 import cz.upce.fei.dt.ui.components.forms.ContactForm;
 import cz.upce.fei.dt.ui.components.forms.events.DeleteEvent;
 import cz.upce.fei.dt.ui.components.forms.events.SaveEvent;
@@ -63,9 +63,7 @@ public class ContactsView extends VerticalLayout {
     }
 
     private void configureActions() {
-        Button addContact = new Button("Přidat Kontakt");
-        addContact.addClickListener(event -> gridFormLayout.addNewValue(new Contact()));
-        gridFormLayout.getActionsLayout().add(addContact);
+        gridFormLayout.addButton.addClickListener(_ -> gridFormLayout.addNewValue(new Contact()));
     }
 
     private void configureForm() {
@@ -112,27 +110,44 @@ public class ContactsView extends VerticalLayout {
         configurableFilterDataProvider.setFilter(contactFilter);
 
         Grid.Column<Contact> icoColumn = grid.addColumn(Contact::getICO).setHeader("IČO").setKey(Contact_.ICO.getName()).setWidth("150px");
+        Grid.Column<Contact> dicColumn = grid.addColumn(Contact::getDIC).setHeader("DIČ").setKey(Contact_.DIC.getName()).setWidth("150px");
         Grid.Column<Contact> clientColumn = grid.addColumn(Contact::getClient).setHeader("Klient").setKey(Contact_.CLIENT).setWidth("150px");
         Grid.Column<Contact> emailColumn = grid.addColumn(Contact::getEmail).setHeader("Email").setKey(Contact_.EMAIL).setWidth("150px");
         Grid.Column<Contact> phoneColumn = grid.addColumn(Contact::getPhone).setHeader("Telefon").setKey(Contact_.PHONE).setWidth("150px");
         Grid.Column<Contact> invoiceAddressColumn = grid.addComponentColumn(contact -> createAddressColumn(contact.getInvoiceAddress())).setHeader("Fakturační adresa").setWidth("150px");
         Grid.Column<Contact> deliveryAddressColumn = grid.addComponentColumn(contact -> createAddressColumn(contact.getDeliveryAddress())).setHeader("Doručovací adresa").setWidth("150px");
-        Grid.Column<Contact> updatedColumn = grid.addColumn(new LocalDateTimeRenderer<>(Contact::getUpdated, "H:mm d. M. yyyy")).setHeader("Upraveno").setWidth("150px");
+        Grid.Column<Contact> createdColumn = grid.addColumn(new LocalDateTimeRenderer<>(Contact::getCreated, "H:mm d. M. yyyy")).setHeader("Vytvořeno").setKey(Contact_.CREATED).setWidth("150px");
+        Grid.Column<Contact> updatedColumn = grid.addColumn(new LocalDateTimeRenderer<>(Contact::getUpdated, "H:mm d. M. yyyy")).setHeader("Upraveno").setKey(Contact_.UPDATED).setWidth("150px");
 
         HeaderRow headerRow = grid.appendHeaderRow();
         headerRow.getCell(icoColumn).setComponent(FilterFields.createTextFieldFilter("ičo", contactFilter::setIcoFilter, configurableFilterDataProvider));
+        headerRow.getCell(dicColumn).setComponent(FilterFields.createTextFieldFilter("ičo", contactFilter::setDicFilter, configurableFilterDataProvider));
         headerRow.getCell(clientColumn).setComponent(FilterFields.createTextFieldFilter("klient", contactFilter::setClientFilter, configurableFilterDataProvider));
         headerRow.getCell(emailColumn).setComponent(FilterFields.createTextFieldFilter("email", contactFilter::setEmailFilter, configurableFilterDataProvider));
         headerRow.getCell(phoneColumn).setComponent(FilterFields.createTextFieldFilter("tel. číslo", contactFilter::setPhoneFilter, configurableFilterDataProvider));
-        headerRow.getCell(invoiceAddressColumn).setComponent(FilterFields.createTextFieldFilter("Fakturační adresa", contactFilter::setInvoiceAddressFilter, configurableFilterDataProvider));
-        headerRow.getCell(deliveryAddressColumn).setComponent(FilterFields.createTextFieldFilter("Doručovací adresa", contactFilter::setDeliveryAddressFilter, configurableFilterDataProvider));
-        headerRow.getCell(updatedColumn).setComponent(FilterFields.createFromToDatePickerFilter(contactFilter::setFromUpdatedFilter, contactFilter::setToUpdatedFilter, configurableFilterDataProvider));
+        headerRow.getCell(invoiceAddressColumn).setComponent(FilterFields.createTextFieldFilter("fakturační adresa", contactFilter::setInvoiceAddressFilter, configurableFilterDataProvider));
+        headerRow.getCell(deliveryAddressColumn).setComponent(FilterFields.createTextFieldFilter("doručovací adresa", contactFilter::setDeliveryAddressFilter, configurableFilterDataProvider));
+        headerRow.getCell(createdColumn).setComponent(new FromToLocalDateFilterFields(contactFilter::setFromCreatedFilter, contactFilter::setToCreatedFilter, configurableFilterDataProvider).getFilterHeaderLayout());
+        headerRow.getCell(updatedColumn).setComponent(new FromToLocalDateFilterFields(contactFilter::setFromUpdatedFilter, contactFilter::setToUpdatedFilter, configurableFilterDataProvider).getFilterHeaderLayout());
 
         grid.asSingleSelect().addValueChangeListener(e -> gridFormLayout.showFormLayout(e.getValue()));
         grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
 
         grid.setMultiSort(true, Grid.MultiSortPriority.APPEND);
-        grid.setSortableColumns(Contact_.ICO.getName(), Contact_.CLIENT, Contact_.EMAIL, Contact_.PHONE);
+        grid.setSortableColumns(Contact_.ICO.getName(), Contact_.DIC.getName(), Contact_.CLIENT, Contact_.EMAIL, Contact_.PHONE, Contact_.CREATED, Contact_.UPDATED);
+
+        dicColumn.setVisible(false);
+        createdColumn.setVisible(false);
+        updatedColumn.setVisible(false);
+        gridFormLayout.showHideMenu.addColumnToggleItem("IČO", icoColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("DIČ", dicColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Klient", clientColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Email", emailColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Telefon", phoneColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Fakturační adresa", invoiceAddressColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Doručovací adresa", deliveryAddressColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Vytvořeno", createdColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Upraveno", updatedColumn);
 
         updateGrid();
     }
@@ -148,6 +163,7 @@ public class ContactsView extends VerticalLayout {
         layout.setPadding(false);
         return layout;
     }
+
     //endregion
     private void updateGrid() {
         grid.setItems(configurableFilterDataProvider);

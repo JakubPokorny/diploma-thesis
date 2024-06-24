@@ -11,16 +11,18 @@ public class ComponentSpec {
 
     public static Specification<Component> filterBy(ComponentFilter componentFilter) {
         return Specification
-                .where(FILTER_UTIL.findAllStringLikeIgnoreCase(componentFilter.getNameFilter(), Component_.name.getName()))
-                .and(FILTER_UTIL.findAllStringLikeIgnoreCase(componentFilter.getDescriptionFilter(), Component_.description.getName()))
-                .and(FILTER_UTIL.findAllIntegerGreaterThanOrEqualTo(componentFilter.getFromInStockFilter(), Component_.inStock.getName()))
-                .and(FILTER_UTIL.findAllIntegerLessThanOrEqualTo(componentFilter.getToInStockFilter(), Component_.inStock.getName()))
-                .and(FILTER_UTIL.findAllIntegerGreaterThanOrEqualTo(componentFilter.getFromMinInStockFilter(), Component_.minInStock.getName()))
-                .and(FILTER_UTIL.findAllIntegerLessThanOrEqualTo(componentFilter.getToMinInStockFilter(), Component_.minInStock.getName()))
-                .and(FILTER_UTIL.findAllDoubleGreaterThanOrEqualTo(componentFilter.getFromPriceFilter(), Component_.price.getName()))
-                .and(FILTER_UTIL.findAllDoubleLessThanOrEqualTo(componentFilter.getToPriceFilter(), Component_.price.getName()))
-                .and(FILTER_UTIL.findAllLocalDateTimeLessThanOrEqualTo(componentFilter.getToUpdatedFilter(), Component_.updated.getName()))
-                .and(FILTER_UTIL.findAllLocalDateTimeGreaterThanOrEqualTo(componentFilter.getFromUpdatedFilter(), Component_.updated.getName()))
+                .where(FILTER_UTIL.findAllStringLikeIgnoreCase(componentFilter.getNameFilter(), Component_.NAME))
+                .and(FILTER_UTIL.findAllStringLikeIgnoreCase(componentFilter.getDescriptionFilter(), Component_.DESCRIPTION))
+                .and(FILTER_UTIL.findAllIntegerGreaterThanOrEqualTo(componentFilter.getFromInStockFilter(), Component_.IN_STOCK))
+                .and(FILTER_UTIL.findAllIntegerLessThanOrEqualTo(componentFilter.getToInStockFilter(), Component_.IN_STOCK))
+                .and(FILTER_UTIL.findAllIntegerGreaterThanOrEqualTo(componentFilter.getFromMinInStockFilter(), Component_.MIN_IN_STOCK))
+                .and(FILTER_UTIL.findAllIntegerLessThanOrEqualTo(componentFilter.getToMinInStockFilter(), Component_.MIN_IN_STOCK))
+                .and(FILTER_UTIL.findAllDoubleGreaterThanOrEqualTo(componentFilter.getFromPriceFilter(), Component_.PRICE))
+                .and(FILTER_UTIL.findAllDoubleLessThanOrEqualTo(componentFilter.getToPriceFilter(), Component_.PRICE))
+                .and(FILTER_UTIL.findAllLocalDateLessThanOrEqualTo(componentFilter.getFromCreatedFilter(), Component_.CREATED))
+                .and(FILTER_UTIL.findAllLocalDateGreaterThanOrEqualTo(componentFilter.getToCreatedFilter(), Component_.CREATED))
+                .and(FILTER_UTIL.findAllLocalDateLessThanOrEqualTo(componentFilter.getToUpdatedFilter(), Component_.UPDATED))
+                .and(FILTER_UTIL.findAllLocalDateGreaterThanOrEqualTo(componentFilter.getFromUpdatedFilter(), Component_.UPDATED))
                 .and(findAllTaggedAs(componentFilter.getTagFilter()));
     }
 
