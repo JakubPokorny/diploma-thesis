@@ -1,8 +1,8 @@
 package cz.upce.fei.dt.beckend.services;
 
 import com.google.gson.Gson;
-import cz.upce.fei.dt.beckend.orms.AresErrorResponse;
-import cz.upce.fei.dt.beckend.orms.AresResponse;
+import cz.upce.fei.dt.beckend.dto.AresErrorResponse;
+import cz.upce.fei.dt.beckend.dto.AresResponse;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;

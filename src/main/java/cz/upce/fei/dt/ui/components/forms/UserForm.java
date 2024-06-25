@@ -1,4 +1,4 @@
-package cz.upce.fei.dt.ui.views.users;
+package cz.upce.fei.dt.ui.components.forms;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -10,7 +10,6 @@ import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.validator.EmailValidator;
 import cz.upce.fei.dt.beckend.entities.Role;
 import cz.upce.fei.dt.beckend.entities.User;
-import cz.upce.fei.dt.ui.components.forms.IEditForm;
 
 import java.util.EnumSet;
 

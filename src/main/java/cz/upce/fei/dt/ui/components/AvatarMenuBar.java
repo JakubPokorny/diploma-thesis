@@ -13,7 +13,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import cz.upce.fei.dt.beckend.entities.User;
-import cz.upce.fei.dt.ui.views.users.ProfileView;
+import cz.upce.fei.dt.ui.views.ProfileView;
 
 public class AvatarMenuBar extends HorizontalLayout {
     public AvatarMenuBar(AuthenticationContext authContext) {

@@ -1,4 +1,4 @@
-package cz.upce.fei.dt.ui.views.users;
+package cz.upce.fei.dt.ui.views;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
@@ -20,12 +20,12 @@ import cz.upce.fei.dt.beckend.entities.User;
 import cz.upce.fei.dt.beckend.entities.User_;
 import cz.upce.fei.dt.beckend.services.UserService;
 import cz.upce.fei.dt.beckend.services.filters.UserFilter;
-import cz.upce.fei.dt.ui.components.filters.FilterFields;
 import cz.upce.fei.dt.ui.components.GridFormLayout;
+import cz.upce.fei.dt.ui.components.filters.FilterFields;
 import cz.upce.fei.dt.ui.components.filters.FromToLocalDateFilterFields;
+import cz.upce.fei.dt.ui.components.forms.UserForm;
 import cz.upce.fei.dt.ui.components.forms.events.DeleteEvent;
 import cz.upce.fei.dt.ui.components.forms.events.SaveEvent;
-import cz.upce.fei.dt.ui.views.MainLayout;
 import jakarta.annotation.security.RolesAllowed;
 
 @Route(value = "users", layout = MainLayout.class)

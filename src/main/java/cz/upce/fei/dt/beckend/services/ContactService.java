@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -53,12 +54,14 @@ public class ContactService extends AbstractBackEndDataProvider<Contact, Contact
         return contactRepository.findAll();
     }
 
+    @Transactional
     public void saveContact(Contact contact) {
         if (!contact.hasDeliveryAddress())
             contact.setDeliveryAddress(null);
         contactRepository.save(contact);
     }
 
+    @Transactional
     public void deleteContact(Contact contact) {
         contactRepository.delete(contact);
     }

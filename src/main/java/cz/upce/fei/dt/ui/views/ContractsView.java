@@ -24,7 +24,9 @@ import cz.upce.fei.dt.beckend.entities.Status;
 import cz.upce.fei.dt.beckend.services.*;
 import cz.upce.fei.dt.beckend.services.filters.ContractFilter;
 import cz.upce.fei.dt.beckend.services.filters.DeadlineFilterTag;
-import cz.upce.fei.dt.ui.components.*;
+import cz.upce.fei.dt.ui.components.Badge;
+import cz.upce.fei.dt.ui.components.GridFormLayout;
+import cz.upce.fei.dt.ui.components.TabWithBadge;
 import cz.upce.fei.dt.ui.components.filters.FilterFields;
 import cz.upce.fei.dt.ui.components.filters.FromToLocalDateFilterFields;
 import cz.upce.fei.dt.ui.components.forms.ContractForm;
@@ -155,7 +157,7 @@ public class ContractsView extends VerticalLayout {
         headerRow.getCell(productsColumn).setComponent(FilterFields.createProductMultiSelectComboBoxFilter("produkty", contractFilter::setProductsFilter, configurableFilterDataProvider, productService));
 
         FromToLocalDateFilterFields createdFromToDatePicker = new FromToLocalDateFilterFields(contractFilter::setFromCreatedFilter, contractFilter::setToCreatedFilter, configurableFilterDataProvider);
-        createdFromToDatePicker.fromDatePicker.setValue(LocalDate.of(LocalDate.now().getYear(), 1,1));
+        createdFromToDatePicker.fromDatePicker.setValue(LocalDate.of(LocalDate.now().getYear(), 1, 1));
         headerRow.getCell(createdColumn).setComponent(createdFromToDatePicker.getFilterHeaderLayout());
 
         headerRow.getCell(updatedColumn).setComponent(new FromToLocalDateFilterFields(contractFilter::setFromUpdatedFilter, contractFilter::setToUpdatedFilter, configurableFilterDataProvider).getFilterHeaderLayout());

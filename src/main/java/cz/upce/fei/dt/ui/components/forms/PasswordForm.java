@@ -1,4 +1,4 @@
-package cz.upce.fei.dt.ui.views.users;
+package cz.upce.fei.dt.ui.components.forms;
 
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
@@ -12,7 +12,7 @@ import com.vaadin.flow.data.binder.ValidationException;
 import cz.upce.fei.dt.beckend.entities.User;
 import cz.upce.fei.dt.beckend.services.UserService;
 import cz.upce.fei.dt.ui.views.LoginView;
-import cz.upce.fei.dt.ui.views.dashboard.DashboardView;
+import cz.upce.fei.dt.ui.views.DashboardView;
 
 public class PasswordForm extends FormLayout {
     private final Binder<User> binder = new Binder<>(User.class);

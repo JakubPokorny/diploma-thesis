@@ -20,14 +20,12 @@ import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.flow.theme.lumo.Lumo;
 import cz.upce.fei.dt.ui.components.AvatarMenuBar;
-import cz.upce.fei.dt.ui.views.customerContacts.ContactsView;
-import cz.upce.fei.dt.ui.views.dashboard.DashboardView;
-import cz.upce.fei.dt.ui.views.users.UsersView;
 
 @JsModule("prefers-color-scheme.js")
-public class MainLayout extends AppLayout implements RouterLayout{
+public class MainLayout extends AppLayout implements RouterLayout {
     private final transient AuthenticationContext authContext;
     private static RouterLink pageTitle;
+
     public MainLayout(AuthenticationContext authContext) {
         this.authContext = authContext;
         if (!authContext.isAuthenticated())
@@ -58,7 +56,7 @@ public class MainLayout extends AppLayout implements RouterLayout{
         addToNavbar(header);
     }
 
-    public static void setPageTitle(String title, Class<? extends Component> navigationTarget){
+    public static void setPageTitle(String title, Class<? extends Component> navigationTarget) {
         pageTitle.setText(title);
         pageTitle.setRoute(navigationTarget);
     }
@@ -68,7 +66,7 @@ public class MainLayout extends AppLayout implements RouterLayout{
         themeSwitcher.setIcon(VaadinIcon.ADJUST.create());
         themeSwitcher.setClassName("theme-switcher");
 
-        themeSwitcher.addClickListener(click -> {
+        themeSwitcher.addClickListener(_ -> {
             ThemeList themeList = UI.getCurrent().getElement().getThemeList();
             if (themeList.contains(Lumo.DARK)) {
                 themeList.remove(Lumo.DARK);

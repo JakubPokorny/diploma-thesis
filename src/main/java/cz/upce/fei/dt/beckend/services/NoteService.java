@@ -22,7 +22,7 @@ public class NoteService {
     private final AuthenticationContext authenticationContext;
 
     @Transactional
-    public MessageListItem save(Note note) throws AuthException{
+    public MessageListItem save(Note note) throws AuthException {
         User user = authenticationContext.getAuthenticatedUser(User.class).orElseThrow(AuthException::new);
         note.setUser(user);
         Note savedNote = noteRepository.save(note);
@@ -33,7 +33,7 @@ public class NoteService {
                 savedNote.getUser().getFullName());
     }
 
-    public Stream<MessageListItem> findAllByContractId(Long contractId, int page, int pageSize){
+    public Stream<MessageListItem> findAllByContractId(Long contractId, int page, int pageSize) {
         return noteRepository.findAllByContractId(contractId, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "created")))
                 .stream()
                 .map(iNote -> new MessageListItem(

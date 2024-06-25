@@ -1,4 +1,4 @@
-package cz.upce.fei.dt.ui.views.users;
+package cz.upce.fei.dt.ui.views;
 
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -7,13 +7,15 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import cz.upce.fei.dt.beckend.repositories.UserRepository;
 import cz.upce.fei.dt.beckend.services.UserService;
+import cz.upce.fei.dt.ui.components.forms.PasswordForm;
 
 @AnonymousAllowed
 @Route(value = "password")
 @PageTitle("Password | DT CRM")
-public class PasswordView  extends VerticalLayout implements HasUrlParameter<String>{
+public class PasswordView extends VerticalLayout implements HasUrlParameter<String> {
     private final UserRepository userRepository;
     private final UserService userService;
+
     public PasswordView(UserRepository userRepository, UserService userService) {
         this.userRepository = userRepository;
         this.userService = userService;
@@ -22,7 +24,7 @@ public class PasswordView  extends VerticalLayout implements HasUrlParameter<Str
         setAlignItems(FlexComponent.Alignment.CENTER);
         setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
 
-        H1 title  = new H1("Nastavení Hesla");
+        H1 title = new H1("Nastavení Hesla");
         add(title);
     }
 

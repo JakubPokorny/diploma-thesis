@@ -26,6 +26,12 @@ public class FileService {
         s3Service.putObject(s3Buckets.getContract(), file.getPath(), inputStream, file.getSize());
     }
 
+    @Transactional
+    public void delete(File file) throws S3Exception {
+        fileRepository.delete(file);
+        s3Service.deleteObject(s3Buckets.getContract(), file.getPath());
+    }
+
     public byte[] getFile(File file) throws IOException, S3Exception {
         return s3Service.getObject(s3Buckets.getContract(), file.getPath());
     }
@@ -43,9 +49,4 @@ public class FileService {
                         .build());
     }
 
-    @Transactional
-    public void delete(File file) throws S3Exception {
-        fileRepository.delete(file);
-        s3Service.deleteObject(s3Buckets.getContract(), file.getPath());
-    }
 }

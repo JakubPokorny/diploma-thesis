@@ -10,6 +10,7 @@ import com.vaadin.flow.component.textfield.NumberField;
 
 public class PriceFieldWithButton extends NumberField {
     public Button button;
+
     public PriceFieldWithButton(String label, VaadinIcon icon) {
         super(label);
 

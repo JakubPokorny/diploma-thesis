@@ -11,11 +11,12 @@ import cz.upce.fei.dt.beckend.entities.User;
 import cz.upce.fei.dt.beckend.repositories.UserRepository;
 import cz.upce.fei.dt.beckend.services.filters.UserFilter;
 import cz.upce.fei.dt.beckend.services.specifications.UserSpec;
-import cz.upce.fei.dt.ui.views.users.PasswordView;
+import cz.upce.fei.dt.ui.views.PasswordView;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InvalidClassException;
 import java.time.LocalDateTime;
@@ -26,7 +27,6 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class UserService extends AbstractBackEndDataProvider<User, UserFilter> {
-
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
@@ -56,6 +56,7 @@ public class UserService extends AbstractBackEndDataProvider<User, UserFilter> {
                 );
     }
 
+    @Transactional
     public void saveUser(User user) {
         if (userRepository.findByEmail(user.getEmail()).isEmpty()) {
             String resetToken = sendResetToken(user);
@@ -64,22 +65,24 @@ public class UserService extends AbstractBackEndDataProvider<User, UserFilter> {
         userRepository.save(user);
     }
 
+    @Transactional
+    public void deleteUser(User user) {
+        userRepository.delete(user);
+    }
+
     public void changePassword(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setResetToken("");
         userRepository.save(user);
     }
 
-    public void deleteUser(User user) {
-        userRepository.delete(user);
-    }
 
     public void generateResetToken(User user) throws InvalidClassException {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             sendResetToken(user);
             userRepository.save(user);
         } else {
-            throw new InvalidClassException(user.getEmail() + "nebyl najit.");
+            throw new InvalidClassException(user.getEmail() + "Emain nebyl nalazen.");
         }
     }
 

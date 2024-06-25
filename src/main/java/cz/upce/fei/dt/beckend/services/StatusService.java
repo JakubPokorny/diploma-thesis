@@ -37,11 +37,12 @@ public class StatusService extends AbstractBackEndDataProvider<Status, StatusFil
     }
 
     @Transactional
-    public void saveStatus(Status status){
+    public void saveStatus(Status status) {
         statusRepository.save(status);
     }
 
-    public void deleteStatus(Status status){
+    @Transactional
+    public void deleteStatus(Status status) {
         statusRepository.delete(status);
     }
 

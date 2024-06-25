@@ -18,8 +18,8 @@ import cz.upce.fei.dt.beckend.entities.Product_;
 import cz.upce.fei.dt.beckend.services.ComponentService;
 import cz.upce.fei.dt.beckend.services.ProductService;
 import cz.upce.fei.dt.beckend.services.filters.ProductFilter;
-import cz.upce.fei.dt.ui.components.filters.FilterFields;
 import cz.upce.fei.dt.ui.components.GridFormLayout;
+import cz.upce.fei.dt.ui.components.filters.FilterFields;
 import cz.upce.fei.dt.ui.components.filters.FromToLocalDateFilterFields;
 import cz.upce.fei.dt.ui.components.forms.ProductForm;
 import cz.upce.fei.dt.ui.components.forms.events.DeleteEvent;
@@ -27,7 +27,7 @@ import cz.upce.fei.dt.ui.components.forms.events.SaveEvent;
 import jakarta.annotation.security.PermitAll;
 
 @Route(value = "products", layout = MainLayout.class)
-@RouteAlias(value = "produkty",  layout = MainLayout.class)
+@RouteAlias(value = "produkty", layout = MainLayout.class)
 @PageTitle("Produkty")
 @PermitAll
 public class ProductsView extends VerticalLayout {
@@ -58,6 +58,7 @@ public class ProductsView extends VerticalLayout {
 
         add(gridFormLayout);
     }
+
     //region configures: grid, form, actions, filters, events
     private void configureFilters() {
     }
@@ -70,6 +71,7 @@ public class ProductsView extends VerticalLayout {
         ComponentUtil.addListener(gridFormLayout, SaveEvent.class, this::saveProduct);
         ComponentUtil.addListener(gridFormLayout, DeleteEvent.class, this::deleteProduct);
     }
+
     //region events: save, delete
     private void deleteProduct(DeleteEvent deleteEvent) {
         try {
@@ -78,7 +80,7 @@ public class ProductsView extends VerticalLayout {
             updateGrid();
             gridFormLayout.closeFormLayout();
             Notification.show("Produkt " + product.getName() + " odstraněn.").addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-        }catch (Exception exception){
+        } catch (Exception exception) {
             Notification.show(exception.getMessage()).addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }
@@ -90,10 +92,11 @@ public class ProductsView extends VerticalLayout {
             updateGrid();
             gridFormLayout.closeFormLayout();
             Notification.show("Produkt " + product.getName() + " uložen.").addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-        }catch (Exception exception){
+        } catch (Exception exception) {
             Notification.show(exception.getMessage()).addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
     }
+
     //endregion
     private void configureGrid() {
         grid.setClassName("grid-content");
@@ -124,7 +127,7 @@ public class ProductsView extends VerticalLayout {
         headerRow.getCell(createdColumn).setComponent(new FromToLocalDateFilterFields(productFilter::setFromCreatedFilter, productFilter::setToCreatedFilter, configurableFilterDataProvider).getFilterHeaderLayout());
         headerRow.getCell(updatedColumn).setComponent(new FromToLocalDateFilterFields(productFilter::setFromUpdatedFilter, productFilter::setToUpdatedFilter, configurableFilterDataProvider).getFilterHeaderLayout());
 
-        grid.asSingleSelect().addValueChangeListener(e-> gridFormLayout.showFormLayout(e.getValue()));
+        grid.asSingleSelect().addValueChangeListener(e -> gridFormLayout.showFormLayout(e.getValue()));
 //        grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
 
         grid.setMultiSort(true, Grid.MultiSortPriority.APPEND);
@@ -144,15 +147,15 @@ public class ProductsView extends VerticalLayout {
     }
 
     private String getSellingPrice(Product product) {
-        return String.format("%.2f", product.getSellingPrice())+ "Kč";
+        return String.format("%.2f", product.getSellingPrice()) + "Kč";
     }
 
     private String getProfit(Product product) {
-        return String.format("%.2f", product.getProfit())+ "%";
+        return String.format("%.2f", product.getProfit()) + "%";
     }
 
     private String getProductionPrice(Product product) {
-        return String.format("%.2f", product.getProductionPrice())+ "Kč";
+        return String.format("%.2f", product.getProductionPrice()) + "Kč";
     }
 
     private MultiSelectComboBox<Component> createProductsComponent(Product product) {
@@ -164,8 +167,9 @@ public class ProductsView extends VerticalLayout {
         comboBox.setSizeFull();
         return comboBox;
     }
+
     //endregion
-    private void updateGrid(){
+    private void updateGrid() {
         grid.setItems(configurableFilterDataProvider);
     }
 }

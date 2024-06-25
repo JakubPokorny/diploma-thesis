@@ -1,4 +1,4 @@
-package cz.upce.fei.dt.ui.views.customerContacts;
+package cz.upce.fei.dt.ui.views;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
@@ -26,7 +26,6 @@ import cz.upce.fei.dt.ui.components.filters.FromToLocalDateFilterFields;
 import cz.upce.fei.dt.ui.components.forms.ContactForm;
 import cz.upce.fei.dt.ui.components.forms.events.DeleteEvent;
 import cz.upce.fei.dt.ui.components.forms.events.SaveEvent;
-import cz.upce.fei.dt.ui.views.MainLayout;
 import jakarta.annotation.security.PermitAll;
 
 @Route(value = "contacts", layout = MainLayout.class)

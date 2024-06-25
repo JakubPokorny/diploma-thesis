@@ -13,7 +13,7 @@ import com.vaadin.flow.router.Route;
 public class LoginView extends VerticalLayout implements BeforeEnterObserver {
     private final LoginForm login = new LoginForm();
 
-    public LoginView(){
+    public LoginView() {
         addClassName("login-view");
         setSizeFull();
         setAlignItems(Alignment.CENTER);
@@ -24,12 +24,13 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
         add(new H1("Příhlášení | DT CRM"), login);
     }
+
     @Override
     public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
         if (beforeEnterEvent.getLocation()
                 .getQueryParameters()
                 .getParameters()
-                .containsKey("error")){
+                .containsKey("error")) {
             login.setError(true);
         }
     }

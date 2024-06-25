@@ -92,6 +92,7 @@ public class ComponentService extends AbstractBackEndDataProvider<Component, Com
 
     }
 
+    @Transactional
     public void deleteComponent(Component component) throws Exception {
         List<Long> productIDs = productComponentService.findAllByComponentId(component.getId())
                 .stream()

@@ -1,4 +1,4 @@
-package cz.upce.fei.dt.beckend.orms;
+package cz.upce.fei.dt.beckend.dto;
 
 import lombok.Getter;
 import lombok.Setter;

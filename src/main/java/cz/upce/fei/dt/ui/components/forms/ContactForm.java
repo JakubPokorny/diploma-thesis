@@ -13,7 +13,7 @@ import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.validator.EmailValidator;
 import cz.upce.fei.dt.beckend.entities.Address;
 import cz.upce.fei.dt.beckend.entities.Contact;
-import cz.upce.fei.dt.beckend.orms.AresResponse;
+import cz.upce.fei.dt.beckend.dto.AresResponse;
 import cz.upce.fei.dt.beckend.services.AresService;
 
 public class ContactForm extends FormLayout implements IEditForm<Contact> {
@@ -87,7 +87,7 @@ public class ContactForm extends FormLayout implements IEditForm<Contact> {
 
     private void setupICO() {
         ico.setSuffixComponent(VaadinIcon.SEARCH.create());
-        ico.getSuffixComponent().getElement().addEventListener("click", event -> searchAres(ico.getValue()));
+        ico.getSuffixComponent().getElement().addEventListener("click", _ -> searchAres(ico.getValue()));
         ico.getSuffixComponent().setId("pointer");
         ico.setHelperText("IČO má 8 číslic bez mezer.");
         ico.setMinLength(8);

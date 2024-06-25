@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,8 +22,9 @@ public class DeadlineService {
     private final DeadlineRepository deadlineRepository;
     private final AuthenticationContext authenticationContext;
 
+    @Transactional
     public void save(Deadline deadline) throws AuthenticationException {
-        if (deadline.getId() != null){
+        if (deadline.getId() != null) {
             Optional<Deadline> savedDeadline = deadlineRepository.findById(deadline.getId());
             if (savedDeadline.isPresent() && savedDeadline.get().equals(deadline))
                 return;
@@ -36,6 +38,7 @@ public class DeadlineService {
         deadlineRepository.save(deadline);
     }
 
+    @Transactional
     public void deleteAll(Long contractId) {
         deadlineRepository.deleteAllByContractId(contractId);
     }
@@ -58,11 +61,11 @@ public class DeadlineService {
         return deadlineRepository.findFirstByContractIdOrderByCreatedDesc(contractId).orElse(new Deadline());
     }
 
-    public List<Deadline> findAllCurrentDeadlinesByStatus(Status.Theme theme){
+    public List<Deadline> findAllCurrentDeadlinesByStatus(Status.Theme theme) {
         return deadlineRepository.findAllCurrentDeadlinesByStatus(theme);
     }
 
-    public List<Deadline> findAllCurrentDeadlines(){
+    public List<Deadline> findAllCurrentDeadlines() {
         return deadlineRepository.findAllCurrentDeadlines();
     }
 

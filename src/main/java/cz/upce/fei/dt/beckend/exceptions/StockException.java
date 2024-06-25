@@ -40,7 +40,7 @@ public class StockException extends RuntimeException {
         Button closeButton = new Button(LumoIcon.CROSS.create());
         closeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         closeButton.setAriaLabel("Close");
-        closeButton.addClickListener(event -> notification.close());
+        closeButton.addClickListener(_ -> notification.close());
 
         notification.add(new HorizontalLayout(missing, closeButton));
         notification.open();

@@ -2,7 +2,7 @@ package cz.upce.fei.dt.ui.components;
 
 import com.vaadin.flow.component.html.Span;
 
-public class Badge  extends Span {
+public class Badge extends Span {
     public String labelText;
     public String theme = "badge pill ";
 

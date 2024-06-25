@@ -6,6 +6,7 @@ import com.vaadin.flow.component.tabs.Tab;
 public class TabWithBadge extends Tab {
     public Span label;
     public Badge badge;
+
     public TabWithBadge(String labelText, Badge badge) {
         label = new Span(labelText);
         this.badge = badge;

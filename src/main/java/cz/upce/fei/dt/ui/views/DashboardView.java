@@ -1,4 +1,4 @@
-package cz.upce.fei.dt.ui.views.dashboard;
+package cz.upce.fei.dt.ui.views;
 
 import com.vaadin.flow.component.board.Board;
 import com.vaadin.flow.component.html.H2;
@@ -13,7 +13,6 @@ import cz.upce.fei.dt.beckend.entities.Status;
 import cz.upce.fei.dt.beckend.services.ComponentService;
 import cz.upce.fei.dt.beckend.services.DeadlineService;
 import cz.upce.fei.dt.ui.components.Badge;
-import cz.upce.fei.dt.ui.views.MainLayout;
 import jakarta.annotation.security.PermitAll;
 
 import java.util.List;

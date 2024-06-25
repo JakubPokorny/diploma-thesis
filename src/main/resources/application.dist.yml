@@ -1,5 +1,8 @@
 server:
   port: 8888
+  servlet:
+    session:
+      tracking-modes: cookie
 spring:
   datasource:
     url: "to-be-replace"
@@ -11,17 +14,27 @@ spring:
   mustache:
     check-template-location: false
   mail:
-    host: "to-be-replace"
-    port: "to-be-replace"
+    host: smtp.gmail.com
+    port: 587
     username: "to-be-replace"
     password: "to-be-replace"
-  level:
-      org:
-        atmosphere: warn
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  codec:
+    max-in-memory-size: 10MB
 vaadin:
   launch-browser: true
   whitelisted-packages: com.vaadin,org,vaadin,dev.hilla,cz.upce.fei.dt
 jwt:
   auth:
     secret: "to-be-replace"
+aws:
+  region: "to-be-replace"
+  s3:
+    buckets:
+      contract: "to-be-replace"
+
+
 

@@ -5,13 +5,10 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.HttpStatusCode;
 import cz.upce.fei.dt.ui.views.MainLayout;
-import cz.upce.fei.dt.ui.views.dashboard.DashboardView;
-
-import java.util.Collection;
 
 @ParentLayout(MainLayout.class)
 @Tag(Tag.DIV)
-public class CustomRouteNotFoundError extends RouteNotFoundError implements HasErrorParameter<NotFoundException>{
+public class CustomRouteNotFoundError extends RouteNotFoundError implements HasErrorParameter<NotFoundException> {
     public CustomRouteNotFoundError() {
         addClassName("error-view");
     }

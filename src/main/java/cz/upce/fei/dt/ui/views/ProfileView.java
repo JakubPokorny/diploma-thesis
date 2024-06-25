@@ -1,4 +1,4 @@
-package cz.upce.fei.dt.ui.views.users;
+package cz.upce.fei.dt.ui.views;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -14,7 +14,8 @@ import com.vaadin.flow.spring.security.AuthenticationContext;
 import cz.upce.fei.dt.beckend.entities.User;
 import cz.upce.fei.dt.beckend.exceptions.AuthenticationException;
 import cz.upce.fei.dt.beckend.services.UserService;
-import cz.upce.fei.dt.ui.views.MainLayout;
+import cz.upce.fei.dt.ui.components.forms.PasswordForm;
+import cz.upce.fei.dt.ui.components.forms.UserForm;
 import jakarta.annotation.security.PermitAll;
 
 @Route(value = "profile", layout = MainLayout.class)
@@ -33,7 +34,7 @@ public class ProfileView extends VerticalLayout {
         add(new H2("Profil"), userForm, new H2("Změna hesla"), passwordForm);
     }
 
-    private PasswordForm setupPasswordForm(User user, UserService userService){
+    private PasswordForm setupPasswordForm(User user, UserService userService) {
         PasswordForm passwordForm = new PasswordForm(user, userService);
         passwordForm.removeClassName("password-form");
         passwordForm.back.setVisible(false);
@@ -53,8 +54,8 @@ public class ProfileView extends VerticalLayout {
                 userForm.validate();
                 User toSave = userForm.getValue();
                 userService.saveUser(toSave);
-                Notification.show("Uživatel "+ toSave.getFullName()+" uložen.").addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            }catch (ValidationException exception){
+                Notification.show("Uživatel " + toSave.getFullName() + " uložen.").addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            } catch (ValidationException exception) {
                 Notification.show(exception.getMessage()).addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });

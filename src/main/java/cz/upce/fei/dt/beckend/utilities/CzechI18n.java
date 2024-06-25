@@ -15,13 +15,14 @@ public class CzechI18n {
     private final static DecimalFormat CURRENCY_FORMAT = new DecimalFormat("#,###.00 ¤", DECIMAL_FORMAT_SYMBOLS);
     private final static DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#,###.00", DECIMAL_FORMAT_SYMBOLS);
 
-    public static String getCurrency(Double number){
+    public static String getCurrency(Double number) {
         return CURRENCY_FORMAT.format(number);
     }
 
-    public static String getDecimal(Double number){
+    public static String getDecimal(Double number) {
         return DECIMAL_FORMAT.format(number);
     }
+
     public static DatePicker.DatePickerI18n getDatePickerI18n() {
         DatePicker.DatePickerI18n czech = new DatePicker.DatePickerI18n();
         czech.setMonthNames(List.of("Leden", "Únor", "Březen", "Duben", "Květen", "Červen", "Červenec", "Srpen", "Září", "Říjen", "Listopad", "Prosinec"));
@@ -32,6 +33,7 @@ public class CzechI18n {
         czech.setDateFormat("d. M. yyyy");
         return czech;
     }
+
     public static UploadI18N getUploadI18n() {
         UploadI18N czech = new UploadI18N();
 
@@ -65,7 +67,7 @@ public class CzechI18n {
         return czech;
     }
 
-    public static MessageInputI18n getMessageInputI18n(){
+    public static MessageInputI18n getMessageInputI18n() {
         MessageInputI18n czech = new MessageInputI18n();
         czech.setSend("Poslat");
         czech.setMessage("Poznámka (max %d znaků)".formatted(Note.MAX_NOTE_LENGTH));

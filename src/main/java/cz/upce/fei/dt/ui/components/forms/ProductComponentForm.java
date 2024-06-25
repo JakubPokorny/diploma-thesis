@@ -29,11 +29,11 @@ public class ProductComponentForm extends FormLayout implements IEditForm<Produc
         componentsPerProduct.setStepButtonsVisible(true);
         binder.forField(componentsPerProduct)
                 .withValidator(new IntegerRangeValidator("Počet dílů " + label + " mimo hodnoty <0; 4 294 967 296>", 0, Integer.MAX_VALUE))
-                .withValidationStatusHandler(statusChange -> componentsPerProduct.setErrorMessage("Hodnoty mimo <1; 4 294 967 296>"))
+                .withValidationStatusHandler(_ -> componentsPerProduct.setErrorMessage("Hodnoty mimo <1; 4 294 967 296>"))
                 .asRequired()
                 .bind(ProductComponent::getComponentsPerProduct, ProductComponent::setComponentsPerProduct);
 
-        componentsPerProduct.addValueChangeListener(event -> ComponentUtil.fireEvent(UI.getCurrent(), new UpdateProductProductionPriceEvent(this, null)));
+        componentsPerProduct.addValueChangeListener(_ -> ComponentUtil.fireEvent(UI.getCurrent(), new UpdateProductProductionPriceEvent(this, null)));
 
         this.setColspan(componentsPerProduct, 2);
         add(componentsPerProduct);

@@ -79,13 +79,14 @@ public class ProductService extends AbstractBackEndDataProvider<Product, Product
         productRepository.save(product);
     }
 
+    @Transactional
     public void deleteProduct(Product product) throws Exception {
         Product wantToDelete = productRepository.findById(product.getId())
                 .orElseThrow(() -> new Exception("Produkt " + product.getName() + " nenalezen."));
         productRepository.delete(wantToDelete);
     }
 
-
+    @Transactional
     public void updatePrices(Iterable<Long> productIDs) {
         List<Product> products = productRepository.findAllById(productIDs);
         for (Product product : products) {

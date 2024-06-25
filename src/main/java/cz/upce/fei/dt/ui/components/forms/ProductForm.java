@@ -63,7 +63,7 @@ public class ProductForm extends FormLayout implements IEditForm<Product> {
 
     //region Setups
     private void setupProductionPrice() {
-        productionPrice.button.addClickListener(event -> updateProductionPrice(null));
+        productionPrice.button.addClickListener(_ -> updateProductionPrice(null));
         productionPrice.setReadOnly(true);
         binder.forField(productionPrice).withValidator(new DoubleRangeValidator("Výrobní cena mimo hodnoty", 0.0, Double.MAX_VALUE)).asRequired().bind(Product::getProductionPrice, Product::setProductionPrice);
     }
@@ -89,13 +89,13 @@ public class ProductForm extends FormLayout implements IEditForm<Product> {
         profit.setValue(15.0);
         profit.setSuffixComponent(new Span("%"));
 
-        profit.addValueChangeListener(event -> updateSellingPrice());
+        profit.addValueChangeListener(_ -> updateSellingPrice());
 
         binder.forField(profit).withValidator(new DoubleRangeValidator("Profit mimo hodnoty", 0.0, Double.MAX_VALUE)).asRequired().bind(Product::getProfit, Product::setProfit);
     }
 
     private void setupSellingPrice() {
-        sellingPrice.button.addClickListener(event -> {
+        sellingPrice.button.addClickListener(_ -> {
             product.setOwnSellingPrice(sellingPrice.isReadOnly());
             sellingPrice.setReadOnly(!sellingPrice.isReadOnly());
             updateSellingPrice();
@@ -166,7 +166,7 @@ public class ProductForm extends FormLayout implements IEditForm<Product> {
     @Override
     public Product getValue() {
         product.getProductComponents().clear();
-        productComponentForms.forEach((key, form) ->
+        productComponentForms.forEach((_, form) ->
                 product.getProductComponents().add(form.getValue()));
         return product;
     }
