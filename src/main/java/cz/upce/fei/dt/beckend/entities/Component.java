@@ -65,6 +65,7 @@ public class Component {
     @OneToMany(mappedBy = "component", cascade = CascadeType.MERGE, orphanRemoval = true)
     @ToString.Exclude
     @JsonIgnore
+    @Builder.Default
     private Set<ProductComponent> productComponents = new HashSet<>();
 
     @ManyToOne

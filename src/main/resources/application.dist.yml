@@ -32,6 +32,8 @@ jwt:
     secret: "to-be-replace"
 aws:
   region: "to-be-replace"
+  access-key-id: "to-be-replace"
+  secret-access-key: "to-be-replace"
   s3:
     buckets:
       contract: "to-be-replace"

@@ -52,6 +52,7 @@ public class Contact {
 
     @OneToMany(mappedBy = "contact")
     @ToString.Exclude
+    @Builder.Default
     Set<Contract> contracts = new HashSet<>();
 
     @OneToOne(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)

@@ -39,15 +39,19 @@ public class Product {
     private String name;
 
     @Column(nullable = false)
+    @Builder.Default
     private Double productionPrice = 0.0;
 
     @Column(nullable = false)
+    @Builder.Default
     private Double profit = 0.0;
 
     @Column(nullable = false)
+    @Builder.Default
     private Double sellingPrice = 0.0;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean ownSellingPrice = false;
 
     @Column(nullable = false)
@@ -61,6 +65,7 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.MERGE, orphanRemoval = true)
     @ToString.Exclude
     @JsonIgnore
+    @Builder.Default
     private Set<ProductComponent> productComponents = new HashSet<>();
 
     public List<Component> getSelectedComponents() {

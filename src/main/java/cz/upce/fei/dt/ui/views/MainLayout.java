@@ -21,7 +21,7 @@ import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.flow.theme.lumo.Lumo;
 import cz.upce.fei.dt.ui.components.AvatarMenuBar;
 
-@JsModule("prefers-color-scheme.js")
+@JsModule("./prefers-color-scheme.js")
 public class MainLayout extends AppLayout implements RouterLayout {
     private final transient AuthenticationContext authContext;
     private static RouterLink pageTitle;

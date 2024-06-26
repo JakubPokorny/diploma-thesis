@@ -16,6 +16,7 @@ import java.util.Objects;
 @Table(name = "contract_products")
 public class ContractProduct {
     @EmbeddedId
+    @Builder.Default
     private ContractProductKey id = new ContractProductKey();
 
     @Column(nullable = false)

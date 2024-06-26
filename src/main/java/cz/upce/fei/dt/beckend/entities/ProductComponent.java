@@ -17,6 +17,7 @@ import java.util.Objects;
 public class ProductComponent {
 
     @EmbeddedId
+    @Builder.Default
     private ProductComponentKey id = new ProductComponentKey();
 
     @Column(nullable = false)

@@ -46,9 +46,11 @@ public class Contract {
     private Long id;
 
     @Column(nullable = false)
+    @Builder.Default
     private Double price = 0.0;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean ownPrice = false;
 
     @Column
@@ -67,19 +69,23 @@ public class Contract {
     @OneToMany(mappedBy = "contract", orphanRemoval = true)
     @ToString.Exclude
     @JsonIgnore
+    @Builder.Default
     private Set<ContractProduct> contractProducts = new HashSet<>();
 
     @OneToMany(mappedBy = "contract")
     @ToString.Exclude
     @JsonIgnore
+    @Builder.Default
     private Set<Deadline> deadlines = new HashSet<>();
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
     @ToString.Exclude
+    @Builder.Default
     private Set<Note> notes = new HashSet<>();
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
     @ToString.Exclude
+    @Builder.Default
     private Set<File> files = new HashSet<>();
 
     public List<Product> getSelectedProducts() {
