@@ -56,7 +56,12 @@
 }
 
 /* GridFormLayout*/
+.content-layout {
+    min-width: 0;
+}
+
 .form-layout {
+    min-width: 200px;
     overflow: auto;
 }
 
@@ -81,15 +86,17 @@
     padding-top: 0;
     padding-bottom: 0;
 }
-.address-form-divider{
+
+.address-form-divider {
     color: var(--lumo-secondary-text-color);
     cursor: pointer;
 }
 
-.address-form-divider:hover{
+.address-form-divider:hover {
     color: var(--lumo-body-text-color);
 }
-.address-form-divider#active{
+
+.address-form-divider#active {
     color: var(--lumo-primary-color);
 }
 
@@ -115,13 +122,13 @@ vaadin-message {
 
 }
 
-.filters-and-action-container{
+.filters-and-action-container {
     display: flex;
     width: 100%;
-    overflow: hidden;
+    /*overflow: hidden;*/
 }
 
-.filter-tabs{
+.filter-tabs {
     flex-grow: 1;
     min-width: 0;
 }

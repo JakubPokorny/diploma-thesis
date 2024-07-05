@@ -46,10 +46,20 @@ public class Deadline {
     @JoinColumn(name = "contract_id", nullable = false)
     private Contract contract;
 
-    public Boolean isBeforeOrNowDeadline(){
+    public boolean isWithoutDeadline() {
+        return deadline == null;
+    }
+
+    public boolean isBeforeOrNowDeadline() {
         if (deadline == null)
-            return null;
-        return deadline.isBefore(LocalDate.now()) || deadline.isEqual(LocalDate.now());
+            return false;
+        return LocalDate.now().isBefore(deadline) || LocalDate.now().isEqual(deadline);
+    }
+
+    public boolean isAfterDeadline() {
+        if (deadline == null)
+            return false;
+        return LocalDate.now().isAfter(deadline);
     }
 
     @Override

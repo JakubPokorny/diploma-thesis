@@ -1,5 +1,7 @@
 package cz.upce.fei.dt.beckend.services;
 
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import cz.upce.fei.dt.beckend.configurations.S3Buckets;
 import cz.upce.fei.dt.beckend.entities.File;
 import cz.upce.fei.dt.beckend.repositories.FileRepository;
@@ -11,6 +13,7 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.stream.Stream;
 
 @Service
@@ -19,6 +22,15 @@ public class FileService {
     private final S3Buckets s3Buckets;
     private final S3Service s3Service;
     private final FileRepository fileRepository;
+
+    public Stream<File> fetchFromBackEnd(Long contractId, Query<File, Void> query) {
+        return fileRepository.findAllByContractId(contractId, VaadinSpringDataHelpers.toSpringPageRequest(query)).stream();
+    }
+
+    public int sizeInBackEnd(Long contractId, Query<File, Void> query) {
+        return (int) fetchFromBackEnd(contractId, query).count();
+    }
+
 
     @Transactional
     public void saveFile(File file, InputStream inputStream) {
@@ -47,6 +59,10 @@ public class FileService {
                         .size(iFile.getSize())
                         .created(iFile.getCreated())
                         .build());
+    }
+
+    public List<File> findAllByContactId(Long contractID) {
+        return fileRepository.findAllByContractId(contractID);
     }
 
 }

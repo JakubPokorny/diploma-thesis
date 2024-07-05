@@ -62,7 +62,7 @@ public class FileForm extends Details {
         Button deleteFile = new Button(new Icon(VaadinIcon.TRASH));
         deleteFile.addThemeVariants(ButtonVariant.LUMO_ERROR);
         deleteFile.setSizeFull();
-        deleteFile.addClickListener(event -> {
+        deleteFile.addClickListener(_ -> {
             try {
                 fileService.delete(file);
                 Notification.show("Soubor %s smazán.".formatted(file.getName())).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
@@ -99,6 +99,7 @@ public class FileForm extends Details {
         long count = downloadArea.setItems(query -> fileService.findAllByContractId(contract.getId(), query.getPage(), query.getPageSize()))
                 .getItems()
                 .count();
+        contract.setFiles(downloadArea.getSelectedItems());
         this.setSummaryText("Soubory (%d), max 10MB na soubor".formatted(count));
 
         if (count > 0) {

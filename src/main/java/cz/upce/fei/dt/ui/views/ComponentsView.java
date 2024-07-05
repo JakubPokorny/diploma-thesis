@@ -11,9 +11,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.router.*;
 import cz.upce.fei.dt.beckend.entities.Component;
 import cz.upce.fei.dt.beckend.entities.Component_;
 import cz.upce.fei.dt.beckend.entities.Product;
@@ -36,7 +34,7 @@ import jakarta.annotation.security.PermitAll;
 @RouteAlias(value = "komponenty", layout = MainLayout.class)
 @PageTitle("Komponenty")
 @PermitAll
-public class ComponentsView extends VerticalLayout {
+public class ComponentsView extends VerticalLayout implements HasUrlParameter<String> {
     private final ComponentService componentService;
     private final ProductService productService;
     private final UserService userService;
@@ -52,6 +50,29 @@ public class ComponentsView extends VerticalLayout {
     private DataProvider<Component, ComponentFilter> dataProvider;
     private ConfigurableFilterDataProvider<Component, Void, ComponentFilter> configurableFilterDataProvider;
 
+    @Override
+    public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
+        if (parameter == null)
+            return;
+        switch (parameter) {
+            case "missing" -> {
+                componentFilter.setTagFilter(ComponentTag.MISSING);
+                gridFormLayout.filterTabs.setSelectedTab(missing);
+            }
+            case "supply" -> {
+                componentFilter.setTagFilter(ComponentTag.SUPPLY);
+                gridFormLayout.filterTabs.setSelectedTab(supply);
+            }
+            case "in_stock" -> {
+                componentFilter.setTagFilter(ComponentTag.IN_STOCK);
+                gridFormLayout.filterTabs.setSelectedTab(inStock);
+            }
+            case "without_limit" -> {
+                componentFilter.setTagFilter(ComponentTag.WITHOUT_LIMIT);
+                gridFormLayout.filterTabs.setSelectedTab(withoutLimit);
+            }
+        }
+    }
 
     public ComponentsView(ComponentService componentService,
                           UserService userService,
@@ -201,7 +222,7 @@ public class ComponentsView extends VerticalLayout {
         MultiSelectComboBox<Product> comboBox = new MultiSelectComboBox<>();
         comboBox.setItemLabelGenerator(Product::getName);
         comboBox.setReadOnly(true);
-        comboBox.setItems(query -> productService.findAllByName(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
+        comboBox.setItems(productService::findAllByName);
         comboBox.setValue(component.getSelectedProduct());
         comboBox.setSizeFull();
         return comboBox;

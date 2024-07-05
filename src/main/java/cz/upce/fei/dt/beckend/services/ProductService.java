@@ -4,9 +4,11 @@ import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import cz.upce.fei.dt.beckend.dto.CheckStockDto;
+import cz.upce.fei.dt.beckend.dto.IMostSaleableProducts;
 import cz.upce.fei.dt.beckend.entities.Product;
 import cz.upce.fei.dt.beckend.entities.ProductComponent;
 import cz.upce.fei.dt.beckend.repositories.ProductRepository;
+import cz.upce.fei.dt.beckend.services.filters.DashboardFilter;
 import cz.upce.fei.dt.beckend.services.filters.ProductFilter;
 import cz.upce.fei.dt.beckend.services.specifications.ProductSpec;
 import lombok.RequiredArgsConstructor;
@@ -43,8 +45,8 @@ public class ProductService extends AbstractBackEndDataProvider<Product, Product
         return (int) fetchFromBackEnd(query).count();
     }
 
-    public Stream<Product> findAllByName(int page, int pageSize, String searchTerm) {
-        return productRepository.findAllByName(PageRequest.of(page, pageSize), searchTerm)
+    public Stream<Product> findAllByName(Query<Product, String> query) {
+        return productRepository.findAllByName(PageRequest.of(query.getPage(), query.getPageSize()), query.getFilter().orElse(""))
                 .stream()
                 .map(iProduct -> Product.builder()
                         .id(iProduct.getId())
@@ -102,4 +104,13 @@ public class ProductService extends AbstractBackEndDataProvider<Product, Product
         }
         productRepository.saveAll(products);
     }
+
+    public List<IMostSaleableProducts> getMostSaleableProducts(DashboardFilter dashboardFilter) {
+        return productRepository.getMostSaleableProducts(
+                dashboardFilter.getProductIDs(),
+                dashboardFilter.getStatusFilter(),
+                dashboardFilter.getFromDateTime(),
+                dashboardFilter.getToDateTime());
+    }
+
 }

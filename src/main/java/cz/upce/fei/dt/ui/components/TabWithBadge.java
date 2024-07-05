@@ -14,4 +14,9 @@ public class TabWithBadge extends Tab {
         this.badge.getStyle().set("margin-inline-start", "var(--lumo-space-s)");
         add(label, this.badge);
     }
+
+    public void setBadgeValue(int value){
+        badge.setText(String.valueOf(value));
+//        this.setVisible(value != 0);
+    }
 }

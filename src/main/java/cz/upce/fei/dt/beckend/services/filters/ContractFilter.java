@@ -22,27 +22,45 @@ public class ContractFilter {
     private LocalDate toCreatedFilter;
     private LocalDate fromUpdatedFilter;
     private LocalDate toUpdatedFilter;
-    private Enum<DeadlineFilterTag> tagsFilter = DeadlineFilterTag.ALL;
+    private Enum<ContractFilterTag> contractFilterTag = ContractFilterTag.ALL;
 
-    public boolean filter(Contract contract){
+    public enum ContractFilterTag {
+        ALL,
+        BEFORE_DEADLINE,
+        WITHOUT_DEADLINE,
+        AFTER_DEADLINE,
+        SUCCESS,
+        CONTRAST,
+        PENDING,
+        WARNING,
+        ERROR
+    }
+
+    public boolean filter(Contract contract) {
         Deadline currentDeadline = contract.getCurrentDeadline();
         boolean filterStates = filterStates(currentDeadline.getStatus());
         boolean filterFromDeadline = filterFromDeadline(currentDeadline.getDeadline());
         boolean filterToDeadline = filterToDeadline(currentDeadline.getDeadline());
-        boolean filterTag = filterTag(currentDeadline);
+        boolean filterContractTags = filterContractTags(currentDeadline);
 
         boolean filterProducts = productsFilter == null || productsFilter.isEmpty() || filterProducts(contract);
 
-        return filterStates && filterFromDeadline && filterToDeadline && filterProducts && filterTag;
+        return filterStates && filterFromDeadline && filterToDeadline && filterProducts && filterContractTags;
     }
 
-    private boolean filterTag(Deadline deadline) {
-        return switch (tagsFilter) {
+    private boolean filterContractTags(Deadline deadline) {
+        Status.Theme theme = deadline.getStatus().getTheme();
+        return switch (contractFilterTag) {
             case null -> true;
-            case DeadlineFilterTag.ALL -> true;
-            case DeadlineFilterTag.WITHOUT_DEADLINE -> deadline.getDeadline() == null;
-            case DeadlineFilterTag.BEFORE_DEADLINE -> deadline.getDeadline() != null && (LocalDate.now().isBefore(deadline.getDeadline()) || LocalDate.now().isEqual(deadline.getDeadline()));
-            case DeadlineFilterTag.AFTER_DEADLINE -> deadline.getDeadline() != null && LocalDate.now().isAfter(deadline.getDeadline());
+            case ContractFilterTag.ALL -> true;
+            case ContractFilterTag.WITHOUT_DEADLINE -> deadline.isWithoutDeadline();
+            case ContractFilterTag.BEFORE_DEADLINE -> deadline.isBeforeOrNowDeadline();
+            case ContractFilterTag.AFTER_DEADLINE -> deadline.isAfterDeadline();
+            case ContractFilterTag.SUCCESS -> theme == Status.Theme.SUCCESS;
+            case ContractFilterTag.CONTRAST -> theme == Status.Theme.CONTRAST;
+            case ContractFilterTag.PENDING -> theme == Status.Theme.PENDING;
+            case ContractFilterTag.WARNING -> theme == Status.Theme.WARNING;
+            case ContractFilterTag.ERROR -> theme == Status.Theme.ERROR;
             default -> false;
         };
     }
@@ -67,7 +85,7 @@ public class ContractFilter {
         return deadline.isBefore(toDeadlineFilter) || deadline.isEqual(toDeadlineFilter);
     }
 
-    private boolean filterProducts(Contract contract){
+    private boolean filterProducts(Contract contract) {
         Set<Long> products = contract.getContractProducts().stream().map(contractProduct -> contractProduct.getId().getProductId()).collect(Collectors.toSet());
         return products.stream().anyMatch(productID -> productsFilter.contains(productID));
     }

@@ -1,9 +1,6 @@
 package cz.upce.fei.dt.ui.views;
 
-import com.vaadin.flow.component.board.Board;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -12,10 +9,12 @@ import cz.upce.fei.dt.beckend.entities.Deadline;
 import cz.upce.fei.dt.beckend.entities.Status;
 import cz.upce.fei.dt.beckend.services.ComponentService;
 import cz.upce.fei.dt.beckend.services.DeadlineService;
+import cz.upce.fei.dt.beckend.services.ProductService;
 import cz.upce.fei.dt.ui.components.Badge;
+import cz.upce.fei.dt.ui.components.BoardCell;
+import cz.upce.fei.dt.ui.components.DashboardItem;
+import cz.upce.fei.dt.ui.components.charts.ProductsPieChart;
 import jakarta.annotation.security.PermitAll;
-
-import java.util.List;
 
 @Route(value = "dashboard", layout = MainLayout.class)
 @RouteAlias(value = "", layout = MainLayout.class)
@@ -24,123 +23,69 @@ import java.util.List;
 public class DashboardView extends VerticalLayout {
     private final ComponentService componentService;
     private final DeadlineService deadlineService;
+    private final ProductService productService;
 
     public DashboardView(
             ComponentService componentService,
-            DeadlineService deadlineService) {
+            DeadlineService deadlineService,
+            ProductService productService) {
         this.componentService = componentService;
         this.deadlineService = deadlineService;
+        this.productService = productService;
 
         MainLayout.setPageTitle("Dashboard", DashboardView.class);
 
-        add(new H2("Skladové komponenty"),
-                createStockBoard(),
-                new H2("Statusy zakázek"),
-                createStatusesBoard(),
-                new H2("Termíny zakázek"),
-                createDeadlinesBoard()
-        );
+        add(createStockBoard(), createContractBoard(), createProductBoard());
     }
 
-    private Board createDeadlinesBoard() {
-        Board board = new Board();
-        board.setSizeFull();
-        DeadlinesCounter counter = getDeadlinesCounter(deadlineService.findAllCurrentDeadlines());
-
-        board.addRow(
-                createCell("Bez termínu", String.valueOf(counter.withoutTerm()), "contrast"),
-                createCell("Před termínem", String.valueOf(counter.beforeTerm()), "pending"),
-                createCell("Po termínu", String.valueOf(counter.afterTerm()), "error")
+    private DashboardItem createStockBoard() {
+        DashboardItem stockBoard = new DashboardItem("Skladové komponenty");
+        stockBoard.addRow(
+                new BoardCell("Doplnit", String.valueOf(componentService.getCountInStockSupply()), "warning", VaadinIcon.WARNING.create(), ui -> ui.navigate(ComponentsView.class, "supply")),
+                new BoardCell("Chybí", String.valueOf(componentService.getCountInStockMissing()), "error", VaadinIcon.EXCLAMATION.create(), ui -> ui.navigate(ComponentsView.class, "missing"))
         );
-        return board;
+        return stockBoard;
     }
 
-
-
-    private Board createStockBoard() {
-
-        Board board = new Board();
-        board.setSizeFull();
-        board.addRow(
-                createCell("Bez minimální nastavené hranice", String.valueOf(componentService.getCountWithoutMinInStock()), "pending"),
-                createCell("Skladem", String.valueOf(componentService.getCountInStock()), "success"),
-                createCell("Doplnit", String.valueOf(componentService.getCountInStockSupply()), "warning"),
-                createCell("Chybí", String.valueOf(componentService.getCountInStockMissing()), "error")
-        );
-        return board;
-    }
-
-    private Board createStatusesBoard() {
-        Board board = new Board();
-        board.setSizeFull();
-        board.addRow(
-                createContractCell(Status.Theme.SUCCESS),
-                createContractCell(Status.Theme.PENDING),
-                createContractCell(Status.Theme.CONTRAST)
-        );
-        board.addRow(
-                createContractCell(Status.Theme.WARNING),
-                createContractCell(Status.Theme.ERROR)
-        );
-        return board;
-    }
-
-    private HorizontalLayout createContractCell(Status.Theme theme) {
-        HorizontalLayout layout = new HorizontalLayout();
-        layout.setSpacing(false);
-        layout.setAlignItems(Alignment.CENTER);
-        layout.setClassName("cell");
-        layout.getElement().getThemeList().add(theme.name().toLowerCase());
-
-        List<Deadline> deadlines = deadlineService.findAllCurrentDeadlinesByStatus(theme);
-        DeadlinesCounter counter = getDeadlinesCounter(deadlines);
-
-        VerticalLayout rightLayout = new VerticalLayout(
-                new Badge(counter.withoutTerm() + " bez termínu", "small contrast"),
-                new Badge(counter.beforeTerm() + " před termínem", "small"),
-                new Badge(counter.afterTerm() + " po termínu", "small error")
-        );
-        rightLayout.setClassName("cell");
-
-        VerticalLayout leftLayout = createCell(theme.getMeaning(), String.valueOf(deadlines.size()), theme.name().toLowerCase());
-        leftLayout.removeClassName("cell");
-        leftLayout.getElement().getThemeList().remove(theme.getTheme().toLowerCase());
-        leftLayout.setAlignItems(Alignment.END);
-        layout.add(leftLayout, rightLayout);
-        return layout;
-    }
-
-    private VerticalLayout createCell(String titleText, String valueText, String theme) {
-        VerticalLayout cell = new VerticalLayout();
-        cell.addClassName("cell");
-        cell.getElement().getThemeList().add(" " + theme);
-        Span title = new Span(titleText);
-        title.addClassName("cell-title");
-        Span value = new Span(valueText);
-        value.addClassName("cell-value");
-        cell.add(title, value);
-        return cell;
-    }
-
-    private static DeadlinesCounter getDeadlinesCounter(List<Deadline> deadlines) {
-        int withoutTerm = 0;
-        int beforeTerm = 0;
-        int afterTerm = 0;
-        for (Deadline deadline : deadlines) {
-            Boolean term = deadline.isBeforeOrNowDeadline();
-            if (term == null) {
-                withoutTerm++;
-                continue;
+    private DashboardItem createContractBoard() {
+        DashboardItem contractBoard = new DashboardItem("Statusy zakázek");
+        int success = 0, pending = 0, warning = 0, error = 0;
+        int pendingAfterDeadline = 0, warningAfterDeadline = 0;
+        for (Deadline deadline : deadlineService.findAllCurrentDeadlines()) {
+            Status.Theme theme = deadline.getStatus().getTheme();
+            switch (theme) {
+                case SUCCESS -> success++;
+                case PENDING -> {
+                    pending++;
+                    if (deadline.isAfterDeadline())
+                        pendingAfterDeadline++;
+                }
+                case WARNING -> {
+                    warning++;
+                    if (deadline.isAfterDeadline())
+                        warningAfterDeadline++;
+                }
+                case ERROR -> error++;
             }
-            if (term)
-                beforeTerm++;
-            else
-                afterTerm++;
         }
-        return new DeadlinesCounter(withoutTerm, beforeTerm, afterTerm);
+
+        BoardCell pendingCell = new BoardCell("V Procesu", String.valueOf(pending), "pending", VaadinIcon.CLOCK.create(), ui -> ui.navigate(ContractsView.class, "in_progress"));
+        pendingCell.leftLayout.add(new Badge(pendingAfterDeadline + " po termínu", "small error"));
+        BoardCell warningCell = new BoardCell("Pozor", String.valueOf(warning), "warning", VaadinIcon.WARNING.create(), ui -> ui.navigate(ContractsView.class, "warning"));
+        warningCell.leftLayout.add(new Badge(warningAfterDeadline + " po termínu", "small error"));
+
+        contractBoard.addRow(
+                new BoardCell("Hotovo", String.valueOf(success), "success", VaadinIcon.CHECK.create(), ui -> ui.navigate(ContractsView.class, "done")),
+                pendingCell,
+                warningCell,
+                new BoardCell("Chyba", String.valueOf(error), "error", VaadinIcon.EXCLAMATION.create(), ui -> ui.navigate(ContractsView.class, "error"))
+        );
+        return contractBoard;
     }
 
-    private record DeadlinesCounter(int withoutTerm, int beforeTerm, int afterTerm) {
+    private DashboardItem createProductBoard() {
+        DashboardItem productBoard = new DashboardItem("Nejprodávanější produkty");
+        productBoard.addRow(new ProductsPieChart(productService));
+        return productBoard;
     }
-
 }

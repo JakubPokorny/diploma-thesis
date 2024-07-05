@@ -15,15 +15,14 @@ import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.router.*;
 import cz.upce.fei.dt.beckend.entities.Contract;
+import cz.upce.fei.dt.beckend.entities.Deadline;
 import cz.upce.fei.dt.beckend.entities.Product;
 import cz.upce.fei.dt.beckend.entities.Status;
 import cz.upce.fei.dt.beckend.services.*;
 import cz.upce.fei.dt.beckend.services.filters.ContractFilter;
-import cz.upce.fei.dt.beckend.services.filters.DeadlineFilterTag;
+import cz.upce.fei.dt.beckend.services.filters.ContractFilter.ContractFilterTag;
 import cz.upce.fei.dt.ui.components.Badge;
 import cz.upce.fei.dt.ui.components.GridFormLayout;
 import cz.upce.fei.dt.ui.components.TabWithBadge;
@@ -42,7 +41,7 @@ import java.util.List;
 @RouteAlias(value = "Zakázky", layout = MainLayout.class)
 @PageTitle("Zakázky")
 @PermitAll
-public class ContractsView extends VerticalLayout {
+public class ContractsView extends VerticalLayout implements HasUrlParameter<String> {
     private final ContractService contractService;
     private final ProductService productService;
     private final ContactService contactService;
@@ -51,12 +50,57 @@ public class ContractsView extends VerticalLayout {
     private final Grid<Contract> grid;
     private final GridFormLayout<ContractForm, Contract> gridFormLayout;
     private final ContractFilter contractFilter = new ContractFilter();
-    private final TabWithBadge all = createTabWithBadge("Všechny", "contrast", DeadlineFilterTag.ALL);
-    private final TabWithBadge withoutDeadline = createTabWithBadge("Bez termínu", "contrast", DeadlineFilterTag.WITHOUT_DEADLINE);
-    private final TabWithBadge beforeDeadline = createTabWithBadge("Před termínem", "", DeadlineFilterTag.BEFORE_DEADLINE);
-    private final TabWithBadge afterDeadline = createTabWithBadge("Po termínu", "error", DeadlineFilterTag.AFTER_DEADLINE);
+    private final TabWithBadge all = createContractTabWithBadge("Všechny", "contrast", ContractFilterTag.ALL);
+    private final TabWithBadge success = createContractTabWithBadge("Hotové", "success", ContractFilterTag.SUCCESS);
+    private final TabWithBadge contrast = createContractTabWithBadge("Čeká na akci", "contrast", ContractFilterTag.CONTRAST);
+    private final TabWithBadge pending = createContractTabWithBadge("V procesu", "", ContractFilterTag.PENDING);
+    private final TabWithBadge warning = createContractTabWithBadge("Pozor", "warning", ContractFilterTag.WARNING);
+    private final TabWithBadge error = createContractTabWithBadge("Chyba", "error", ContractFilterTag.ERROR);
+    private final TabWithBadge withoutDeadline = createContractTabWithBadge("Bez termínu", "contrast", ContractFilterTag.WITHOUT_DEADLINE);
+    private final TabWithBadge beforeDeadline = createContractTabWithBadge("Před termínem", "", ContractFilterTag.BEFORE_DEADLINE);
+    private final TabWithBadge afterDeadline = createContractTabWithBadge("Po termínu", "error", ContractFilterTag.AFTER_DEADLINE);
     private DataProvider<Contract, ContractFilter> dataProvider;
     private ConfigurableFilterDataProvider<Contract, Void, ContractFilter> configurableFilterDataProvider;
+
+    @Override
+    public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
+        if (parameter == null)
+            return;
+        switch (parameter) {
+            case "done" -> {
+                contractFilter.setContractFilterTag(ContractFilterTag.SUCCESS);
+                gridFormLayout.filterTabs.setSelectedTab(success);
+            }
+            case "in_progress" -> {
+                contractFilter.setContractFilterTag(ContractFilterTag.PENDING);
+                gridFormLayout.filterTabs.setSelectedTab(pending);
+            }
+            case "waiting_for_action" -> {
+                contractFilter.setContractFilterTag(ContractFilterTag.CONTRAST);
+                gridFormLayout.filterTabs.setSelectedTab(contrast);
+            }
+            case "warning" -> {
+                contractFilter.setContractFilterTag(ContractFilterTag.WARNING);
+                gridFormLayout.filterTabs.setSelectedTab(warning);
+            }
+            case "error" -> {
+                contractFilter.setContractFilterTag(ContractFilterTag.ERROR);
+                gridFormLayout.filterTabs.setSelectedTab(error);
+            }
+            case "without_deadline" -> {
+                contractFilter.setContractFilterTag(ContractFilterTag.WITHOUT_DEADLINE);
+                gridFormLayout.filterTabs.setSelectedTab(withoutDeadline);
+            }
+            case "before_deadline" -> {
+                contractFilter.setContractFilterTag(ContractFilterTag.BEFORE_DEADLINE);
+                gridFormLayout.filterTabs.setSelectedTab(beforeDeadline);
+            }
+            case "after_deadline" -> {
+                contractFilter.setContractFilterTag(ContractFilterTag.AFTER_DEADLINE);
+                gridFormLayout.filterTabs.setSelectedTab(afterDeadline);
+            }
+        }
+    }
 
     public ContractsView(
             ContractService contractService,
@@ -88,7 +132,8 @@ public class ContractsView extends VerticalLayout {
 
     //region configures
     private void configureFilters() {
-        gridFormLayout.filterTabs.add(all, withoutDeadline, beforeDeadline, afterDeadline);
+        gridFormLayout.filterTabs.add(all, success, contrast, pending, warning, error);
+        gridFormLayout.filterTabs.add(withoutDeadline, beforeDeadline, afterDeadline);
         gridFormLayout.filterTabs.setSelectedIndex(0);
     }
 
@@ -211,7 +256,7 @@ public class ContractsView extends VerticalLayout {
         MultiSelectComboBox<Product> comboBox = new MultiSelectComboBox<>();
         comboBox.setItemLabelGenerator(Product::getName);
         comboBox.setReadOnly(true);
-        comboBox.setItems(query -> productService.findAllByName(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
+        comboBox.setItems(productService::findAllByName);
         comboBox.setValue(contract.getSelectedProducts());
         comboBox.setSizeFull();
         return comboBox;
@@ -222,11 +267,11 @@ public class ContractsView extends VerticalLayout {
     }
     //endregion
 
-    private TabWithBadge createTabWithBadge(String labelText, String style, DeadlineFilterTag tag) {
+    private TabWithBadge createContractTabWithBadge(String labelText, String style, ContractFilterTag tag) {
         TabWithBadge tabWithBadge = new TabWithBadge(labelText, new Badge("", style));
 
         tabWithBadge.getElement().addEventListener("click", _ -> {
-            contractFilter.setTagsFilter(tag);
+            contractFilter.setContractFilterTag(tag);
             dataProvider.refreshAll();
         });
 
@@ -236,9 +281,34 @@ public class ContractsView extends VerticalLayout {
     private void updateGrid() {
         grid.setItems(configurableFilterDataProvider);
 
-        all.badge.setText(String.valueOf(contractService.getCountAll()));
-        withoutDeadline.badge.setText(String.valueOf(deadlineService.countWithoutDeadline()));
-        beforeDeadline.badge.setText(String.valueOf(deadlineService.countBeforeDeadline()));
-        afterDeadline.badge.setText(String.valueOf(deadlineService.countAfterDeadline()));
+        int success = 0, contrast = 0, pending = 0, warning = 0, error = 0;
+        int withoutDeadline = 0, beforeDeadline = 0, afterDeadline = 0;
+        for (Deadline deadline : deadlineService.findAllCurrentDeadlines()) {
+            switch (deadline.getStatus().getTheme()) {
+                case SUCCESS -> success++;
+                case CONTRAST -> contrast++;
+                case PENDING -> pending++;
+                case WARNING -> warning++;
+                case ERROR -> error++;
+            }
+
+            if (deadline.getDeadline() == null){
+                withoutDeadline++;
+            } else if (deadline.isBeforeOrNowDeadline()){
+                beforeDeadline++;
+            } else {
+                afterDeadline++;
+            }
+        }
+
+        this.all.badge.setText(String.valueOf(contractService.getCountAll()));
+        this.withoutDeadline.setBadgeValue(withoutDeadline);
+        this.beforeDeadline.setBadgeValue(beforeDeadline);
+        this.afterDeadline.setBadgeValue(afterDeadline);
+        this.success.setBadgeValue(success);
+        this.contrast.setBadgeValue(contrast);
+        this.pending.setBadgeValue(pending);
+        this.warning.setBadgeValue(warning);
+        this.error.setBadgeValue(error);
     }
 }

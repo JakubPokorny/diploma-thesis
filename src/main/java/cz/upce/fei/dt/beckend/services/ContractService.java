@@ -6,6 +6,7 @@ import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import cz.upce.fei.dt.beckend.entities.Contract;
 import cz.upce.fei.dt.beckend.entities.ContractProduct;
 import cz.upce.fei.dt.beckend.entities.Deadline;
+import cz.upce.fei.dt.beckend.entities.File;
 import cz.upce.fei.dt.beckend.repositories.ContractRepository;
 import cz.upce.fei.dt.beckend.services.filters.ContractFilter;
 import cz.upce.fei.dt.beckend.services.specifications.ContractSpec;
@@ -69,7 +70,8 @@ public class ContractService extends AbstractBackEndDataProvider<Contract, Contr
 
     @Transactional
     public void deleteContract(Contract contract) {
-        contract.getFiles().forEach(fileService::delete);
+        Iterable<File> files = fileService.findAllByContactId(contract.getId());
+        files.forEach(fileService::delete);
         contractProductService.deleteAll(contract);
         deadlineService.deleteAll(contract.getId());
         contractRepository.delete(contract);
