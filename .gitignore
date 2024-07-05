@@ -20,4 +20,5 @@ drivers/
 error-screenshots/
 webpack.generated.js
 
-src/main/resources/application.yml
+src/main/resources/application-dev.yml
+src/main/resources/application-prod.yml
