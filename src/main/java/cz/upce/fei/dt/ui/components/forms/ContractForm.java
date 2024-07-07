@@ -6,6 +6,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -72,29 +73,42 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
         this.setColspan(contactCB, 2);
         this.setColspan(contactAccordion, 2);
         this.setColspan(productsMSB, 2);
-        this.setColspan(priceField, 2);
         this.setColspan(deadlineForm, 2);
         this.setColspan(contractProductFormsLayout, 2);
-        add(contactCB, contactAccordion, productsMSB, contractProductFormsLayout, priceField, deadlineForm);
+        add(contactCB, contactAccordion, productsMSB, contractProductFormsLayout, priceField, reloadProducts, deadlineForm);
     }
 
+    //region Setups
     private void setupReloadProducts() {
+        reloadProducts.setText("Aktualizovat ceny produktů");
         reloadProducts.addThemeVariants(ButtonVariant.LUMO_SMALL);
         reloadProducts.addClickListener(_ -> {
-            Set<Product> selectedProducts = productsMSB.getSelectedItems();
-            HashMap<Long, Double> productionPriceMap = new HashMap<>();
-            selectedProducts.forEach(product -> productionPriceMap.put(product.getId(), product.getProductionPrice()));
-            contractProductForms.forEach((key, form) -> {
-                ContractProduct contractProduct = form.getValue();
-                contractProduct.setPricePerPiece(productionPriceMap.get(key));
-                form.setValue(contractProduct);
-            });
-            updatePrice(null);
+            ConfirmDialog dialog = new ConfirmDialog();
+            dialog.setHeader("Aktualizovat ceny");
+            dialog.setText("Opravdu chcete aktualizovat ceny produktů?");
+
+            dialog.setCancelable(true);
+            dialog.setCancelText("Zrušit");
+
+            dialog.setConfirmText("Aktualizovat");
+            dialog.addConfirmListener(_ -> reloadProducts());
+            dialog.open();
         });
     }
 
+    private void reloadProducts() {
+        Set<Product> selectedProducts = productsMSB.getSelectedItems();
+        HashMap<Long, Double> productionPriceMap = new HashMap<>();
+        selectedProducts.forEach(product -> productionPriceMap.put(product.getId(), product.getProductionPrice()));
+        contractProductForms.forEach((key, form) -> {
+            ContractProduct contractProduct = form.getValue();
+            contractProduct.setPricePerPiece(productionPriceMap.get(key));
+            form.setValue(contractProduct);
+        });
+        updatePrice(null);
+        Notification.show("Aktualizováno, ulož změny.");
+    }
 
-    //region Setups
     private void setupContractProductsForms() {
         contractProductFormsLayout.setWidthFull();
         contractProductFormsLayout.setClassName("contract-products-layout");
@@ -109,7 +123,6 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
     }
 
     private void setupPriceField() {
-        priceField.setPrefixComponent(reloadProducts);
         priceField.setReadOnly(true);
         priceField.button.addClickListener(_ -> {
             contract.setOwnPrice(priceField.isReadOnly());
