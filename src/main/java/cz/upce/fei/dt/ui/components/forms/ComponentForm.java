@@ -83,8 +83,12 @@ public class ComponentForm extends FormLayout implements IEditForm<Component> {
         minInStock.setStepButtonsVisible(true);
         minInStock.setMin(Integer.MIN_VALUE);
         minInStock.setMax(Integer.MAX_VALUE);
+        minInStock.setValue(0);
         minInStock.setSuffixComponent(new Span("ks"));
-        binder.forField(minInStock).withValidator(new IntegerRangeValidator("Minimum mimo hodnoty <-2 147 483 648; 2 147 483 647>", Integer.MIN_VALUE, Integer.MAX_VALUE)).bind(Component::getMinInStock, Component::setMinInStock);
+        binder.forField(minInStock)
+                .asRequired()
+                .withValidator(new IntegerRangeValidator("Minimum mimo hodnoty <-2 147 483 648; 2 147 483 647>", Integer.MIN_VALUE, Integer.MAX_VALUE))
+                .bind(Component::getMinInStock, Component::setMinInStock);
     }
 
     private void setupInStock() {

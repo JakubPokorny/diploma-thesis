@@ -48,7 +48,7 @@ public class Component {
     @Column(nullable = false)
     private int inStock;
 
-    @Column
+    @Column(nullable = false)
     private Integer minInStock;
 
     @Column(nullable = false)
