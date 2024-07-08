@@ -2,7 +2,6 @@ package cz.upce.fei.dt.beckend.services;
 
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import cz.upce.fei.dt.beckend.entities.Deadline;
-import cz.upce.fei.dt.beckend.entities.Status;
 import cz.upce.fei.dt.beckend.entities.User;
 import cz.upce.fei.dt.beckend.exceptions.AuthenticationException;
 import cz.upce.fei.dt.beckend.repositories.DeadlineRepository;
@@ -61,24 +60,11 @@ public class DeadlineService {
         return deadlineRepository.findFirstByContractIdOrderByCreatedDesc(contractId).orElse(new Deadline());
     }
 
-    public List<Deadline> findAllCurrentDeadlinesByStatus(Status.Theme theme) {
-        return deadlineRepository.findAllCurrentDeadlinesByStatus(theme);
+    public List<Deadline> findAllCurrentDeadlinesByStatusID(Long statusID) {
+        return deadlineRepository.findAllCurrentDeadlinesByStatusId(statusID);
     }
 
     public List<Deadline> findAllCurrentDeadlines() {
         return deadlineRepository.findAllCurrentDeadlines();
     }
-
-    public int countAfterDeadline() {
-        return deadlineRepository.countAfterDeadline();
-    }
-
-    public int countWithoutDeadline() {
-        return deadlineRepository.countWithoutDeadline();
-    }
-
-    public int countBeforeDeadline() {
-        return deadlineRepository.countBeforeDeadline();
-    }
-
 }

@@ -14,6 +14,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import cz.upce.fei.dt.beckend.entities.Status;
 import cz.upce.fei.dt.beckend.entities.Status_;
+import cz.upce.fei.dt.beckend.exceptions.UsedStatusException;
 import cz.upce.fei.dt.beckend.services.StatusService;
 import cz.upce.fei.dt.beckend.services.filters.StatusFilter;
 import cz.upce.fei.dt.ui.components.Badge;
@@ -84,6 +85,8 @@ public class StatusView extends VerticalLayout {
             updateGrid();
             gridFormLayout.closeFormLayout();
             Notification.show("Status " + status.getStatus() + " odstraněn.").addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        } catch (UsedStatusException usedStatusException) {
+            usedStatusException.showNotification();
         } catch (Exception exception) {
             Notification.show(exception.getMessage()).addThemeVariants(NotificationVariant.LUMO_ERROR);
         }

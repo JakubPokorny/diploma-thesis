@@ -35,11 +35,11 @@ public class Status {
     @Column(nullable = false, unique = true)
     private String status;
 
-    @Column()
+    @Column
     @Enumerated(EnumType.STRING)
     private Theme theme ;
 
-    @OneToMany(mappedBy = "status")
+    @OneToMany(mappedBy = "status", cascade = CascadeType.REMOVE)
     @JsonIgnore
     @ToString.Exclude
     Set<Deadline> deadlines;

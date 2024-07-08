@@ -20,6 +20,7 @@ import cz.upce.fei.dt.beckend.entities.Contract;
 import cz.upce.fei.dt.beckend.entities.Deadline;
 import cz.upce.fei.dt.beckend.entities.Product;
 import cz.upce.fei.dt.beckend.entities.Status;
+import cz.upce.fei.dt.beckend.exceptions.ResourceNotFoundException;
 import cz.upce.fei.dt.beckend.services.*;
 import cz.upce.fei.dt.beckend.services.filters.ContractFilter;
 import cz.upce.fei.dt.beckend.services.filters.ContractFilter.ContractFilterTag;
@@ -28,6 +29,7 @@ import cz.upce.fei.dt.ui.components.GridFormLayout;
 import cz.upce.fei.dt.ui.components.TabWithBadge;
 import cz.upce.fei.dt.ui.components.filters.FilterFields;
 import cz.upce.fei.dt.ui.components.filters.FromToLocalDateFilterFields;
+import cz.upce.fei.dt.ui.components.filters.IDFilterField;
 import cz.upce.fei.dt.ui.components.forms.ContractForm;
 import cz.upce.fei.dt.ui.components.forms.events.DeleteEvent;
 import cz.upce.fei.dt.ui.components.forms.events.SaveEvent;
@@ -61,11 +63,20 @@ public class ContractsView extends VerticalLayout implements HasUrlParameter<Str
     private final TabWithBadge afterDeadline = createContractTabWithBadge("Po termínu", "error", ContractFilterTag.AFTER_DEADLINE);
     private DataProvider<Contract, ContractFilter> dataProvider;
     private ConfigurableFilterDataProvider<Contract, Void, ContractFilter> configurableFilterDataProvider;
+    private IDFilterField idFilterField;
 
     @Override
     public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
         if (parameter == null)
             return;
+        try {
+            idFilterField.setValue(Double.parseDouble(parameter));
+            return;
+        } catch (ResourceNotFoundException resourceNotFoundException) {
+            Notification.show(resourceNotFoundException.getMessage()).addThemeVariants(NotificationVariant.LUMO_ERROR);
+        } catch (NumberFormatException _) {
+
+        }
         switch (parameter) {
             case "done" -> {
                 contractFilter.setContractFilterTag(ContractFilterTag.SUCCESS);
@@ -182,7 +193,6 @@ public class ContractsView extends VerticalLayout implements HasUrlParameter<Str
         );
 
         configurableFilterDataProvider = dataProvider.withConfigurableFilter();
-//        contractFilter.setFromCreatedFilter(LocalDate.of(LocalDate.now().getYear(), 1,1));
         configurableFilterDataProvider.setFilter(contractFilter);
 
         Grid.Column<Contract> idColumn = grid.addColumn(Contract::getId).setHeader("ID").setKey("id").setWidth("50px");
@@ -195,6 +205,9 @@ public class ContractsView extends VerticalLayout implements HasUrlParameter<Str
         Grid.Column<Contract> updatedColumn = grid.addColumn(new LocalDateTimeRenderer<>(Contract::getUpdated, "H:mm d. M. yyyy")).setHeader("Upraveno").setKey("updated").setWidth("150px");
 
         HeaderRow headerRow = grid.appendHeaderRow();
+
+        idFilterField = new IDFilterField(contractFilter::setIdFilter, configurableFilterDataProvider);
+        headerRow.getCell(idColumn).setComponent(idFilterField.getFilterHeaderLayout());
         headerRow.getCell(clientColumn).setComponent(FilterFields.createContactMultiSelectComboBoxFilter("klienti", contractFilter::setClientsFilter, configurableFilterDataProvider, contactService));
         headerRow.getCell(stateColumn).setComponent(FilterFields.createStatusMultiSelectComboBoxFilter("stavy", contractFilter::setStatusFilter, configurableFilterDataProvider, statusService));
         headerRow.getCell(deadlineColumn).setComponent(new FromToLocalDateFilterFields(contractFilter::setFromDeadlineFilter, contractFilter::setToDeadlineFilter, configurableFilterDataProvider).getFilterHeaderLayout());
@@ -214,7 +227,6 @@ public class ContractsView extends VerticalLayout implements HasUrlParameter<Str
         grid.setSortableColumns("id", "price", "created", "updated");
         grid.sort(List.of(new GridSortOrder<>(createdColumn, SortDirection.DESCENDING)));
 
-        idColumn.setVisible(false);
         updatedColumn.setVisible(false);
         gridFormLayout.showHideMenu.addColumnToggleItem("ID", idColumn);
         gridFormLayout.showHideMenu.addColumnToggleItem("Klient", clientColumn);
@@ -292,9 +304,9 @@ public class ContractsView extends VerticalLayout implements HasUrlParameter<Str
                 case ERROR -> error++;
             }
 
-            if (deadline.getDeadline() == null){
+            if (deadline.getDeadline() == null) {
                 withoutDeadline++;
-            } else if (deadline.isBeforeOrNowDeadline()){
+            } else if (deadline.isBeforeOrNowDeadline()) {
                 beforeDeadline++;
             } else {
                 afterDeadline++;

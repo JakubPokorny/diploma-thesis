@@ -2,7 +2,6 @@ package cz.upce.fei.dt.beckend.repositories;
 
 import cz.upce.fei.dt.beckend.dto.IDeadline;
 import cz.upce.fei.dt.beckend.entities.Deadline;
-import cz.upce.fei.dt.beckend.entities.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,10 +32,8 @@ public interface DeadlineRepository extends JpaRepository<Deadline, Long> {
                 FROM Deadline d
                 GROUP BY d.contract.id
             ) sub ON d.contract.id = sub.contract_id AND d.created = sub.latest_created
-            join Status s on s.id = d.status.id
-            where s.theme = :theme
             """)
-    List<Deadline> findAllCurrentDeadlinesByStatus(@NonNull @Param("theme") Status.Theme theme);
+    List<Deadline> findAllCurrentDeadlines();
 
     @Query(value = """
             SELECT d
@@ -46,48 +43,7 @@ public interface DeadlineRepository extends JpaRepository<Deadline, Long> {
                 FROM Deadline d
                 GROUP BY d.contract.id
             ) sub ON d.contract.id = sub.contract_id AND d.created = sub.latest_created
+            where d.status.id = :statusID
             """)
-    List<Deadline> findAllCurrentDeadlines();
-
-    @Query(value =
-        """
-        SELECT count(d.contract_id)
-        FROM deadlines d
-            INNER JOIN (
-            SELECT contract_id, MAX(created) AS latest_created
-            FROM deadlines
-            GROUP BY contract_id
-        ) sub ON d.contract_id = sub.contract_id AND d.created = sub.latest_created
-        WHERE deadline IS NOT NULL AND deadline < DATE(now())
-        """
-            , nativeQuery = true)
-    int countAfterDeadline();
-
-    @Query(value =
-            """
-            SELECT count(d.contract_id)
-            FROM deadlines d
-                INNER JOIN (
-                SELECT contract_id, MAX(created) AS latest_created
-                FROM deadlines
-                GROUP BY contract_id
-            ) sub ON d.contract_id = sub.contract_id AND d.created = sub.latest_created
-            WHERE deadline IS NULL
-            """
-            , nativeQuery = true)
-    int countWithoutDeadline();
-
-    @Query(value =
-            """
-            SELECT count(d.contract_id)
-            FROM deadlines d
-                INNER JOIN (
-                SELECT contract_id, MAX(created) AS latest_created
-                FROM deadlines
-                GROUP BY contract_id
-            ) sub ON d.contract_id = sub.contract_id AND d.created = sub.latest_created
-            WHERE deadline IS NOT NULL AND DATE(now()) <= deadline
-            """
-            , nativeQuery = true)
-    int countBeforeDeadline();
+    List<Deadline> findAllCurrentDeadlinesByStatusId(@NonNull @Param("statusID") long statusID);
 }
