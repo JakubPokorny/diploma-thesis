@@ -69,6 +69,7 @@ public class ProductsPieChart extends Row {
         chart.setClassName("board-cell");
 
         config.setTooltip(tooltip);
+        config.getChart().setStyledMode(true);
 
         options.setAllowPointSelect(true);
         options.setCursor(Cursor.POINTER);
