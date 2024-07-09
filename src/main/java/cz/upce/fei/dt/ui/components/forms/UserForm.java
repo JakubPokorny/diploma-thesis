@@ -16,6 +16,7 @@ import java.util.EnumSet;
 public class UserForm extends FormLayout implements IEditForm<User> {
     private final Binder<User> binder;
     public final EmailField emailField = new EmailField("Email");
+    public final ComboBox<Role> role = new ComboBox<>("Oprávnění");
     private User user;
 
     public UserForm() {
@@ -37,7 +38,6 @@ public class UserForm extends FormLayout implements IEditForm<User> {
                 .asRequired()
                 .bind(User::getEmail, User::setEmail);
 
-        final ComboBox<Role> role = new ComboBox<>("Oprávnění");
         binder.forField(role)
                 .asRequired()
                 .bind(User::getRole, User::setRole);

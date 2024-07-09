@@ -1,6 +1,7 @@
 package cz.upce.fei.dt.beckend.utilities;
 
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.messages.MessageInputI18n;
 import com.vaadin.flow.component.upload.UploadI18N;
 import cz.upce.fei.dt.beckend.entities.Note;
@@ -72,5 +73,27 @@ public class CzechI18n {
         czech.setSend("Poslat");
         czech.setMessage("Poznámka (max %d znaků)".formatted(Note.MAX_NOTE_LENGTH));
         return czech;
+    }
+
+    public static LoginI18n getLoginI18n() {
+        LoginI18n loginI18n = LoginI18n.createDefault();
+        LoginI18n.Header header = new LoginI18n.Header();
+        header.setTitle("BOXE");
+        header.setDescription("Dip práce 2024");
+        loginI18n.setHeader(header);
+
+        LoginI18n.Form form = loginI18n.getForm();
+        form.setTitle("Přihlášení");
+        form.setUsername("Email");
+        form.setPassword("Heslo");
+        form.setSubmit("Přihlásit se");
+        form.setForgotPassword("Zapomenuté heslo");
+        loginI18n.setForm(form);
+
+        LoginI18n.ErrorMessage errorMessage = loginI18n.getErrorMessage();
+        errorMessage.setTitle("Email nebo heslo je špatně.");
+        errorMessage.setMessage("Zkontroluj si zadaný email a heslo a zkus to znova.");
+        loginI18n.setErrorMessage(errorMessage);
+        return loginI18n;
     }
 }

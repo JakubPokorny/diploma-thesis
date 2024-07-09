@@ -5,32 +5,32 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import cz.upce.fei.dt.beckend.repositories.UserRepository;
+import com.vaadin.flow.spring.security.AuthenticationContext;
 import cz.upce.fei.dt.beckend.services.UserService;
-import cz.upce.fei.dt.ui.components.forms.PasswordForm;
+import cz.upce.fei.dt.ui.components.forms.ChangePasswordForm;
 
 @AnonymousAllowed
-@Route(value = "password")
-@PageTitle("Password | DT CRM")
-public class PasswordView extends VerticalLayout implements HasUrlParameter<String> {
-    private final UserRepository userRepository;
+@Route(value = "changePassword")
+@RouteAlias(value = "zmenaHesla")
+@PageTitle("Nastavení hesla")
+public class ChangePasswordView extends VerticalLayout implements HasUrlParameter<String> {
     private final UserService userService;
+    private final AuthenticationContext authenticationContext;
 
-    public PasswordView(UserRepository userRepository, UserService userService) {
-        this.userRepository = userRepository;
+    public ChangePasswordView(UserService userService, AuthenticationContext authenticationContext) {
         this.userService = userService;
+        this.authenticationContext = authenticationContext;
 
         setHeightFull();
         setAlignItems(FlexComponent.Alignment.CENTER);
         setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
 
-        H1 title = new H1("Nastavení Hesla");
+        H1 title = new H1("Nastavení hesla");
         add(title);
     }
 
     @Override
     public void setParameter(BeforeEvent beforeEvent, String token) {
-        var user = userRepository.findByResetToken(token).orElseThrow(NotFoundException::new);
-        add(new PasswordForm(user, userService));
+        add(new ChangePasswordForm(userService.findByResetToken(token), userService, authenticationContext));
     }
 }

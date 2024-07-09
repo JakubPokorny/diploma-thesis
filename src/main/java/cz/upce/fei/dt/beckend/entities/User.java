@@ -64,6 +64,12 @@ public class User implements UserDetails {
         return firstName + " " + lastName;
     }
 
+    public boolean hasRole(Role role) {
+        return getAuthorities()
+                .stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_" + role.name()));
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));

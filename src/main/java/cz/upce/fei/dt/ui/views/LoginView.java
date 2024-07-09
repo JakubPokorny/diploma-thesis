@@ -7,9 +7,10 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import cz.upce.fei.dt.beckend.utilities.CzechI18n;
 
 @Route("login")
-@PageTitle("Login | DT CRM")
+@PageTitle("Login | BOXE")
 public class LoginView extends VerticalLayout implements BeforeEnterObserver {
     private final LoginForm login = new LoginForm();
 
@@ -21,8 +22,10 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
         login.setAction("login");
         login.setForgotPasswordButtonVisible(true);
+        login.addForgotPasswordListener(event -> event.getSource().getUI().ifPresent(ui -> ui.navigate(ForgotPasswordView.class)));
+        login.setI18n(CzechI18n.getLoginI18n());
 
-        add(new H1("Příhlášení | DT CRM"), login);
+        add(new H1("BOXE"), login);
     }
 
     @Override
