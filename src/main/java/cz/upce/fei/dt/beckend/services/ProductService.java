@@ -76,6 +76,7 @@ public class ProductService extends AbstractBackEndDataProvider<Product, Product
             product.setProductComponents(productComponents);
         }
         List<ProductComponent> orphans = productComponentService.findAllByProductId(product.getId());
+        orphans.removeAll(product.getProductComponents());
         productComponentService.deleteAll(orphans);
 
         productRepository.save(product);
