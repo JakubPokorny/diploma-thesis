@@ -1,7 +1,9 @@
 package cz.upce.fei.dt.beckend.services;
 
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import cz.upce.fei.dt.beckend.entities.Deadline;
+import cz.upce.fei.dt.beckend.entities.Deadline_;
 import cz.upce.fei.dt.beckend.entities.User;
 import cz.upce.fei.dt.beckend.exceptions.AuthenticationException;
 import cz.upce.fei.dt.beckend.repositories.DeadlineRepository;
@@ -42,14 +44,15 @@ public class DeadlineService {
         deadlineRepository.deleteAllByContractId(contractId);
     }
 
-    public Stream<Deadline> findAllByContractId(Long contractId, int page, int pageSize) {
-        return deadlineRepository.findAllByContractId(contractId, PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "created")))
+    public Stream<Deadline> findAllByContractId(Long contractId, Query<Deadline, Void> query) {
+        return deadlineRepository.findAllByContractId(PageRequest.of(query.getPage(), query.getPageSize(), Sort.by(Sort.Direction.DESC, Deadline_.CREATED)), contractId)
                 .stream()
                 .map(iDeadline -> Deadline.builder()
+                        .id(iDeadline.getId())
                         .status(iDeadline.getStatus())
                         .user(User.builder()
-                                .firstName(iDeadline.getUser().getFirstName())
-                                .lastName(iDeadline.getUser().getLastName())
+                                .firstName(iDeadline.getFirstName())
+                                .lastName(iDeadline.getLastName())
                                 .build())
                         .deadline(iDeadline.getDeadline())
                         .created(iDeadline.getCreated())
@@ -60,11 +63,16 @@ public class DeadlineService {
         return deadlineRepository.findFirstByContractIdOrderByCreatedDesc(contractId).orElse(new Deadline());
     }
 
-    public List<Deadline> findAllCurrentDeadlinesByStatusID(Long statusID) {
-        return deadlineRepository.findAllCurrentDeadlinesByStatusId(statusID);
+    public List<Deadline> findAllCurrentDeadlinesByStatusId(Long statusId) {
+        return deadlineRepository.findAllCurrentDeadlinesByStatusId(statusId);
     }
 
     public List<Deadline> findAllCurrentDeadlines() {
         return deadlineRepository.findAllCurrentDeadlines();
+    }
+
+    @Transactional
+    public void updateAllUserByUser(Long userId, Long alternateUserId) {
+        deadlineRepository.updateAllUserByUser(userId, alternateUserId);
     }
 }

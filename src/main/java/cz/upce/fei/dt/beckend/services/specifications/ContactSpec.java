@@ -11,8 +11,8 @@ public class ContactSpec {
 
     public static Specification<Contact> filterBy(ContactFilter contactFilter){
         return Specification
-                .where(FILTER_UTIL.findAllStringLikeIgnoreCase(contactFilter.getIcoFilter(), Contact_.ICO.getName()))
-                .and(FILTER_UTIL.findAllStringLikeIgnoreCase(contactFilter.getDicFilter(), Contact_.DIC.getName()))
+                .where(FILTER_UTIL.findAllStringLikeIgnoreCase(contactFilter.getIcoFilter(), Contact_.I_CO))
+                .and(FILTER_UTIL.findAllStringLikeIgnoreCase(contactFilter.getDicFilter(), Contact_.D_IC))
                 .and(FILTER_UTIL.findAllStringLikeIgnoreCase(contactFilter.getClientFilter(), Contact_.CLIENT))
                 .and(FILTER_UTIL.findAllStringLikeIgnoreCase(contactFilter.getEmailFilter(), Contact_.EMAIL))
                 .and(FILTER_UTIL.findAllStringLikeIgnoreCase(contactFilter.getPhoneFilter(), Contact_.PHONE))

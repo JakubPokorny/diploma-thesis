@@ -1,6 +1,7 @@
 package cz.upce.fei.dt.beckend.repositories;
 
 import cz.upce.fei.dt.beckend.dto.IComponent;
+import cz.upce.fei.dt.beckend.dto.IComponentCount;
 import cz.upce.fei.dt.beckend.entities.Component;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,14 +31,11 @@ public interface ComponentRepository extends JpaRepository<Component, Long>, Jpa
     @Query(value = "update Component c set c.inStock = :inStock where c.id = :id")
     void updateAmountById(@NonNull @Param("id") Long id, @NonNull @Param("inStock") int inStock);
 
-    @Query(value = "select count(id) from Component")
-    int countAll();
-    @Query(value = "select count(id) from Component where minInStock is NULL")
-    int countWithoutMinInStock();
-    @Query(value = "select count(id) from Component where inStock > minInStock")
-    int countInStock();
-    @Query(value = "select count(id) from Component where inStock < 0")
-    int countMissing();
-    @Query(value = "select count(id) from Component where inStock <= minInStock and inStock >= 0")
-    int countSupply();
+    @Modifying
+    @Transactional
+    @Query(value = "update Component c set c.user.id = :alternateUserId where c.user.id = :userId")
+    void updateAllUserByUser(@NonNull @Param("userId") Long userId, @NonNull @Param("alternateUserId") Long alternateUserId);
+
+    @Query(value = "select inStock as inStock, minInStock as minInStock from Component ")
+    List<IComponentCount> findAllComponentMetrics();
 }

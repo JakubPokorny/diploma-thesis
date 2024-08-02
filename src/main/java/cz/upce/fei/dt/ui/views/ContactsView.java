@@ -20,13 +20,14 @@ import cz.upce.fei.dt.beckend.entities.Contact;
 import cz.upce.fei.dt.beckend.entities.Contact_;
 import cz.upce.fei.dt.beckend.services.ContactService;
 import cz.upce.fei.dt.beckend.services.filters.ContactFilter;
-import cz.upce.fei.dt.ui.components.filters.FilterFields;
 import cz.upce.fei.dt.ui.components.GridFormLayout;
+import cz.upce.fei.dt.ui.components.filters.FilterFields;
 import cz.upce.fei.dt.ui.components.filters.FromToLocalDateFilterFields;
 import cz.upce.fei.dt.ui.components.forms.ContactForm;
 import cz.upce.fei.dt.ui.components.forms.events.DeleteEvent;
 import cz.upce.fei.dt.ui.components.forms.events.SaveEvent;
 import jakarta.annotation.security.PermitAll;
+import org.hibernate.exception.ConstraintViolationException;
 
 @Route(value = "contacts", layout = MainLayout.class)
 @RouteAlias(value = "kontakty", layout = MainLayout.class)
@@ -90,8 +91,13 @@ public class ContactsView extends VerticalLayout {
             updateGrid();
             gridFormLayout.closeFormLayout();
             Notification.show("Kontakt " + contact.getClient() + " odstraněn.").addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-        } catch (Exception exception) {
-            Notification.show(exception.getMessage()).addThemeVariants(NotificationVariant.LUMO_ERROR);
+        } catch (Exception e) {
+            if (e.getCause() instanceof ConstraintViolationException cve) {
+                if ("23000".equals(cve.getSQLState())) {
+                    throw new IllegalStateException("kontakt nelze smazat dokud je přiřazen k zakázkám.", e);
+                }
+            }
+            throw e;
         }
     }
 

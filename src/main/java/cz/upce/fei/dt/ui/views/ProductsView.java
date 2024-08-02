@@ -25,6 +25,7 @@ import cz.upce.fei.dt.ui.components.forms.ProductForm;
 import cz.upce.fei.dt.ui.components.forms.events.DeleteEvent;
 import cz.upce.fei.dt.ui.components.forms.events.SaveEvent;
 import jakarta.annotation.security.PermitAll;
+import org.hibernate.exception.ConstraintViolationException;
 
 @Route(value = "products", layout = MainLayout.class)
 @RouteAlias(value = "produkty", layout = MainLayout.class)
@@ -80,8 +81,13 @@ public class ProductsView extends VerticalLayout {
             updateGrid();
             gridFormLayout.closeFormLayout();
             Notification.show("Produkt " + product.getName() + " odstraněn.").addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-        } catch (Exception exception) {
-            Notification.show(exception.getMessage()).addThemeVariants(NotificationVariant.LUMO_ERROR);
+        } catch (Exception e) {
+            if (e.getCause() instanceof ConstraintViolationException cve) {
+                if ("23000".equals(cve.getSQLState())) {
+                    throw new IllegalStateException("produkt nelze smazat dokud je přiřazen k zakázkám.", e);
+                }
+            }
+            throw e;
         }
     }
 
@@ -162,7 +168,7 @@ public class ProductsView extends VerticalLayout {
         MultiSelectComboBox<Component> comboBox = new MultiSelectComboBox<>();
         comboBox.setItemLabelGenerator(Component::getName);
         comboBox.setReadOnly(true);
-        comboBox.setItems(query -> componentService.findAllByName(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
+        comboBox.setItems(componentService::findAllByName);
         comboBox.setValue(product.getSelectedComponents());
         comboBox.setSizeFull();
         return comboBox;

@@ -49,7 +49,7 @@ public class Component {
     private int inStock;
 
     @Column(nullable = false)
-    private Integer minInStock;
+    private int minInStock;
 
     @Column(nullable = false)
     private Double price;

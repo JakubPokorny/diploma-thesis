@@ -33,6 +33,14 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     Page<IProduct> findAllByName(@NonNull Pageable pageable, @Param("searchTerm") String searchTerm);
 
     @Query("""
+        select p
+        from Product p
+        join ProductComponent pc on pc.id.productId = p.id
+        where pc.id.componentId = :componentId
+        """)
+    List<Product> findAllByComponentId(@NonNull @Param("componentId") Long componentId);
+
+    @Query("""
             select
                 p.id as productID,
                 pc.componentsPerProduct as componentsPerProduct,
@@ -48,7 +56,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
             left join User u on u.id = c.user.id
             where p.id in :productIDs
             """)
-    List<ICheckProduct> findAllByID(@Param("productIDs") Iterable<Long> productIDs);
+    List<ICheckProduct> findAllByID(@NonNull @Param("productIDs") Iterable<Long> productIDs);
 
     @EntityGraph(value = "Product.eagerlyFetchComponent")
     @NonNull

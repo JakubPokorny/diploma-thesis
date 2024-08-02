@@ -68,7 +68,6 @@ public class GridFormLayout<F extends FormLayout & IEditForm<T>, T> extends Hori
         dialog.setHeader("Odstranit záznam");
         dialog.setText("Opravdu chcete smazat načtený záznam v formuláři?");
 
-
         dialog.setCancelable(true);
         dialog.setConfirmText("Odstranit");
         dialog.setConfirmButtonTheme("error primary");

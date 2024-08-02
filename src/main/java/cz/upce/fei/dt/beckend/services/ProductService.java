@@ -5,6 +5,7 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import cz.upce.fei.dt.beckend.dto.CheckStockDto;
 import cz.upce.fei.dt.beckend.dto.IMostSaleableProducts;
+import cz.upce.fei.dt.beckend.entities.Component;
 import cz.upce.fei.dt.beckend.entities.Product;
 import cz.upce.fei.dt.beckend.entities.ProductComponent;
 import cz.upce.fei.dt.beckend.repositories.ProductRepository;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -56,11 +58,17 @@ public class ProductService extends AbstractBackEndDataProvider<Product, Product
                 );
     }
 
-    public List<CheckStockDto> findAllByID(Iterable<Long> productsID) {
-        return productRepository.findAllByID(productsID)
+    public List<CheckStockDto> findAllByID(Iterable<Long> productIDs) {
+        return productRepository.findAllByID(productIDs)
                 .stream()
                 .map(CheckStockDto::toCheckStockDTO)
                 .toList();
+    }
+
+    public List<Product> findAllByComponent(Component component) {
+        return component.getId() == null
+                ? Collections.emptyList()
+                : productRepository.findAllByComponentId(component.getId());
     }
 
     @Transactional
@@ -83,15 +91,17 @@ public class ProductService extends AbstractBackEndDataProvider<Product, Product
     }
 
     @Transactional
-    public void deleteProduct(Product product) throws Exception {
-        Product wantToDelete = productRepository.findById(product.getId())
-                .orElseThrow(() -> new Exception("Produkt " + product.getName() + " nenalezen."));
-        productRepository.delete(wantToDelete);
+    public void deleteProduct(Product product) {
+        productRepository.delete(product);
     }
 
     @Transactional
     public void updatePrices(Iterable<Long> productIDs) {
         List<Product> products = productRepository.findAllById(productIDs);
+        updatePrices(products);
+    }
+
+    public void updatePrices(List<Product> products) {
         for (Product product : products) {
             double productionPrice = 0;
             for (ProductComponent pc : product.getProductComponents()) {

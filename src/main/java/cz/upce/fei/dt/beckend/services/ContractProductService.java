@@ -33,8 +33,7 @@ public class ContractProductService {
         componentService.updateAll(componentsToUpdate.values());
 
         if (!missingComponents.isEmpty())
-            new StockException(missingComponents, "Chybí skomponenty").showNotification();
-
+            new StockException(missingComponents, "Chybí komponenty").showNotification();
     }
 
     @Transactional

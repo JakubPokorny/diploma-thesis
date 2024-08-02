@@ -96,7 +96,7 @@ public class FileForm extends Details {
     }
 
     private void updateDownloadArea() {
-        long count = downloadArea.setItems(query -> fileService.findAllByContractId(contract.getId(), query.getPage(), query.getPageSize()))
+        long count = downloadArea.setItems(query -> fileService.fetchFromBackEnd(contract.getId(), query))
                 .getItems()
                 .count();
         contract.setFiles(downloadArea.getSelectedItems());

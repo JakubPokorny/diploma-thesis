@@ -14,7 +14,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 @Service
@@ -35,8 +34,8 @@ public class ContactService extends AbstractBackEndDataProvider<Contact, Contact
         return (int) fetchFromBackEnd(query).count();
     }
 
-    public Stream<Contact> findAllByIcoOrClientOrEmailOrPhone(int page, int pageSize, String searchTerm) {
-        return contactRepository.findAllByIcoOrClientOrEmailOrPhone(PageRequest.of(page, pageSize), searchTerm)
+    public Stream<Contact> findAllByIcoOrClientOrEmailOrPhone(Query<Contact, String> query) {
+        return contactRepository.findAllByIcoOrClientOrEmailOrPhone(PageRequest.of(query.getPage(), query.getPageSize()), query.getFilter().orElse(""))
                 .stream()
                 .map(iContact -> Contact.builder()
                         .id(iContact.getId())
@@ -48,10 +47,6 @@ public class ContactService extends AbstractBackEndDataProvider<Contact, Contact
 
     public Contact findById(Long id) throws ResourceNotFoundException {
         return contactRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Klient nenalezen."));
-    }
-
-    public List<Contact> getAll() {
-        return contactRepository.findAll();
     }
 
     @Transactional

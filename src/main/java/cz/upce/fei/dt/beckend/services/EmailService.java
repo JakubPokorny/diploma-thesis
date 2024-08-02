@@ -1,7 +1,5 @@
 package cz.upce.fei.dt.beckend.services;
 
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import cz.upce.fei.dt.beckend.dto.CheckStockDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,10 +31,10 @@ public class EmailService {
     }
 
     @Async
-    public void sendStockNotification(List<CheckStockDto> checkStockDtos) {
+    public void sendStockNotification(List<CheckStockDto> componentsUnderLimit) throws MailException {
         HashMap<String, List<CheckStockDto>> mailMap = new HashMap<>();
 
-        for (CheckStockDto checkStockDto : checkStockDtos) {
+        for (CheckStockDto checkStockDto : componentsUnderLimit) {
             String email = checkStockDto.getEmail();
             mailMap.computeIfAbsent(email, _ -> new ArrayList<>()).add(checkStockDto);
         }
@@ -52,8 +50,7 @@ public class EmailService {
             text.append("\n\nZasláno automatem.");
             try {
                 send(email, subject, text.toString());
-            } catch (Exception e) {
-                Notification.show(e.getMessage()).addThemeVariants(NotificationVariant.LUMO_ERROR);
+            } catch (InterruptedException _) {
             }
         });
     }

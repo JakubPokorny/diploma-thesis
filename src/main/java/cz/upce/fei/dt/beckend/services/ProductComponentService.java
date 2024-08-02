@@ -13,22 +13,12 @@ import java.util.List;
 public class ProductComponentService {
     private final ProductComponentRepository productComponentRepository;
 
-    public List<ProductComponent> getAll() {
-        return productComponentRepository.findAll();
-    }
-
-
-    public List<ProductComponent> findAllByComponentId(Long componentID) {
-        return productComponentRepository.findAllByComponentId(componentID);
+    public List<ProductComponent> findAllByComponentId(Long componentId) {
+        return productComponentRepository.findAllByComponentId(componentId);
     }
 
     public List<ProductComponent> findAllByProductId(Long productId) {
         return productComponentRepository.findAllByProductId(productId);
-    }
-
-    @Transactional
-    public List<ProductComponent> saveAll(Iterable<ProductComponent> productComponents) {
-        return productComponentRepository.saveAll(productComponents);
     }
 
     @Transactional

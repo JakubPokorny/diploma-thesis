@@ -10,12 +10,12 @@ public class ContractSpec {
 
     public static Specification<Contract> filterBy(ContractFilter contractFilter) {
         return Specification
-                .where(FILTER_UTIL.findAllDoubleGreaterThanOrEqualTo(contractFilter.getFromPriceFilter(), Contract_.price.getName()))
+                .where(FILTER_UTIL.findAllDoubleGreaterThanOrEqualTo(contractFilter.getFromPriceFilter(), Contract_.PRICE))
                 .and(FILTER_UTIL.findAllLongEqual(contractFilter.getIdFilter(), Contract_.ID))
-                .and(FILTER_UTIL.findAllDoubleLessThanOrEqualTo(contractFilter.getToPriceFilter(), Contract_.price.getName()))
-                .and(FILTER_UTIL.findAllLocalDateGreaterThanOrEqualTo(contractFilter.getFromCreatedFilter(), Contract_.created.getName()))
-                .and(FILTER_UTIL.findAllLocalDateLessThanOrEqualTo(contractFilter.getToCreatedFilter(), Contract_.created.getName()))
-                .and(FILTER_UTIL.findAllLocalDateGreaterThanOrEqualTo(contractFilter.getFromUpdatedFilter(), Contract_.updated.getName()))
-                .and(FILTER_UTIL.findAllLocalDateLessThanOrEqualTo(contractFilter.getToUpdatedFilter(), Contract_.updated.getName()));
+                .and(FILTER_UTIL.findAllDoubleLessThanOrEqualTo(contractFilter.getToPriceFilter(), Contract_.PRICE))
+                .and(FILTER_UTIL.findAllLocalDateGreaterThanOrEqualTo(contractFilter.getFromCreatedFilter(), Contract_.CREATED))
+                .and(FILTER_UTIL.findAllLocalDateLessThanOrEqualTo(contractFilter.getToCreatedFilter(), Contract_.CREATED))
+                .and(FILTER_UTIL.findAllLocalDateGreaterThanOrEqualTo(contractFilter.getFromUpdatedFilter(), Contract_.UPDATED))
+                .and(FILTER_UTIL.findAllLocalDateLessThanOrEqualTo(contractFilter.getToUpdatedFilter(), Contract_.UPDATED));
     }
 }

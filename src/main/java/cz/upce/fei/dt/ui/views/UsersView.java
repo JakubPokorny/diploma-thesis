@@ -3,12 +3,18 @@ package cz.upce.fei.dt.ui.views;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -83,9 +89,47 @@ public class UsersView extends VerticalLayout {
     }
 
     private void deleteUser(DeleteEvent deleteEvent) {
+        User user = (User) deleteEvent.getValue();
+
+        Dialog dialog = new Dialog();
+
+        ComboBox<User> userCB = new ComboBox<>("Nahradit uživatelem");
+        userCB.setAutofocus(true);
+        userCB.setWidthFull();
+        userCB.setItemLabelGenerator(u -> u.getFullName() + ", " + u.getEmail());
+        userCB.setItems(query -> userService.findAllByFirstnameAndLastnameAndEmail(query)
+                .filter(u -> !u.getEmail().equals(user.getEmail())));
+
+        Button confirmButton = new Button("Pokračovat", _ -> {
+            User alternateUser = userCB.getValue();
+            if (alternateUser == null) {
+                Notification.show("Vyberte uživatele.");
+            } else {
+                dialog.close();
+                performDeletion(user, alternateUser);
+            }
+        });
+        confirmButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+
+        Button closeButton = new Button("Zrušit", _ -> dialog.close());
+        closeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        HorizontalLayout buttonLayout = new HorizontalLayout(confirmButton, closeButton);
+        buttonLayout.setWidthFull();
+        buttonLayout.setJustifyContentMode(JustifyContentMode.END);
+
+        VerticalLayout dialogLayout = new VerticalLayout(
+                new H2("Vyberte uživatele"),
+                new Paragraph("Na koho převést záznamy od uživatele " + user.getFullName() + "?"),
+                userCB,
+                buttonLayout);
+
+        dialog.add(dialogLayout);
+        dialog.open();
+    }
+
+    private void performDeletion(User user, User alternateUser) {
         try {
-            User user = (User) deleteEvent.getValue();
-            userService.deleteUser(user);
+            userService.deleteUser(user, alternateUser);
             updateGrid();
             gridFormLayout.closeFormLayout();
             Notification.show("Uživatel " + user.getFullName() + " odstraněn.").addThemeVariants(NotificationVariant.LUMO_SUCCESS);
@@ -146,12 +190,8 @@ public class UsersView extends VerticalLayout {
         if (user.getResetToken() == null || user.getResetToken().isEmpty()) {
             Button generate = new Button("Generovat");
             generate.addClickListener(_ -> {
-                try {
-                    userService.generateResetToken(user);
-                    updateGrid();
-                } catch (Exception exception) {
-                    Notification.show(exception.getMessage()).addThemeVariants(NotificationVariant.LUMO_ERROR);
-                }
+                userService.generateResetToken(user);
+                updateGrid();
             });
             return generate;
         } else {

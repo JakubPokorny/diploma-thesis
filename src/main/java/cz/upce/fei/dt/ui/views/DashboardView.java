@@ -5,6 +5,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
+import cz.upce.fei.dt.beckend.dto.ComponentMetrics;
 import cz.upce.fei.dt.beckend.entities.Deadline;
 import cz.upce.fei.dt.beckend.entities.Status;
 import cz.upce.fei.dt.beckend.services.ComponentService;
@@ -40,9 +41,10 @@ public class DashboardView extends VerticalLayout {
 
     private DashboardItem createStockBoard() {
         DashboardItem stockBoard = new DashboardItem("Skladové komponenty");
+        ComponentMetrics componentMetrics = componentService.countMetrics();
         stockBoard.addRow(
-                new BoardCell("Doplnit", String.valueOf(componentService.getCountInStockSupply()), "warning", VaadinIcon.WARNING.create(), ui -> ui.navigate(ComponentsView.class, "supply")),
-                new BoardCell("Chybí", String.valueOf(componentService.getCountInStockMissing()), "error", VaadinIcon.EXCLAMATION.create(), ui -> ui.navigate(ComponentsView.class, "missing"))
+                new BoardCell("Doplnit", String.valueOf(componentMetrics.supply()), "warning", VaadinIcon.WARNING.create(), ui -> ui.navigate(ComponentsView.class, "supply")),
+                new BoardCell("Chybí", String.valueOf(componentMetrics.missing()), "error", VaadinIcon.EXCLAMATION.create(), ui -> ui.navigate(ComponentsView.class, "missing"))
         );
         return stockBoard;
     }

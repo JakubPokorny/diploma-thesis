@@ -10,14 +10,11 @@ public interface IDeadline {
 
     Status getStatus();
 
-
     LocalDate getDeadline();
 
     LocalDateTime getCreated();
 
-    LocalDateTime getUpdated();
+    String getFirstName();
 
-    IUser getUser();
-
-    IContract getContract();
+    String getLastName();
 }

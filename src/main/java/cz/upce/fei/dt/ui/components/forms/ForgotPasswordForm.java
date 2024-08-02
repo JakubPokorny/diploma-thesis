@@ -9,11 +9,11 @@ import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.server.VaadinSession;
 import cz.upce.fei.dt.beckend.entities.User;
+import cz.upce.fei.dt.beckend.exceptions.CustomErrorHandler;
 import cz.upce.fei.dt.beckend.services.UserService;
 import cz.upce.fei.dt.ui.views.DashboardView;
-
-import java.io.InvalidClassException;
 
 public class ForgotPasswordForm extends FormLayout {
     private final Binder<User> binder = new BeanValidationBinder<>(User.class);
@@ -22,6 +22,7 @@ public class ForgotPasswordForm extends FormLayout {
     public ForgotPasswordForm(UserService userService) {
         setClassName("password-form");
         setResponsiveSteps(new ResponsiveStep("0", 1));
+        VaadinSession.getCurrent().setErrorHandler(new CustomErrorHandler());
 
         user = new User();
         binder.readBean(user);
@@ -37,8 +38,6 @@ public class ForgotPasswordForm extends FormLayout {
                 event.getSource().getElement().setEnabled(false);
             } catch (ValidationException validationException) {
                 Notification.show("Neplatný email.").addThemeVariants(NotificationVariant.LUMO_ERROR);
-            } catch (InvalidClassException invalidClassException) {
-                Notification.show(invalidClassException.getMessage()).addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
         });
 

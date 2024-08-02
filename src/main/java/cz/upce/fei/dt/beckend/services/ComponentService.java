@@ -4,6 +4,8 @@ import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import cz.upce.fei.dt.beckend.dto.CheckStockDto;
+import cz.upce.fei.dt.beckend.dto.ComponentMetrics;
+import cz.upce.fei.dt.beckend.dto.IComponentCount;
 import cz.upce.fei.dt.beckend.entities.Component;
 import cz.upce.fei.dt.beckend.entities.ProductComponent;
 import cz.upce.fei.dt.beckend.repositories.ComponentRepository;
@@ -37,7 +39,7 @@ public class ComponentService extends AbstractBackEndDataProvider<Component, Com
         Stream<Component> stream = componentRepository.findAll(spec, VaadinSpringDataHelpers.toSpringDataSort(query)).stream();
 
         if (query.getFilter().isPresent()) {
-            stream = stream.filter(contract -> query.getFilter().get().filter(contract));
+            stream = stream.filter(component -> query.getFilter().get().filter(component));
         }
 
         return stream.skip(query.getOffset()).limit(query.getLimit());
@@ -48,8 +50,8 @@ public class ComponentService extends AbstractBackEndDataProvider<Component, Com
         return (int) fetchFromBackEnd(query).count();
     }
 
-    public Stream<Component> findAllByName(int page, int pageSize, String searchTerm) {
-        return componentRepository.findAllByName(PageRequest.of(page, pageSize), searchTerm)
+    public Stream<Component> findAllByName(Query<Component, String> query) {
+        return componentRepository.findAllByName(PageRequest.of(query.getPage(), query.getPageSize()), query.getFilter().orElse(""))
                 .stream()
                 .map(iComponent -> Component.builder()
                         .id(iComponent.getId())
@@ -74,36 +76,25 @@ public class ComponentService extends AbstractBackEndDataProvider<Component, Com
         }
 
         List<ProductComponent> orphans = productComponentService.findAllByComponentId(component.getId());
-        component.getProductComponents().forEach(productComponent ->
-                orphans.removeIf(orphan -> orphan.getId().equals(productComponent.getId())));
+        orphans.removeAll(component.getProductComponents());
         productComponentService.deleteAll(orphans);
 
         componentRepository.save(component);
 
         Stream<Long> orphanIDs = orphans
                 .stream()
-                .map(productComponent -> productComponent.getId().getProductId())
-                .distinct();
+                .map(productComponent -> productComponent.getId().getProductId());
         Stream<Long> productComponentsIDs = component.getProductComponents()
                 .stream()
-                .map(productComponent -> productComponent.getId().getProductId())
-                .distinct();
+                .map(productComponent -> productComponent.getId().getProductId());
         productService.updatePrices(Stream.concat(orphanIDs, productComponentsIDs).collect(Collectors.toSet()));
 
     }
 
     @Transactional
-    public void deleteComponent(Component component) throws Exception {
-        List<Long> productIDs = productComponentService.findAllByComponentId(component.getId())
-                .stream()
-                .map(productComponent -> productComponent.getId().getProductId())
-                .toList();
-
-        Component wantToDelete = componentRepository.findById(component.getId())
-                .orElseThrow(() -> new Exception("Komponenta " + component.getName() + " nenalezana."));
-        componentRepository.delete(wantToDelete);
-
-        productService.updatePrices(productIDs);
+    public void deleteComponent(Component component) {
+        componentRepository.delete(component);
+        productService.updatePrices(productService.findAllByComponent(component));
     }
 
     @Transactional
@@ -112,32 +103,29 @@ public class ComponentService extends AbstractBackEndDataProvider<Component, Com
         componentsToUpdate.forEach(checkStockDto -> {
             componentRepository.updateAmountById(checkStockDto.getComponentID(), checkStockDto.getComponentsInStock());
 
-            if (checkStockDto.getMinComponentsInStock() != null && checkStockDto.getComponentsInStock() < checkStockDto.getMinComponentsInStock() && checkStockDto.getEmail() != null) {
+            if (checkStockDto.sendNotification())
                 underMinInStockLimit.add(checkStockDto);
-            }
         });
 
         emailService.sendStockNotification(underMinInStockLimit);
     }
 
-    public int getCountAll() {
-        return componentRepository.countAll();
+    @Transactional
+    public void updateAllUserByUser(Long userId, Long alternateUserId) {
+        componentRepository.updateAllUserByUser(userId, alternateUserId);
     }
 
-    public int getCountWithoutMinInStock() {
-        return componentRepository.countWithoutMinInStock();
-    }
+    public ComponentMetrics countMetrics() {
+        int all = 0, inStockCounter = 0, supply = 0, missing = 0;
+        for (IComponentCount component : componentRepository.findAllComponentMetrics()) {
+            int minInStock = component.getMinInStock();
+            int inStock = component.getInStock();
 
-    public int getCountInStock() {
-        return componentRepository.countInStock();
+            all++;
+            if (inStock > minInStock && inStock > 0) inStockCounter++;
+            if (inStock < 0) missing++;
+            if (inStock <= minInStock && inStock >= 0) supply++;
+        }
+        return new ComponentMetrics(all, inStockCounter, supply, missing);
     }
-
-    public int getCountInStockSupply() {
-        return componentRepository.countSupply();
-    }
-
-    public int getCountInStockMissing() {
-        return componentRepository.countMissing();
-    }
-
 }

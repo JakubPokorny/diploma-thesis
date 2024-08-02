@@ -2,10 +2,12 @@ package cz.upce.fei.dt.beckend.dto;
 
 
 import cz.upce.fei.dt.beckend.entities.keys.ProductComponentKey;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
 @Builder
+@AllArgsConstructor
 @Data
 public class CheckStockDto {
     private Long productID;
@@ -14,7 +16,7 @@ public class CheckStockDto {
     private String componentName;
     private int componentsPerProduct;
     private int componentsInStock;
-    private Integer minComponentsInStock;
+    private int minComponentsInStock;
     private String email;
 
     public static CheckStockDto toCheckStockDTO(ICheckProduct iCheckProduct){
@@ -28,5 +30,9 @@ public class CheckStockDto {
                 .minComponentsInStock(iCheckProduct.getMinComponentsInStock())
                 .email(iCheckProduct.getEmail())
                 .build();
+    }
+
+    public boolean sendNotification(){
+        return email != null && componentsInStock < minComponentsInStock;
     }
 }

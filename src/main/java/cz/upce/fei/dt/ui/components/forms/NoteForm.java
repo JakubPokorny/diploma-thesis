@@ -73,12 +73,12 @@ public class NoteForm extends Details {
 
 
     private void updateMessageList(Long contractId) {
-        long count = messageGrid.setItems(query -> noteService.findAllByContractId(contractId, query.getPage(), query.getPageSize()))
+        long count = messageGrid.setItems(query -> noteService.findAllByContractId(contractId, query))
                 .getItems()
                 .count();
         this.setSummaryText("Poznámky (%d)".formatted(count));
 
-        if (count > 0 ){
+        if (count > 0) {
             this.setOpened(true);
         }
     }

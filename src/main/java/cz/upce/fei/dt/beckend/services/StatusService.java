@@ -47,7 +47,7 @@ public class StatusService extends AbstractBackEndDataProvider<Status, StatusFil
 
     @Transactional
     public void deleteStatus(Status status) throws UsedStatusException {
-        List<Deadline> deadlines = deadlineService.findAllCurrentDeadlinesByStatusID(status.getId());
+        List<Deadline> deadlines = deadlineService.findAllCurrentDeadlinesByStatusId(status.getId());
         if (!deadlines.isEmpty())
             throw new UsedStatusException(deadlines);
 

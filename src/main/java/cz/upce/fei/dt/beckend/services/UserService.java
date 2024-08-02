@@ -12,6 +12,7 @@ import com.vaadin.flow.spring.security.AuthenticationContext;
 import cz.upce.fei.dt.beckend.entities.Role;
 import cz.upce.fei.dt.beckend.entities.User;
 import cz.upce.fei.dt.beckend.exceptions.AuthenticationException;
+import cz.upce.fei.dt.beckend.exceptions.ResourceNotFoundException;
 import cz.upce.fei.dt.beckend.repositories.UserRepository;
 import cz.upce.fei.dt.beckend.services.filters.UserFilter;
 import cz.upce.fei.dt.beckend.services.specifications.UserSpec;
@@ -22,7 +23,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.InvalidClassException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -36,11 +36,15 @@ public class UserService extends AbstractBackEndDataProvider<User, UserFilter> {
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+    private final DeadlineService deadlineService;
+    private final NoteService noteService;
+    private final ComponentService componentService;
 
     @Override
     public Stream<User> fetchFromBackEnd(Query<User, UserFilter> query) {
         Specification<User> spec = UserSpec.filterBy(query.getFilter().orElse(null));
         Stream<User> stream = userRepository.findAll(spec, VaadinSpringDataHelpers.toSpringDataSort(query)).stream();
+
         return stream.skip(query.getOffset()).limit(query.getLimit());
     }
 
@@ -65,10 +69,10 @@ public class UserService extends AbstractBackEndDataProvider<User, UserFilter> {
     @Transactional
     public void saveUser(User user) throws AuthenticationException {
         User authUser = authenticationContext.getAuthenticatedUser(User.class)
-                .orElseThrow(() -> new AuthenticationException("neznámý uživatel. Přihlašte se prosím."));
+                .orElseThrow(() -> new AuthenticationException("Neznámý uživatel. Přihlašte se prosím."));
 
         Optional<User> savedUser = userRepository.findByEmail(user.getEmail());
-        if (savedUser.isPresent() && user.getRole() != savedUser.get().getRole()){
+        if (savedUser.isPresent() && user.getRole() != savedUser.get().getRole()) {
             if (!authUser.hasRole(Role.ADMIN))
                 throw new AuthenticationException(authUser.getRole() + " nemůže měnit oprávnění");
         }
@@ -82,12 +86,23 @@ public class UserService extends AbstractBackEndDataProvider<User, UserFilter> {
     }
 
     @Transactional
-    public void deleteUser(User user) {
+    public void deleteUser(User user, User alternateUser) {
+        if (user == null || alternateUser == null)
+            return;
+
+        Long userId = user.getId();
+        Long alternateUserId = alternateUser.getId();
+
+        deadlineService.updateAllUserByUser(userId, alternateUserId);
+        noteService.updateAllUserByUser(userId, alternateUserId);
+        componentService.updateAllUserByUser(userId, alternateUserId);
+
         userRepository.delete(user);
     }
 
     public User findByResetToken(String token) throws NotFoundException {
-        return userRepository.findByResetToken(token).orElseThrow(NotFoundException::new);
+        return userRepository.findByResetToken(token).orElseThrow(
+                () -> new NotFoundException("Neznámý token."));
     }
 
     public void changePassword(User user) {
@@ -96,9 +111,9 @@ public class UserService extends AbstractBackEndDataProvider<User, UserFilter> {
         userRepository.save(user);
     }
 
-    public void generateResetToken(User user) throws InvalidClassException {
+    public void generateResetToken(User user) throws ResourceNotFoundException {
         User savedUser = userRepository.findByEmail(user.getEmail())
-                .orElseThrow(() -> new InvalidClassException(user.getEmail() + " nenalezen."));
+                .orElseThrow(() -> new ResourceNotFoundException("neplatný email (" + user.getEmail() + ")."));
         String token = sendResetToken(savedUser.getEmail());
         savedUser.setResetToken(token);
         userRepository.save(savedUser);

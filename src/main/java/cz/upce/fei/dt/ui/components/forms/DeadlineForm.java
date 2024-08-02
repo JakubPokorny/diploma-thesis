@@ -96,7 +96,7 @@ public class DeadlineForm extends FormLayout implements IEditForm<Deadline> {
             historyButton.setVisible(true);
             this.setColspan(state, 3);
             this.setColspan(deadlineDate, 3);
-            historyGrid.setItems(query -> deadlineService.findAllByContractId(deadline.getContract().getId(), query.getPage(), query.getPageSize()));
+            historyGrid.setItems(query -> deadlineService.findAllByContractId(deadline.getContract().getId(), query));
         } else {
             deadline = new Deadline();
             state.setLabel("Stav");

@@ -122,7 +122,7 @@ public class FilterFields {
         msb.addThemeVariants(MultiSelectComboBoxVariant.LUMO_SMALL);
         msb.setItemLabelGenerator(Contact::getClient);
 
-        msb.setItems(query -> contactService.findAllByIcoOrClientOrEmailOrPhone(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
+        msb.setItems(contactService::findAllByIcoOrClientOrEmailOrPhone);
 
         msb.addValueChangeListener(event -> {
             consumer.accept(event.getValue().stream().map(Contact::getId).collect(Collectors.toSet()));
@@ -138,7 +138,7 @@ public class FilterFields {
         msb.addThemeVariants(MultiSelectComboBoxVariant.LUMO_SMALL);
         msb.setItemLabelGenerator(cz.upce.fei.dt.beckend.entities.Component::getName);
 
-        msb.setItems(query -> componentService.findAllByName(query.getPage(), query.getPageSize(), query.getFilter().orElse("")));
+        msb.setItems(componentService::findAllByName);
 
         msb.addValueChangeListener(event -> {
             consumer.accept(event.getValue().stream().map(cz.upce.fei.dt.beckend.entities.Component::getId).collect(Collectors.toSet()));

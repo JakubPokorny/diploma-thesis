@@ -160,9 +160,7 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
     }
 
     private void setupContactCB(ContactService contactService) {
-        contactCB.setItems(query ->
-                contactService.findAllByIcoOrClientOrEmailOrPhone(query.getPage(), query.getPageSize(), query.getFilter().orElse(""))
-        );
+        contactCB.setItems(contactService::findAllByIcoOrClientOrEmailOrPhone);
 
         contactCB.addValueChangeListener(event -> {
             if (event != null && event.getValue() != null) {

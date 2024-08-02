@@ -12,6 +12,7 @@ import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.router.*;
+import cz.upce.fei.dt.beckend.dto.ComponentMetrics;
 import cz.upce.fei.dt.beckend.entities.Component;
 import cz.upce.fei.dt.beckend.entities.Component_;
 import cz.upce.fei.dt.beckend.entities.Product;
@@ -46,7 +47,6 @@ public class ComponentsView extends VerticalLayout implements HasUrlParameter<St
     private final TabWithBadge inStock = createTabWithBadge("Skladem", "success", ComponentTag.IN_STOCK);
     private final TabWithBadge supply = createTabWithBadge("Doplnit", "warning", ComponentTag.SUPPLY);
     private final TabWithBadge missing = createTabWithBadge("Chybí", "error", ComponentTag.MISSING);
-    private final TabWithBadge withoutLimit = createTabWithBadge("Bez limitu", "", ComponentTag.WITHOUT_LIMIT);
     private DataProvider<Component, ComponentFilter> dataProvider;
     private ConfigurableFilterDataProvider<Component, Void, ComponentFilter> configurableFilterDataProvider;
 
@@ -66,10 +66,6 @@ public class ComponentsView extends VerticalLayout implements HasUrlParameter<St
             case "in_stock" -> {
                 componentFilter.setTagFilter(ComponentTag.IN_STOCK);
                 gridFormLayout.filterTabs.setSelectedTab(inStock);
-            }
-            case "without_limit" -> {
-                componentFilter.setTagFilter(ComponentTag.WITHOUT_LIMIT);
-                gridFormLayout.filterTabs.setSelectedTab(withoutLimit);
             }
         }
     }
@@ -98,7 +94,7 @@ public class ComponentsView extends VerticalLayout implements HasUrlParameter<St
 
     //region configures: grid, form, actions, filters, events
     private void configureFilters() {
-        gridFormLayout.filterTabs.add(all, withoutLimit, inStock, supply, missing);
+        gridFormLayout.filterTabs.add(all, inStock, supply, missing);
         gridFormLayout.filterTabs.setSelectedIndex(0);
     }
 
@@ -203,9 +199,7 @@ public class ComponentsView extends VerticalLayout implements HasUrlParameter<St
 
         if (inStock < 0)
             badge.getElement().getThemeList().add("error");
-        else if (component.getMinInStock() == null)
-            badge.getElement().getThemeList().add("contrast");
-        else if (inStock > component.getMinInStock())
+        else if (inStock > component.getMinInStock() && inStock > 0)
             badge.getElement().getThemeList().add("success");
         else
             badge.getElement().getThemeList().add("warning");
@@ -238,16 +232,16 @@ public class ComponentsView extends VerticalLayout implements HasUrlParameter<St
 
         return tabWithBadge;
     }
-
     //endregion
 
     private void updateGrid() {
         grid.setItems(configurableFilterDataProvider);
 
-        all.badge.setText(String.valueOf(componentService.getCountAll()));
-        withoutLimit.badge.setText(String.valueOf(componentService.getCountWithoutMinInStock()));
-        inStock.badge.setText(String.valueOf(componentService.getCountInStock()));
-        supply.badge.setText(String.valueOf(componentService.getCountInStockSupply()));
-        missing.badge.setText(String.valueOf(componentService.getCountInStockMissing()));
+        ComponentMetrics componentMetrics = componentService.countMetrics();
+
+        this.all.setBadgeValue(componentMetrics.all());
+        this.inStock.setBadgeValue(componentMetrics.inStock());
+        this.supply.setBadgeValue(componentMetrics.supply());
+        this.missing.setBadgeValue(componentMetrics.missing());
     }
 }
