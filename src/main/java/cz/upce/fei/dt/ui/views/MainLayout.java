@@ -5,8 +5,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -23,7 +22,7 @@ import com.vaadin.flow.theme.lumo.Lumo;
 import cz.upce.fei.dt.backend.exceptions.CustomErrorHandler;
 import cz.upce.fei.dt.ui.components.AvatarMenuBar;
 
-@JsModule("./prefers-color-scheme.js")
+//@JsModule("./prefers-color-scheme.js")
 public class MainLayout extends AppLayout implements RouterLayout {
     private final transient AuthenticationContext authContext;
     private static RouterLink pageTitle;
@@ -81,20 +80,21 @@ public class MainLayout extends AppLayout implements RouterLayout {
     }
 
     private void createDrawer() {
-        H1 appTitle = new H1("IS | DT CRM");
-        appTitle.addClassName("app-title");
-        addToDrawer(appTitle, getDrawerNavigation());
+        Image logo = new Image("./images/logo-blue.png", "logo 2024 | BoxEnergy");
+        logo.getStyle().set("margin", "var(--lumo-space-m)");
+
+        addToDrawer(logo, getDrawerNavigation());
         setPrimarySection(Section.DRAWER);
     }
 
     private Tabs getDrawerNavigation() {
         Tabs tabs = new Tabs(
                 new Tab(VaadinIcon.DASHBOARD.create(), new RouterLink("Dashboard", DashboardView.class)),
-                new Tab(VaadinIcon.USERS.create(), new RouterLink("Uživatelé", UsersView.class)),
-                new Tab(VaadinIcon.NOTEBOOK.create(), new RouterLink("Kontakty", ContactsView.class)),
-                new Tab(VaadinIcon.CART.create(), new RouterLink("Zakázky", ContractsView.class)),
-                new Tab(VaadinIcon.HOME.create(), new RouterLink("Komponenty", ComponentsView.class)),
+                new Tab(VaadinIcon.PAPERCLIP.create(), new RouterLink("Zakázky", ContractsView.class)),
                 new Tab(VaadinIcon.CART.create(), new RouterLink("Produkty", ProductsView.class)),
+                new Tab(VaadinIcon.HOME.create(), new RouterLink("Komponenty", ComponentsView.class)),
+                new Tab(VaadinIcon.NOTEBOOK.create(), new RouterLink("Kontakty", ContactsView.class)),
+                new Tab(VaadinIcon.USERS.create(), new RouterLink("Uživatelé", UsersView.class)),
                 new Tab(VaadinIcon.TABLE.create(), new RouterLink("Stavy", StatusView.class))
         );
         tabs.setOrientation(Tabs.Orientation.VERTICAL);

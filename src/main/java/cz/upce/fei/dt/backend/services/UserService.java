@@ -125,7 +125,7 @@ public class UserService extends AbstractBackEndDataProvider<User, UserFilter> {
             String url = String.format("%s://%s:%s/%s",
                     currentUrl.getProtocol(),
                     currentUrl.getHost(),
-                    currentUrl.getPort(),
+                    currentUrl.getPort() == -1 ? "" : currentUrl.getPort(),
                     RouteConfiguration.forSessionScope().getUrl(ChangePasswordView.class, resetToken));
             try {
                 emailService.send(

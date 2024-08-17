@@ -1,6 +1,7 @@
 package cz.upce.fei.dt;
 
 import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.server.AppShellSettings;
 import com.vaadin.flow.theme.Theme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -20,5 +21,15 @@ import org.springframework.scheduling.annotation.EnableAsync;
 public class Application extends SpringBootServletInitializer implements AppShellConfigurator {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
+    }
+
+    @Override
+    public void configurePage(AppShellSettings settings) {
+        settings.setPageTitle("BoxEnergy");
+        settings.addMetaTag("author", "Jakub Pokorný");
+        settings.addFavIcon("icon", "icons/favicon.ico", "100x100");
+        settings.addLink("shortcut icon", "icons/favicon.ico");
+
+        AppShellConfigurator.super.configurePage(settings);
     }
 }

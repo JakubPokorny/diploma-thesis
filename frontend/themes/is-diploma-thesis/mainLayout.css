@@ -1,0 +1,22 @@
+.header {
+    margin: var(--lumo-space-m);
+}
+
+.page-title {
+    line-height: var(--lumo-size-l);
+}
+
+.page-title {
+    font-size: var(--lumo-font-size-m);
+    color: var(--lumo-header-text-color);
+}
+
+.page-title:hover {
+    text-decoration: none;
+}
+
+@media only screen and (max-width: 550px) {
+    .user-name, .user-name-angle-down {
+        display: none;
+    }
+}

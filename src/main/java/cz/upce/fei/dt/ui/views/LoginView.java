@@ -1,6 +1,6 @@
 package cz.upce.fei.dt.ui.views;
 
-import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -10,7 +10,7 @@ import com.vaadin.flow.router.Route;
 import cz.upce.fei.dt.backend.utilities.CzechI18n;
 
 @Route("login")
-@PageTitle("Login | BOXE")
+@PageTitle("Login | BoxEnergy")
 public class LoginView extends VerticalLayout implements BeforeEnterObserver {
     private final LoginForm login = new LoginForm();
 
@@ -25,7 +25,9 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         login.addForgotPasswordListener(event -> event.getSource().getUI().ifPresent(ui -> ui.navigate(ForgotPasswordView.class)));
         login.setI18n(CzechI18n.getLoginI18n());
 
-        add(new H1("BOXE"), login);
+        Image image = new Image("./images/logo-blue.png", "logo 2024 | BoxEnergy");
+        image.setWidth("300px");
+        add(image, login);
     }
 
     @Override
