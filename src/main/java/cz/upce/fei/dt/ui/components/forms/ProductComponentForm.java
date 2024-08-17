@@ -8,7 +8,7 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.validator.IntegerRangeValidator;
-import cz.upce.fei.dt.beckend.entities.ProductComponent;
+import cz.upce.fei.dt.backend.entities.ProductComponent;
 import cz.upce.fei.dt.ui.components.forms.events.UpdateProductProductionPriceEvent;
 import lombok.Getter;
 import lombok.Setter;

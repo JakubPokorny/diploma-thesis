@@ -11,12 +11,12 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
-import cz.upce.fei.dt.beckend.dto.IMostSaleableProducts;
-import cz.upce.fei.dt.beckend.entities.Product;
-import cz.upce.fei.dt.beckend.entities.Status;
-import cz.upce.fei.dt.beckend.services.ProductService;
-import cz.upce.fei.dt.beckend.services.filters.DashboardFilter;
-import cz.upce.fei.dt.beckend.utilities.CzechI18n;
+import cz.upce.fei.dt.backend.dto.IMostSaleableProducts;
+import cz.upce.fei.dt.backend.entities.Product;
+import cz.upce.fei.dt.backend.entities.Status;
+import cz.upce.fei.dt.backend.services.ProductService;
+import cz.upce.fei.dt.backend.services.filters.DashboardFilter;
+import cz.upce.fei.dt.backend.utilities.CzechI18n;
 
 import java.time.LocalDate;
 import java.util.stream.Collectors;

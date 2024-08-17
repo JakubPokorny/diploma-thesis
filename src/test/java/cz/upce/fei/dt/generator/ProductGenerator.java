@@ -1,6 +1,6 @@
 package cz.upce.fei.dt.generator;
 
-import cz.upce.fei.dt.beckend.entities.Product;
+import cz.upce.fei.dt.backend.entities.Product;
 
 public class ProductGenerator {
     public static Product generateProduct(Long id){

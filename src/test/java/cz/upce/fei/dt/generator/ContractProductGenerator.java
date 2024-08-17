@@ -1,9 +1,9 @@
 package cz.upce.fei.dt.generator;
 
-import cz.upce.fei.dt.beckend.entities.Contract;
-import cz.upce.fei.dt.beckend.entities.ContractProduct;
-import cz.upce.fei.dt.beckend.entities.Product;
-import cz.upce.fei.dt.beckend.entities.keys.ContractProductKey;
+import cz.upce.fei.dt.backend.entities.Contract;
+import cz.upce.fei.dt.backend.entities.ContractProduct;
+import cz.upce.fei.dt.backend.entities.Product;
+import cz.upce.fei.dt.backend.entities.keys.ContractProductKey;
 
 public class ContractProductGenerator {
     public static ContractProduct generateContractProduct(Contract contract, Product product){

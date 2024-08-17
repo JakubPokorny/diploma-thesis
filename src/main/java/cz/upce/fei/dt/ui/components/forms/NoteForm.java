@@ -8,10 +8,10 @@ import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import cz.upce.fei.dt.beckend.entities.Contract;
-import cz.upce.fei.dt.beckend.entities.Note;
-import cz.upce.fei.dt.beckend.services.NoteService;
-import cz.upce.fei.dt.beckend.utilities.CzechI18n;
+import cz.upce.fei.dt.backend.entities.Contract;
+import cz.upce.fei.dt.backend.entities.Note;
+import cz.upce.fei.dt.backend.services.NoteService;
+import cz.upce.fei.dt.backend.utilities.CzechI18n;
 
 public class NoteForm extends Details {
     private final MessageInput messageInput = new MessageInput();

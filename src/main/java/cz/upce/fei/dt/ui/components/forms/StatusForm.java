@@ -6,7 +6,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
-import cz.upce.fei.dt.beckend.entities.Status;
+import cz.upce.fei.dt.backend.entities.Status;
 
 public class StatusForm extends FormLayout implements IEditForm<Status> {
     private final Binder<Status> binder = new BeanValidationBinder<>(Status.class);

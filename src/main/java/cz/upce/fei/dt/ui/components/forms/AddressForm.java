@@ -7,7 +7,7 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.shared.Registration;
-import cz.upce.fei.dt.beckend.entities.Address;
+import cz.upce.fei.dt.backend.entities.Address;
 import lombok.Getter;
 import lombok.Setter;
 

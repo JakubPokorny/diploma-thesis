@@ -6,8 +6,8 @@ import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import cz.upce.fei.dt.beckend.entities.Address;
-import cz.upce.fei.dt.beckend.entities.Contact;
+import cz.upce.fei.dt.backend.entities.Address;
+import cz.upce.fei.dt.backend.entities.Contact;
 import lombok.Getter;
 
 public class ContactAccordion extends Div {

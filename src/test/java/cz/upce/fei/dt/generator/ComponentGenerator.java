@@ -1,6 +1,6 @@
 package cz.upce.fei.dt.generator;
 
-import cz.upce.fei.dt.beckend.entities.Component;
+import cz.upce.fei.dt.backend.entities.Component;
 
 public class ComponentGenerator {
 

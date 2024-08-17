@@ -10,9 +10,9 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.server.VaadinSession;
-import cz.upce.fei.dt.beckend.entities.User;
-import cz.upce.fei.dt.beckend.exceptions.CustomErrorHandler;
-import cz.upce.fei.dt.beckend.services.UserService;
+import cz.upce.fei.dt.backend.entities.User;
+import cz.upce.fei.dt.backend.exceptions.CustomErrorHandler;
+import cz.upce.fei.dt.backend.services.UserService;
 import cz.upce.fei.dt.ui.views.DashboardView;
 
 public class ForgotPasswordForm extends FormLayout {

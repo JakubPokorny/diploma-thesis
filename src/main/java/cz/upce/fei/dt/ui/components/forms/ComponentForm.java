@@ -14,13 +14,13 @@ import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.validator.DoubleRangeValidator;
 import com.vaadin.flow.data.validator.IntegerRangeValidator;
-import cz.upce.fei.dt.beckend.entities.Component;
-import cz.upce.fei.dt.beckend.entities.Product;
-import cz.upce.fei.dt.beckend.entities.ProductComponent;
-import cz.upce.fei.dt.beckend.entities.User;
-import cz.upce.fei.dt.beckend.entities.keys.ProductComponentKey;
-import cz.upce.fei.dt.beckend.services.ProductService;
-import cz.upce.fei.dt.beckend.services.UserService;
+import cz.upce.fei.dt.backend.entities.Component;
+import cz.upce.fei.dt.backend.entities.Product;
+import cz.upce.fei.dt.backend.entities.ProductComponent;
+import cz.upce.fei.dt.backend.entities.User;
+import cz.upce.fei.dt.backend.entities.keys.ProductComponentKey;
+import cz.upce.fei.dt.backend.services.ProductService;
+import cz.upce.fei.dt.backend.services.UserService;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -76,7 +76,10 @@ public class ComponentForm extends FormLayout implements IEditForm<Component> {
         price.setMin(0);
         price.setMax(Double.MAX_VALUE);
         price.setSuffixComponent(new Span("Kč"));
-        binder.forField(price).withValidator(new DoubleRangeValidator("Minimum mimo hodnoty", 0.0, Double.MAX_VALUE)).asRequired().bind(Component::getPrice, Component::setPrice);
+        binder.forField(price)
+                .withValidator(new DoubleRangeValidator("Minimum mimo hodnoty", 0.0, Double.MAX_VALUE))
+                .asRequired()
+                .bind(Component::getPrice, Component::setPrice);
     }
 
     private void setupMinInStock() {
@@ -148,7 +151,8 @@ public class ComponentForm extends FormLayout implements IEditForm<Component> {
             }
         });
 
-        event.getRemovedSelection().forEach(product -> productComponentsFormLayout.remove(productComponentForms.remove(product.getId())));
+        event.getRemovedSelection()
+                .forEach(product -> productComponentsFormLayout.remove(productComponentForms.remove(product.getId())));
     }
 
     //endregion

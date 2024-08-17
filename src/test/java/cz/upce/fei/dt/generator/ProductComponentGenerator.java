@@ -1,9 +1,9 @@
 package cz.upce.fei.dt.generator;
 
-import cz.upce.fei.dt.beckend.entities.Component;
-import cz.upce.fei.dt.beckend.entities.Product;
-import cz.upce.fei.dt.beckend.entities.ProductComponent;
-import cz.upce.fei.dt.beckend.entities.keys.ProductComponentKey;
+import cz.upce.fei.dt.backend.entities.Component;
+import cz.upce.fei.dt.backend.entities.Product;
+import cz.upce.fei.dt.backend.entities.ProductComponent;
+import cz.upce.fei.dt.backend.entities.keys.ProductComponentKey;
 
 public class ProductComponentGenerator {
     public static ProductComponent generateProductComponent(Component component, Product product) {

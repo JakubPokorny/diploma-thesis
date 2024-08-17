@@ -12,11 +12,11 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
-import cz.upce.fei.dt.beckend.entities.Deadline;
-import cz.upce.fei.dt.beckend.entities.Status;
-import cz.upce.fei.dt.beckend.services.DeadlineService;
-import cz.upce.fei.dt.beckend.services.StatusService;
-import cz.upce.fei.dt.beckend.utilities.CzechI18n;
+import cz.upce.fei.dt.backend.entities.Deadline;
+import cz.upce.fei.dt.backend.entities.Status;
+import cz.upce.fei.dt.backend.services.DeadlineService;
+import cz.upce.fei.dt.backend.services.StatusService;
+import cz.upce.fei.dt.backend.utilities.CzechI18n;
 import lombok.Getter;
 import lombok.Setter;
 

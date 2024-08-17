@@ -20,7 +20,7 @@ import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import com.vaadin.flow.theme.lumo.Lumo;
-import cz.upce.fei.dt.beckend.exceptions.CustomErrorHandler;
+import cz.upce.fei.dt.backend.exceptions.CustomErrorHandler;
 import cz.upce.fei.dt.ui.components.AvatarMenuBar;
 
 @JsModule("./prefers-color-scheme.js")

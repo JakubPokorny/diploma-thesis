@@ -3,7 +3,7 @@ package cz.upce.fei.dt.ui.components.filters;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datepicker.DatePickerVariant;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
-import cz.upce.fei.dt.beckend.utilities.CzechI18n;
+import cz.upce.fei.dt.backend.utilities.CzechI18n;
 
 import java.time.LocalDate;
 import java.util.function.Consumer;

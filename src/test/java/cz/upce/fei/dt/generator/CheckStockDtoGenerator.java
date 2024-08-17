@@ -1,7 +1,7 @@
 package cz.upce.fei.dt.generator;
 
-import cz.upce.fei.dt.beckend.dto.CheckStockDto;
-import cz.upce.fei.dt.beckend.entities.keys.ProductComponentKey;
+import cz.upce.fei.dt.backend.dto.CheckStockDto;
+import cz.upce.fei.dt.backend.entities.keys.ProductComponentKey;
 
 import java.util.ArrayList;
 import java.util.List;

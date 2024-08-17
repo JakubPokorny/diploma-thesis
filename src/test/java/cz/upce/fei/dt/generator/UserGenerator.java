@@ -1,7 +1,7 @@
 package cz.upce.fei.dt.generator;
 
-import cz.upce.fei.dt.beckend.entities.Role;
-import cz.upce.fei.dt.beckend.entities.User;
+import cz.upce.fei.dt.backend.entities.Role;
+import cz.upce.fei.dt.backend.entities.User;
 
 public class UserGenerator {
     public static User generateUser(Long id) {

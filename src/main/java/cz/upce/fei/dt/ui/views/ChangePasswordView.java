@@ -6,7 +6,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.spring.security.AuthenticationContext;
-import cz.upce.fei.dt.beckend.services.UserService;
+import cz.upce.fei.dt.backend.services.UserService;
 import cz.upce.fei.dt.ui.components.forms.ChangePasswordForm;
 
 @AnonymousAllowed

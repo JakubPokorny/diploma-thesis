@@ -7,11 +7,11 @@ import com.vaadin.flow.component.combobox.MultiSelectComboBoxVariant;
 import com.vaadin.flow.component.textfield.*;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import cz.upce.fei.dt.beckend.entities.Contact;
-import cz.upce.fei.dt.beckend.entities.Product;
-import cz.upce.fei.dt.beckend.entities.Status;
-import cz.upce.fei.dt.beckend.entities.User;
-import cz.upce.fei.dt.beckend.services.*;
+import cz.upce.fei.dt.backend.entities.Contact;
+import cz.upce.fei.dt.backend.entities.Product;
+import cz.upce.fei.dt.backend.entities.Status;
+import cz.upce.fei.dt.backend.entities.User;
+import cz.upce.fei.dt.backend.services.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -50,7 +50,7 @@ public class FilterFields {
     }
 
     public static Component createComponentMultiSelectComboBoxFilter(String placeHolder, Consumer<Set<Long>> consumer, ConfigurableFilterDataProvider<?, ?, ?> dataProvider, ComponentService componentService) {
-        MultiSelectComboBox<cz.upce.fei.dt.beckend.entities.Component> filter = createComponentMultiSelectComboBoxField(placeHolder, consumer, dataProvider, componentService);
+        MultiSelectComboBox<cz.upce.fei.dt.backend.entities.Component> filter = createComponentMultiSelectComboBoxField(placeHolder, consumer, dataProvider, componentService);
         return new FilterHeaderLayout(filter);
     }
 
@@ -131,17 +131,17 @@ public class FilterFields {
         return msb;
     }
 
-    private static MultiSelectComboBox<cz.upce.fei.dt.beckend.entities.Component> createComponentMultiSelectComboBoxField(String placeHolder, Consumer<Set<Long>> consumer, ConfigurableFilterDataProvider<?, ?, ?> dataProvider, ComponentService componentService) {
-        MultiSelectComboBox<cz.upce.fei.dt.beckend.entities.Component> msb = new MultiSelectComboBox<>();
+    private static MultiSelectComboBox<cz.upce.fei.dt.backend.entities.Component> createComponentMultiSelectComboBoxField(String placeHolder, Consumer<Set<Long>> consumer, ConfigurableFilterDataProvider<?, ?, ?> dataProvider, ComponentService componentService) {
+        MultiSelectComboBox<cz.upce.fei.dt.backend.entities.Component> msb = new MultiSelectComboBox<>();
         setupComboBoxBase(placeHolder, msb);
 
         msb.addThemeVariants(MultiSelectComboBoxVariant.LUMO_SMALL);
-        msb.setItemLabelGenerator(cz.upce.fei.dt.beckend.entities.Component::getName);
+        msb.setItemLabelGenerator(cz.upce.fei.dt.backend.entities.Component::getName);
 
         msb.setItems(componentService::findAllByName);
 
         msb.addValueChangeListener(event -> {
-            consumer.accept(event.getValue().stream().map(cz.upce.fei.dt.beckend.entities.Component::getId).collect(Collectors.toSet()));
+            consumer.accept(event.getValue().stream().map(cz.upce.fei.dt.backend.entities.Component::getId).collect(Collectors.toSet()));
             dataProvider.refreshAll();
         });
         return msb;

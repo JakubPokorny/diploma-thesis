@@ -11,10 +11,10 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.validator.EmailValidator;
-import cz.upce.fei.dt.beckend.entities.Address;
-import cz.upce.fei.dt.beckend.entities.Contact;
-import cz.upce.fei.dt.beckend.dto.AresResponse;
-import cz.upce.fei.dt.beckend.services.AresService;
+import cz.upce.fei.dt.backend.entities.Address;
+import cz.upce.fei.dt.backend.entities.Contact;
+import cz.upce.fei.dt.backend.dto.AresResponse;
+import cz.upce.fei.dt.backend.services.AresService;
 
 public class ContactForm extends FormLayout implements IEditForm<Contact> {
     private final Binder<Contact> customerBinder = new BeanValidationBinder<>(Contact.class);
@@ -26,8 +26,8 @@ public class ContactForm extends FormLayout implements IEditForm<Contact> {
     private final TextField ico = new TextField("IČO");
     private final TextField dic = new TextField("DIČ");
     private final TextField client = new TextField("Společnost");
-    private final EmailField email = new EmailField("Email");
-    private final TextField phone = new TextField("Telefon");
+    private final EmailField emailField = new EmailField("Email");
+    private final TextField phoneField = new TextField("Telefon");
 
     public ContactForm() {
         setClassName("edit-form");
@@ -40,7 +40,7 @@ public class ContactForm extends FormLayout implements IEditForm<Contact> {
         setupInvoiceAddressForm();
         setupDeliveryAddressForm();
 
-        add(ico, dic, client, email, phone, invoiceAddressDetail, deliveryAddressDetail);
+        add(ico, dic, client, emailField, phoneField, invoiceAddressDetail, deliveryAddressDetail);
     }
 
     //region Setups
@@ -58,16 +58,16 @@ public class ContactForm extends FormLayout implements IEditForm<Contact> {
     }
 
     private void setupPhone() {
-        phone.setMinLength(9);
-        phone.setPattern("([+][0-9]{2,3})?[0-9]{9}");
-        this.setColspan(phone, 2);
-        customerBinder.forField(phone)
+        phoneField.setMinLength(9);
+        phoneField.setPattern("([+][0-9]{2,3})?[0-9]{9}");
+        this.setColspan(phoneField, 2);
+        customerBinder.forField(phoneField)
                 .asRequired()
                 .bind(Contact::getPhone, Contact::setPhone);
     }
 
     private void setupEmail() {
-        customerBinder.forField(email)
+        customerBinder.forField(emailField)
                 .withValidator(new EmailValidator("Nevalidní email."))
                 .asRequired()
                 .bind(Contact::getEmail, Contact::setEmail);
