@@ -16,10 +16,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.router.*;
-import cz.upce.fei.dt.backend.entities.Contract;
-import cz.upce.fei.dt.backend.entities.Deadline;
-import cz.upce.fei.dt.backend.entities.Product;
-import cz.upce.fei.dt.backend.entities.Status;
+import cz.upce.fei.dt.backend.entities.*;
 import cz.upce.fei.dt.backend.exceptions.ResourceNotFoundException;
 import cz.upce.fei.dt.backend.services.*;
 import cz.upce.fei.dt.backend.services.filters.ContractFilter;
@@ -195,19 +192,21 @@ public class ContractsView extends VerticalLayout implements HasUrlParameter<Str
         configurableFilterDataProvider = dataProvider.withConfigurableFilter();
         configurableFilterDataProvider.setFilter(contractFilter);
 
-        Grid.Column<Contract> idColumn = grid.addColumn(Contract::getId).setHeader("ID").setKey("id").setWidth("50px");
+        Grid.Column<Contract> idColumn = grid.addColumn(Contract::getId).setHeader("ID").setKey(Contract_.ID).setWidth("50px");
+        Grid.Column<Contract> descriptionColumn = grid.addColumn(Contract::getDescription).setHeader("Popis").setWidth("300px");
         Grid.Column<Contract> clientColumn = grid.addComponentColumn(this::getClient).setHeader("Klient").setWidth("150px");
         Grid.Column<Contract> stateColumn = grid.addComponentColumn(this::getState).setHeader("Stav").setWidth("150px");
         Grid.Column<Contract> deadlineColumn = grid.addComponentColumn(this::getDeadline).setHeader("Termín").setWidth("150px");
-        Grid.Column<Contract> priceColumn = grid.addColumn(Contract::getPrice).setHeader("Cena s marží").setKey("price").setWidth("150px");
+        Grid.Column<Contract> priceColumn = grid.addColumn(this::getPrice).setHeader("Cena s marží").setKey(Contract_.PRICE).setWidth("150px");
         Grid.Column<Contract> productsColumn = grid.addComponentColumn(this::getProducts).setHeader("Objednané produkty").setWidth("150px");
-        Grid.Column<Contract> createdColumn = grid.addColumn(new LocalDateTimeRenderer<>(Contract::getCreated, "H:mm d. M. yyyy")).setHeader("Vytvořeno").setKey("created").setWidth("150px");
-        Grid.Column<Contract> updatedColumn = grid.addColumn(new LocalDateTimeRenderer<>(Contract::getUpdated, "H:mm d. M. yyyy")).setHeader("Upraveno").setKey("updated").setWidth("150px");
+        Grid.Column<Contract> createdColumn = grid.addColumn(new LocalDateTimeRenderer<>(Contract::getCreated, "H:mm d. M. yyyy")).setHeader("Vytvořeno").setKey(Contract_.CREATED).setWidth("150px");
+        Grid.Column<Contract> updatedColumn = grid.addColumn(new LocalDateTimeRenderer<>(Contract::getUpdated, "H:mm d. M. yyyy")).setHeader("Upraveno").setKey(Contract_.UPDATED).setWidth("150px");
 
         HeaderRow headerRow = grid.appendHeaderRow();
 
         idFilterField = new IDFilterField(contractFilter::setIdFilter, configurableFilterDataProvider);
         headerRow.getCell(idColumn).setComponent(idFilterField.getFilterHeaderLayout());
+        headerRow.getCell(descriptionColumn).setComponent(FilterFields.createTextFieldFilter("popis", contractFilter::setDescriptionFilter, configurableFilterDataProvider));
         headerRow.getCell(clientColumn).setComponent(FilterFields.createContactMultiSelectComboBoxFilter("klienti", contractFilter::setClientsFilter, configurableFilterDataProvider, contactService));
         headerRow.getCell(stateColumn).setComponent(FilterFields.createStatusMultiSelectComboBoxFilter("stavy", contractFilter::setStatusFilter, configurableFilterDataProvider, statusService));
         headerRow.getCell(deadlineColumn).setComponent(new FromToLocalDateFilterFields(contractFilter::setFromDeadlineFilter, contractFilter::setToDeadlineFilter, configurableFilterDataProvider).getFilterHeaderLayout());
@@ -224,11 +223,14 @@ public class ContractsView extends VerticalLayout implements HasUrlParameter<Str
         grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
 
         grid.setMultiSort(true, Grid.MultiSortPriority.APPEND);
-        grid.setSortableColumns("id", "price", "created", "updated");
+        grid.setSortableColumns(Contract_.ID, Contract_.PRICE, Contract_.CREATED, Contract_.UPDATED);
         grid.sort(List.of(new GridSortOrder<>(createdColumn, SortDirection.DESCENDING)));
 
+        descriptionColumn.setVisible(false);
+        createdColumn.setVisible(false);
         updatedColumn.setVisible(false);
         gridFormLayout.showHideMenu.addColumnToggleItem("ID", idColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Popis", descriptionColumn);
         gridFormLayout.showHideMenu.addColumnToggleItem("Klient", clientColumn);
         gridFormLayout.showHideMenu.addColumnToggleItem("Stav", stateColumn);
         gridFormLayout.showHideMenu.addColumnToggleItem("Termín", deadlineColumn);
@@ -238,6 +240,10 @@ public class ContractsView extends VerticalLayout implements HasUrlParameter<Str
         gridFormLayout.showHideMenu.addColumnToggleItem("Upraveno", updatedColumn);
 
         updateGrid();
+    }
+
+    private String getPrice(Contract contract) {
+        return String.format("%d", contract.getPrice().intValue()) + "Kč";
     }
 
     private Component getState(Contract contract) {

@@ -12,6 +12,7 @@ public class ContractSpec {
         return Specification
                 .where(FILTER_UTIL.findAllDoubleGreaterThanOrEqualTo(contractFilter.getFromPriceFilter(), Contract_.PRICE))
                 .and(FILTER_UTIL.findAllLongEqual(contractFilter.getIdFilter(), Contract_.ID))
+                .and(FILTER_UTIL.findAllStringLikeIgnoreCase(contractFilter.getDescriptionFilter(), Contract_.DESCRIPTION))
                 .and(FILTER_UTIL.findAllDoubleLessThanOrEqualTo(contractFilter.getToPriceFilter(), Contract_.PRICE))
                 .and(FILTER_UTIL.findAllLocalDateGreaterThanOrEqualTo(contractFilter.getFromCreatedFilter(), Contract_.CREATED))
                 .and(FILTER_UTIL.findAllLocalDateLessThanOrEqualTo(contractFilter.getToCreatedFilter(), Contract_.CREATED))

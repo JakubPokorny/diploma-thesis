@@ -40,10 +40,14 @@ import java.util.stream.Collectors;
         }
 )
 public class Contract {
+    public static final int MAX_DESCRIPTION_LENGTH = 1500;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(length = MAX_DESCRIPTION_LENGTH)
+    private String description;
 
     @Column(nullable = false)
     @Builder.Default

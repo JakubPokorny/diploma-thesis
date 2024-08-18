@@ -7,19 +7,19 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.details.Details;
+import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.validator.DoubleRangeValidator;
 import com.vaadin.flow.theme.lumo.LumoIcon;
-import cz.upce.fei.dt.backend.entities.Contact;
-import cz.upce.fei.dt.backend.entities.Contract;
-import cz.upce.fei.dt.backend.entities.ContractProduct;
-import cz.upce.fei.dt.backend.entities.Product;
+import cz.upce.fei.dt.backend.entities.*;
 import cz.upce.fei.dt.backend.entities.keys.ContractProductKey;
 import cz.upce.fei.dt.backend.exceptions.ResourceNotFoundException;
 import cz.upce.fei.dt.backend.services.*;
@@ -34,19 +34,25 @@ import java.util.Set;
 public class ContractForm extends FormLayout implements IEditForm<Contract> {
     private final BeanValidationBinder<Contract> binder = new BeanValidationBinder<>(Contract.class);
     private final ComboBox<Contact> contactCB = new ComboBox<>("Klient");
-    private final ContactAccordion contactAccordion = new ContactAccordion();
+    private final TextArea description = new TextArea();
+    private final PriceFieldWithButton priceField = new PriceFieldWithButton("Cena s marží", VaadinIcon.EDIT);
     private final MultiSelectComboBox<Product> productsMSB = new MultiSelectComboBox<>("Objednané Produkty");
+
+    private NoteForm noteForm;
+    private final DeadlineForm deadlineForm;
+    private FileForm fileForm;
+
+    private final Details descriptionDetails = new Details("Popis", description);
+    private final ContactAccordion contactAccordion = new ContactAccordion();
     private final FormLayout contractProductFormsLayout = new FormLayout();
     private final HashMap<Long, ContractProductForm> contractProductForms = new HashMap<>();
-    private final PriceFieldWithButton priceField = new PriceFieldWithButton("Cena s marží", VaadinIcon.EDIT);
-    private final DeadlineForm deadlineForm;
+    private final Button reloadProducts = new Button(LumoIcon.RELOAD.create());
+
     private final DeadlineService deadlineService;
     private final NoteService noteService;
-    private NoteForm noteForm;
     private final FileService fileService;
-    private FileForm fileForm;
+
     private Contract contract;
-    private final Button reloadProducts = new Button(LumoIcon.RELOAD.create());
 
     public ContractForm(
             ContactService contactService,
@@ -63,6 +69,7 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
         deadlineForm = new DeadlineForm(deadlineService, statusService);
 
         setupContactCB(contactService);
+        setupDescriptionDetail();
         setupProductMSB(productService);
         setupContractProductsForms();
         setupPriceField();
@@ -71,11 +78,12 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
         ComponentUtil.addListener(UI.getCurrent(), UpdateContractPriceEvent.class, this::updatePrice);
 
         this.setColspan(contactCB, 2);
+        this.setColspan(descriptionDetails, 2);
         this.setColspan(contactAccordion, 2);
         this.setColspan(productsMSB, 2);
         this.setColspan(deadlineForm, 2);
         this.setColspan(contractProductFormsLayout, 2);
-        add(contactCB, contactAccordion, productsMSB, contractProductFormsLayout, priceField, reloadProducts, deadlineForm);
+        add(contactCB, contactAccordion, descriptionDetails, productsMSB, contractProductFormsLayout, priceField, reloadProducts, deadlineForm);
     }
 
     //region Setups
@@ -96,10 +104,22 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
         });
     }
 
+    private void setupDescriptionDetail() {
+        descriptionDetails.addThemeVariants(DetailsVariant.FILLED);
+
+        description.setWidthFull();
+        description.setHeight("100px");
+        description.setMaxLength(Contract.MAX_DESCRIPTION_LENGTH);
+        description.setHelperText(description.getValue().length()+"/"+Contract.MAX_DESCRIPTION_LENGTH);
+        description.addValueChangeListener(event -> event.getSource().setHelperText(event.getValue().length() + "/" + Contract.MAX_DESCRIPTION_LENGTH));
+
+        binder.forField(description).bind(Contract::getDescription, Contract::setDescription);
+    }
+
     private void reloadProducts() {
         Set<Product> selectedProducts = productsMSB.getSelectedItems();
         HashMap<Long, Double> productionPriceMap = new HashMap<>();
-        selectedProducts.forEach(product -> productionPriceMap.put(product.getId(), product.getProductionPrice()));
+        selectedProducts.forEach(product -> productionPriceMap.put(product.getId(), product.getSellingPrice()));
         contractProductForms.forEach((key, form) -> {
             ContractProduct contractProduct = form.getValue();
             contractProduct.setPricePerPiece(productionPriceMap.get(key));

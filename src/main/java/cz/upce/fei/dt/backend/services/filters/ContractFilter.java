@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 @Data
 public class ContractFilter {
     private Long idFilter;
+    private String descriptionFilter;
     private Set<Long> clientsFilter;
     private LocalDate fromDeadlineFilter;
     private LocalDate toDeadlineFilter;
