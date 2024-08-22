@@ -7,7 +7,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import cz.upce.fei.dt.backend.utilities.CzechI18n;
+import cz.upce.fei.dt.ui.utilities.CzechI18n;
 
 @Route("login")
 @PageTitle("Login | BoxEnergy")

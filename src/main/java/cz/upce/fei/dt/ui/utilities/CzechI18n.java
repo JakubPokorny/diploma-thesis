@@ -1,4 +1,4 @@
-package cz.upce.fei.dt.backend.utilities;
+package cz.upce.fei.dt.ui.utilities;
 
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.login.LoginI18n;

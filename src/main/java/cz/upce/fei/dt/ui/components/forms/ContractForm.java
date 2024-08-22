@@ -25,7 +25,7 @@ import cz.upce.fei.dt.backend.entities.Product;
 import cz.upce.fei.dt.backend.entities.keys.ContractProductKey;
 import cz.upce.fei.dt.backend.exceptions.ResourceNotFoundException;
 import cz.upce.fei.dt.backend.services.*;
-import cz.upce.fei.dt.backend.utilities.CzechI18n;
+import cz.upce.fei.dt.ui.utilities.CzechI18n;
 import cz.upce.fei.dt.ui.components.ContactAccordion;
 import cz.upce.fei.dt.ui.components.forms.events.UpdateContractFinancialBalance;
 import cz.upce.fei.dt.ui.components.forms.fields.DescriptionField;
@@ -50,7 +50,7 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
     private CommentForm commentForm;
     private final DeadlineForm deadlineForm;
     private FileForm fileForm;
-    private ExtraCostForm extraCostForm;
+    private final ExtraCostForm extraCostForm;
     private final FormLayout contractProductFormsLayout = new FormLayout();
     private final FormLayout financialBalanceForm = new FormLayout();
 

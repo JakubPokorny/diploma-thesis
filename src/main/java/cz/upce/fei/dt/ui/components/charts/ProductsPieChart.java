@@ -16,7 +16,7 @@ import cz.upce.fei.dt.backend.entities.Product;
 import cz.upce.fei.dt.backend.entities.Status;
 import cz.upce.fei.dt.backend.services.ProductService;
 import cz.upce.fei.dt.backend.services.filters.DashboardFilter;
-import cz.upce.fei.dt.backend.utilities.CzechI18n;
+import cz.upce.fei.dt.ui.utilities.CzechI18n;
 
 import java.time.LocalDate;
 import java.util.stream.Collectors;

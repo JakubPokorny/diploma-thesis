@@ -11,7 +11,7 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import cz.upce.fei.dt.backend.entities.Comment;
 import cz.upce.fei.dt.backend.entities.Contract;
 import cz.upce.fei.dt.backend.services.CommentService;
-import cz.upce.fei.dt.backend.utilities.CzechI18n;
+import cz.upce.fei.dt.ui.utilities.CzechI18n;
 
 public class CommentForm extends Details {
     private final MessageInput messageInput = new MessageInput();

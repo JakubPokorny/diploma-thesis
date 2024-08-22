@@ -22,7 +22,7 @@ import com.vaadin.flow.server.StreamResource;
 import cz.upce.fei.dt.backend.entities.Contract;
 import cz.upce.fei.dt.backend.entities.File;
 import cz.upce.fei.dt.backend.services.FileService;
-import cz.upce.fei.dt.backend.utilities.CzechI18n;
+import cz.upce.fei.dt.ui.utilities.CzechI18n;
 import jakarta.validation.*;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 

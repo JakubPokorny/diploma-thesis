@@ -16,7 +16,7 @@ import cz.upce.fei.dt.backend.entities.Deadline;
 import cz.upce.fei.dt.backend.entities.Status;
 import cz.upce.fei.dt.backend.services.DeadlineService;
 import cz.upce.fei.dt.backend.services.StatusService;
-import cz.upce.fei.dt.backend.utilities.CzechI18n;
+import cz.upce.fei.dt.ui.utilities.CzechI18n;
 import lombok.Getter;
 import lombok.Setter;
 

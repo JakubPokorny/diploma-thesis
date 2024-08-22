@@ -9,7 +9,7 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import cz.upce.fei.dt.backend.entities.ContractProduct;
-import cz.upce.fei.dt.backend.utilities.CzechI18n;
+import cz.upce.fei.dt.ui.utilities.CzechI18n;
 import cz.upce.fei.dt.ui.components.forms.events.UpdateContractFinancialBalance;
 
 public class ContractProductForm extends FormLayout implements IEditForm<ContractProduct> {

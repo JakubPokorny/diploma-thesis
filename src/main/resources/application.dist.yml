@@ -10,7 +10,7 @@ spring:
     password: "to-be-replace"
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
   mustache:
     check-template-location: false
   mail:
@@ -27,9 +27,6 @@ spring:
 vaadin:
   launch-browser: true
   whitelisted-packages: com.vaadin,org,vaadin,dev.hilla,cz.upce.fei.dt
-jwt:
-  auth:
-    secret: "to-be-replace"
 aws:
   region: "to-be-replace"
   access-key-id: "to-be-replace"
@@ -37,6 +34,3 @@ aws:
   s3:
     buckets:
       contract: "to-be-replace"
-
-
-
