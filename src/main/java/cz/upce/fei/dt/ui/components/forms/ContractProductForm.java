@@ -10,7 +10,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import cz.upce.fei.dt.backend.entities.ContractProduct;
 import cz.upce.fei.dt.backend.utilities.CzechI18n;
-import cz.upce.fei.dt.ui.components.forms.events.UpdateContractPriceEvent;
+import cz.upce.fei.dt.ui.components.forms.events.UpdateContractFinancialBalance;
 
 public class ContractProductForm extends FormLayout implements IEditForm<ContractProduct> {
     private final Binder<ContractProduct> binder = new BeanValidationBinder<>(ContractProduct.class);
@@ -19,7 +19,7 @@ public class ContractProductForm extends FormLayout implements IEditForm<Contrac
 
     public ContractProductForm(ContractProduct contractProduct) {
         amount.setLabel(contractProduct.getProduct().getName());
-        amount.setHelperText(CzechI18n.getCurrency(contractProduct.getPricePerPiece()) +"/ks");
+        amount.setHelperText(CzechI18n.getCurrency(contractProduct.getSellingPricePerPiece()) +"/ks");
         amount.setMin(1);
         amount.setValue(1);
         amount.setStep(1);
@@ -31,7 +31,7 @@ public class ContractProductForm extends FormLayout implements IEditForm<Contrac
                 .asRequired()
                 .bind(ContractProduct::getAmount, ContractProduct::setAmount);
 
-        amount.addValueChangeListener(_ -> ComponentUtil.fireEvent(UI.getCurrent(), new UpdateContractPriceEvent(this)));
+        amount.addValueChangeListener(_ -> ComponentUtil.fireEvent(UI.getCurrent(), new UpdateContractFinancialBalance(this)));
 
         this.setColspan(amount, 2);
         add(amount);
@@ -49,7 +49,7 @@ public class ContractProductForm extends FormLayout implements IEditForm<Contrac
     @Override
     public void setValue(ContractProduct value) {
         contractProduct = value;
-        amount.setHelperText(CzechI18n.getCurrency(contractProduct.getPricePerPiece()) +"/ks");
+        amount.setHelperText(CzechI18n.getCurrency(contractProduct.getSellingPricePerPiece()) +"/ks");
         binder.readBean(contractProduct);
     }
 

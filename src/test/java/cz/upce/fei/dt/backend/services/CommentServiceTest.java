@@ -3,11 +3,11 @@ package cz.upce.fei.dt.backend.services;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.spring.security.AuthenticationContext;
-import cz.upce.fei.dt.backend.dto.INote;
-import cz.upce.fei.dt.backend.entities.Note;
+import cz.upce.fei.dt.backend.dto.IComment;
+import cz.upce.fei.dt.backend.entities.Comment;
 import cz.upce.fei.dt.backend.entities.User;
 import cz.upce.fei.dt.backend.exceptions.AuthenticationException;
-import cz.upce.fei.dt.backend.repositories.NoteRepository;
+import cz.upce.fei.dt.backend.repositories.CommentRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,18 +28,18 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class NoteServiceTest {
+class CommentServiceTest {
     @Mock
-    private NoteRepository noteRepository;
+    private CommentRepository commentRepository;
     @Mock
     private AuthenticationContext authenticationContext;
 
     @InjectMocks
-    private NoteService noteService;
+    private CommentService commentService;
 
     @Test
     void saveThrowsAuthenticationExceptionWhenNoOneIsAuthenticated() {
-        Exception exception = assertThrows(AuthenticationException.class, () -> noteService.save(mock(Note.class)));
+        Exception exception = assertThrows(AuthenticationException.class, () -> commentService.save(mock(Comment.class)));
         assertEquals(exception.getMessage(), "Neznámý uživatel. Přihlašte se prosím.");
 
         verify(authenticationContext).getAuthenticatedUser(User.class);
@@ -51,55 +51,55 @@ class NoteServiceTest {
         when(authUser.getFullName()).thenReturn("Joe Doe");
 
         LocalDateTime created = LocalDateTime.now();
-        Note note = Note.builder()
+        Comment comment = Comment.builder()
                 .id(1L)
-                .note("Lorem ipsum dolor sit amet")
+                .comment("Lorem ipsum dolor sit amet")
                 .user(authUser)
                 .created(created)
                 .build();
 
         when(authenticationContext.getAuthenticatedUser(User.class)).thenReturn(Optional.of(authUser));
-        when(noteRepository.save(note)).thenReturn(note);
+        when(commentRepository.save(comment)).thenReturn(comment);
 
-        MessageListItem message = noteService.save(note);
+        MessageListItem message = commentService.save(comment);
 
         assertEquals(message.getText(), "Lorem ipsum dolor sit amet");
         assertEquals(message.getUserName(), "Joe Doe");
         assertEquals(message.getTime(), created.toInstant(ZoneOffset.UTC));
 
         verify(authenticationContext).getAuthenticatedUser(User.class);
-        verify(noteRepository).save(note);
+        verify(commentRepository).save(comment);
     }
 
     @Test
     void findAllByContractId() {
-        INote iNote = mock(INote.class);
-        when(iNote.getNote()).thenReturn("Lorem ipsum dolor sit amet");
-        when(iNote.getFirstName()).thenReturn("Joe");
-        when(iNote.getLastName()).thenReturn("Doe");
+        IComment iComment = mock(IComment.class);
+        when(iComment.getComment()).thenReturn("Lorem ipsum dolor sit amet");
+        when(iComment.getFirstName()).thenReturn("Joe");
+        when(iComment.getLastName()).thenReturn("Doe");
         LocalDateTime created = LocalDateTime.now();
-        when(iNote.getCreated()).thenReturn(created);
+        when(iComment.getCreated()).thenReturn(created);
 
-        List<INote> iNotes = List.of(iNote);
-        Page<INote> page = new PageImpl<>(iNotes);
+        List<IComment> iComments = List.of(iComment);
+        Page<IComment> page = new PageImpl<>(iComments);
 
-        when(noteRepository.findAllByContractId(any(), anyLong())).thenReturn(page);
+        when(commentRepository.findAllByContractId(any(), anyLong())).thenReturn(page);
 
-        Stream<MessageListItem> result = noteService.findAllByContractId(1L, new Query<>());
+        Stream<MessageListItem> result = commentService.findAllByContractId(1L, new Query<>());
 
         List<MessageListItem> resultList = result.toList();
 
         MessageListItem message = resultList.getFirst();
-        assertEquals(message.getText(), iNote.getNote());
-        assertEquals(message.getTime(), iNote.getCreated().toInstant(ZoneOffset.UTC));
-        assertEquals(message.getUserName(), iNote.getFirstName() + " " + iNote.getLastName());
+        assertEquals(message.getText(), iComment.getComment());
+        assertEquals(message.getTime(), iComment.getCreated().toInstant(ZoneOffset.UTC));
+        assertEquals(message.getUserName(), iComment.getFirstName() + " " + iComment.getLastName());
 
-        verify(noteRepository).findAllByContractId(any(), anyLong());
+        verify(commentRepository).findAllByContractId(any(), anyLong());
     }
 
     @Test
     void updateAllUserByUser() {
-        noteService.updateAllUserByUser(1L, 2L);
-        verify(noteRepository).updateAllUserByUser(1L, 2L);
+        commentService.updateAllUserByUser(1L, 2L);
+        verify(commentRepository).updateAllUserByUser(1L, 2L);
     }
 }

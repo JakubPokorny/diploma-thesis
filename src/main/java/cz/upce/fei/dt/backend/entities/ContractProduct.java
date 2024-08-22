@@ -23,7 +23,10 @@ public class ContractProduct {
     private int amount;
 
     @Column(nullable = false)
-    private Double pricePerPiece;
+    private Double sellingPricePerPiece;
+
+    @Column(nullable = false)
+    private Double productionPricePerPiece;
 
     @ManyToOne
     @MapsId("contractId")

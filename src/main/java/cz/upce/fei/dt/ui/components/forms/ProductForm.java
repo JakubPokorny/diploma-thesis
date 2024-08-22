@@ -51,7 +51,7 @@ public class ProductForm extends FormLayout implements IEditForm<Product> {
         setupProductComponentsForms();
 
         this.setResponsiveSteps(new ResponsiveStep("0", 1), new ResponsiveStep("600px", 3));
-        this.setColspan(name, 2);
+        this.setColspan(name, 3);
         this.setColspan(componentMSB, 3);
         this.setColspan(productComponentsFormLayout, 3);
 
@@ -66,6 +66,10 @@ public class ProductForm extends FormLayout implements IEditForm<Product> {
         productionPrice.button.addClickListener(_ -> updateProductionPrice(null));
         productionPrice.setReadOnly(true);
         binder.forField(productionPrice).withValidator(new DoubleRangeValidator("Výrobní cena mimo hodnoty", 0.0, Double.MAX_VALUE)).asRequired().bind(Product::getProductionPrice, Product::setProductionPrice);
+        productionPrice.addValueChangeListener(event -> {
+            if (product != null && product.getProductionPrice() != null)
+                productionPrice.setValue((double)Math.round(event.getValue()));
+        });
     }
 
     private void updateProductionPrice(UpdateProductProductionPriceEvent updateProductionProductPriceEvent) {
@@ -102,6 +106,10 @@ public class ProductForm extends FormLayout implements IEditForm<Product> {
         });
 
         binder.forField(sellingPrice).withValidator(new DoubleRangeValidator("Prodejní cena mimo hodnoty", 0.0, Double.MAX_VALUE)).asRequired().bind(Product::getSellingPrice, Product::setSellingPrice);
+        sellingPrice.addValueChangeListener(event -> {
+            if (product != null && product.getSellingPrice() != null)
+                sellingPrice.setValue((double)Math.round(event.getValue()));
+        });
     }
 
     private void updateSellingPrice() {

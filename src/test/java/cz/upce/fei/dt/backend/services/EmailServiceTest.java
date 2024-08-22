@@ -48,10 +48,10 @@ class EmailServiceTest {
     }
 
     @Test
-    void sendStockNotification() {
+    void notifyUserAboutMissingComponents() {
         List<CheckStockDto> underLimit = CheckStockDtoGenerator.generateCheckStockDto(List.of(1L, 2L));
 
-        emailService.sendStockNotification(underLimit);
+        emailService.notifyUserAboutMissingComponents(underLimit);
 
         verify(sender).send(messageCaptor.capture());
         SimpleMailMessage message = messageCaptor.getValue();

@@ -4,7 +4,7 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.messages.MessageInputI18n;
 import com.vaadin.flow.component.upload.UploadI18N;
-import cz.upce.fei.dt.backend.entities.Note;
+import cz.upce.fei.dt.backend.entities.Comment;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -71,7 +71,7 @@ public class CzechI18n {
     public static MessageInputI18n getMessageInputI18n() {
         MessageInputI18n czech = new MessageInputI18n();
         czech.setSend("Poslat");
-        czech.setMessage("Poznámka (max %d znaků)".formatted(Note.MAX_NOTE_LENGTH));
+        czech.setMessage("Poznámka (max %d znaků)".formatted(Comment.MAX_COMMENT_LENGTH));
         return czech;
     }
 

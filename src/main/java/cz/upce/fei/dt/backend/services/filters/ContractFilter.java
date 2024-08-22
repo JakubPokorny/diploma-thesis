@@ -12,13 +12,19 @@ import java.util.stream.Collectors;
 @Data
 public class ContractFilter {
     private Long idFilter;
-    private String descriptionFilter;
+    private String noteFilter;
     private Set<Long> clientsFilter;
+    private LocalDate fromFinalDeadlineFilter;
+    private LocalDate toFinalDeadlineFilter;
     private LocalDate fromDeadlineFilter;
     private LocalDate toDeadlineFilter;
     private Set<Status> statusFilter;
-    private Double fromPriceFilter;
-    private Double toPriceFilter;
+    private Double fromInvoicePriceFilter;
+    private Double toInvoicePriceFilter;
+    private Double fromTotalCostFilter;
+    private Double toTotalCostFilter;
+    private Double fromTotalProfitFilter;
+    private Double toTotalProfitFilter;
     private Set<Long> productsFilter;
     private LocalDate fromCreatedFilter;
     private LocalDate toCreatedFilter;
@@ -45,9 +51,15 @@ public class ContractFilter {
         boolean filterToDeadline = filterToDeadline(currentDeadline.getDeadline());
         boolean filterContractTags = filterContractTags(currentDeadline);
 
+        boolean filterClients = clientsFilter == null || clientsFilter.isEmpty() || filterClients(contract);
         boolean filterProducts = productsFilter == null || productsFilter.isEmpty() || filterProducts(contract);
 
-        return filterStates && filterFromDeadline && filterToDeadline && filterProducts && filterContractTags;
+        return filterStates && filterFromDeadline && filterToDeadline && filterClients && filterProducts && filterContractTags;
+    }
+
+    private boolean filterClients(Contract contract) {
+        return clientsFilter.stream().anyMatch(clientId -> clientId.equals(contract.getContact().getId()));
+
     }
 
     private boolean filterContractTags(Deadline deadline) {

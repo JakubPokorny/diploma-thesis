@@ -5,14 +5,18 @@ import java.util.Set;
 
 public interface IContract {
     Long getId();
+
     LocalDateTime getCreated();
+
     LocalDateTime getUpdated();
+
     IContact getContact();
+
     Set<IContractProduct> getContractProducts();
+
     Set<IDeadline> getDeadlines();
-    Set<INote> getNotes();
+
+    Set<IComment> getNotes();
+
     Set<IFile> getFiles();
-
-
-
 }

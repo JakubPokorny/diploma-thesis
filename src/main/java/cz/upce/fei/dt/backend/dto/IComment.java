@@ -2,8 +2,8 @@ package cz.upce.fei.dt.backend.dto;
 
 import java.time.LocalDateTime;
 
-public interface INote {
-    String getNote();
+public interface IComment {
+    String getComment();
 
     LocalDateTime getCreated();
 

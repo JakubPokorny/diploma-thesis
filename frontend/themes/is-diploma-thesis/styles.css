@@ -6,6 +6,12 @@
     cursor: pointer;
 }
 
+.context-icon{
+    color: var(--lumo-secondary-text-color);
+    margin-inline-end: var(--lumo-space-s);
+    padding: var(--lumo-space-xs);
+}
+
 /* PasswordForm */
 .password-form {
     max-width: calc(var(--lumo-size-m) * 10);

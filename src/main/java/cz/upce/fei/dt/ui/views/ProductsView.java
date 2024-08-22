@@ -153,7 +153,7 @@ public class ProductsView extends VerticalLayout {
     }
 
     private String getSellingPrice(Product product) {
-        return String.format("%.2f", product.getSellingPrice()) + "Kč";
+        return String.format("%s", Math.round(product.getSellingPrice())) + "Kč";
     }
 
     private String getProfit(Product product) {
@@ -161,7 +161,7 @@ public class ProductsView extends VerticalLayout {
     }
 
     private String getProductionPrice(Product product) {
-        return String.format("%.2f", product.getProductionPrice()) + "Kč";
+        return String.format("%s", Math.round(product.getProductionPrice())) + "Kč";
     }
 
     private MultiSelectComboBox<Component> createProductsComponent(Product product) {

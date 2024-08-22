@@ -80,6 +80,10 @@ public class ComponentForm extends FormLayout implements IEditForm<Component> {
                 .withValidator(new DoubleRangeValidator("Minimum mimo hodnoty", 0.0, Double.MAX_VALUE))
                 .asRequired()
                 .bind(Component::getPrice, Component::setPrice);
+        price.addValueChangeListener(event -> {
+            if (component != null && component.getPrice() != null)
+                price.setValue((double)Math.round(event.getValue()));
+        });
     }
 
     private void setupMinInStock() {

@@ -58,7 +58,7 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     @JsonIgnore
     @ToString.Exclude
-    List<Component> components;
+    private List<Component> components;
 
     public String getFullName() {
         return firstName + " " + lastName;

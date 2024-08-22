@@ -108,7 +108,7 @@ public class ComponentService extends AbstractBackEndDataProvider<Component, Com
                 underMinInStockLimit.add(checkStockDto);
         });
 
-        emailService.sendStockNotification(underMinInStockLimit);
+        emailService.notifyUserAboutMissingComponents(underMinInStockLimit);
     }
 
     @Transactional

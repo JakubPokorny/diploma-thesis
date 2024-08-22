@@ -13,16 +13,16 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "notes")
-public class Note {
-    public static final int MAX_NOTE_LENGTH = 500;
+@Table(name = "comments")
+public class Comment {
+    public static final int MAX_COMMENT_LENGTH = 500;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, updatable = false, length = MAX_NOTE_LENGTH)
-    private String note;
+    @Column(nullable = false, updatable = false, length = MAX_COMMENT_LENGTH)
+    private String comment;
 
     @Column
     @CreationTimestamp
@@ -40,12 +40,12 @@ public class Note {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Note note = (Note) o;
-        return Objects.equals(id, note.id);
+        Comment comment = (Comment) o;
+        return Objects.equals(id, comment.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, note, created, user, contract);
+        return Objects.hash(id, comment, created, user, contract);
     }
 }

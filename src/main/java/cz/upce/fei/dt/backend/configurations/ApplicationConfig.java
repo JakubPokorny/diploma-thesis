@@ -32,6 +32,7 @@ public class ApplicationConfig {
     private String MAIL_USERNAME;
     @Value("${spring.mail.password}")
     private String MAIL_PASSWORD;
+
     @Bean
     public UserDetailsService userDetailsService() throws UsernameNotFoundException{
         return username -> userRepository.findByEmail(username)

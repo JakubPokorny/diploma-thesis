@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -47,15 +48,25 @@ public class Contract {
     private Long id;
 
     @Column(length = MAX_DESCRIPTION_LENGTH)
-    private String description;
+    private String note;
 
     @Column(nullable = false)
     @Builder.Default
-    private Double price = 0.0;
+    private Double invoicePrice = 0.0;
+
+    @Column(nullable = false)
+    private Double totalProfit;
+
+    @Column(nullable = false)
+    private Double totalCost;
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean ownPrice = false;
+    private Boolean ownInvoicePrice = false;
+
+    @Column
+    @Builder.Default
+    private LocalDate finalDeadline = LocalDate.now().plusWeeks(8);
 
     @Column
     @CreationTimestamp
@@ -85,12 +96,21 @@ public class Contract {
     @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
     @ToString.Exclude
     @Builder.Default
-    private Set<Note> notes = new HashSet<>();
+    private Set<Comment> comments = new HashSet<>();
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
     @ToString.Exclude
     @Builder.Default
     private Set<File> files = new HashSet<>();
+
+    @OneToMany(mappedBy = "contract", cascade = CascadeType.REMOVE)
+    @ToString.Exclude
+    @Builder.Default
+    private Set<ExtraCost> extraCosts = new HashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User createdBy;
 
     public List<Product> getSelectedProducts() {
         return contractProducts.stream().map(ContractProduct::getProduct).toList();
@@ -99,7 +119,7 @@ public class Contract {
     public Deadline getCurrentDeadline() {
         if (deadlines.isEmpty())
             return new Deadline();
-        else{
+        else {
             deadlines = deadlines.stream().sorted(Comparator.comparing(Deadline::getCreated).reversed()).collect(Collectors.toCollection(LinkedHashSet::new));
             return deadlines.iterator().next();
         }

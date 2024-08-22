@@ -31,10 +31,10 @@ import java.io.IOException;
 import java.util.Set;
 
 public class FileForm extends Details {
+    private final FileService fileService;
     private final MultiFileMemoryBuffer multiFileMemoryBuffer = new MultiFileMemoryBuffer();
     private final Upload upload = new Upload(multiFileMemoryBuffer);
     private final Grid<File> downloadArea = new Grid<>();
-    private final FileService fileService;
     private final Contract contract;
 
     public FileForm(FileService fileService, Contract contract) {

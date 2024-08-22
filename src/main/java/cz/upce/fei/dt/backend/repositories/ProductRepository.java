@@ -28,7 +28,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @NonNull
     List<Product> findAll(@Nullable Specification<Product> specification, @NonNull Sort sort);
 
-    @Query(value = "select id, name, selling_price as sellingPrice from products where lower(name) like lower(concat('%', :searchTerm, '%'))", nativeQuery = true)
+    @Query(value = "select id, name, selling_price as sellingPrice, production_price as productionPrice from products where lower(name) like lower(concat('%', :searchTerm, '%'))", nativeQuery = true)
     @NonNull
     Page<IProduct> findAllByName(@NonNull Pageable pageable, @Param("searchTerm") String searchTerm);
 

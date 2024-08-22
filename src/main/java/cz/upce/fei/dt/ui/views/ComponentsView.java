@@ -189,7 +189,7 @@ public class ComponentsView extends VerticalLayout implements HasUrlParameter<St
     }
 
     private String getPrice(Component component) {
-        return component.getPrice() != null ? String.format("%,.2f", component.getPrice()) + " Kč" : "";
+        return component.getPrice() != null ? String.format("%s", Math.round(component.getPrice())) + " Kč" : "";
     }
 
     private Span createInStockBadge(Component component) {

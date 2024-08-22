@@ -3,9 +3,12 @@ package cz.upce.fei.dt.backend.services;
 import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
+import com.vaadin.flow.spring.security.AuthenticationContext;
 import cz.upce.fei.dt.backend.entities.Contract;
 import cz.upce.fei.dt.backend.entities.ContractProduct;
 import cz.upce.fei.dt.backend.entities.Deadline;
+import cz.upce.fei.dt.backend.entities.User;
+import cz.upce.fei.dt.backend.exceptions.AuthenticationException;
 import cz.upce.fei.dt.backend.repositories.ContractRepository;
 import cz.upce.fei.dt.backend.services.filters.ContractFilter;
 import cz.upce.fei.dt.backend.services.specifications.ContractSpec;
@@ -25,6 +28,7 @@ public class ContractService extends AbstractBackEndDataProvider<Contract, Contr
     private final DeadlineService deadlineService;
     private final ContractProductService contractProductService;
     private final FileService fileService;
+    private final AuthenticationContext authenticationContext;
 
     @Override
     public Stream<Contract> fetchFromBackEnd(Query<Contract, ContractFilter> query) {
@@ -44,7 +48,11 @@ public class ContractService extends AbstractBackEndDataProvider<Contract, Contr
     }
 
     @Transactional
-    public void saveContract(Contract contract) {
+    public void saveContract(Contract contract) throws AuthenticationException {
+        User user = authenticationContext.getAuthenticatedUser(User.class)
+                .orElseThrow(() -> new AuthenticationException("Neznámý uživatel. Přihlašte se prosím."));
+
+        contract.setCreatedBy(user);
         contract.setUpdated(LocalDateTime.now());
         Deadline deadline = contract.getCurrentDeadline();
         if (contract.getId() == null) { // new Contract
@@ -79,4 +87,8 @@ public class ContractService extends AbstractBackEndDataProvider<Contract, Contr
         return contractRepository.countAll();
     }
 
+    @Transactional
+    public void updateAllUserByUser(Long userId, Long alternateUserId) {
+        contractRepository.updateAllUserByUser(userId, alternateUserId);
+    }
 }

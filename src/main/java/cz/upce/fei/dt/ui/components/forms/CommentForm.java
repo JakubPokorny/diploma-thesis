@@ -8,20 +8,20 @@ import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import cz.upce.fei.dt.backend.entities.Comment;
 import cz.upce.fei.dt.backend.entities.Contract;
-import cz.upce.fei.dt.backend.entities.Note;
-import cz.upce.fei.dt.backend.services.NoteService;
+import cz.upce.fei.dt.backend.services.CommentService;
 import cz.upce.fei.dt.backend.utilities.CzechI18n;
 
-public class NoteForm extends Details {
+public class CommentForm extends Details {
     private final MessageInput messageInput = new MessageInput();
     Grid<MessageListItem> messageGrid = new Grid<>();
-    private final NoteService noteService;
+    private final CommentService commentService;
 
 
-    public NoteForm(NoteService noteService, Contract contract) {
+    public CommentForm(CommentService commentService, Contract contract) {
         this.setClassName("notes-layout");
-        this.noteService = noteService;
+        this.commentService = commentService;
 
         setupMessageInput(contract);
         setupMessageList(contract.getId());
@@ -48,23 +48,23 @@ public class NoteForm extends Details {
 
         messageInput.getElement().addPropertyChangeListener("value", "change", event -> {
             int length = event.getValue().toString().length();
-            messageInput.setTooltipText("%d/%d".formatted(length, Note.MAX_NOTE_LENGTH));
+            messageInput.setTooltipText("%d/%d".formatted(length, Comment.MAX_COMMENT_LENGTH));
 
-            if (length >= Note.MAX_NOTE_LENGTH)
-                Notification.show("Poznámka je moc dlouhá. %d/%d".formatted(length, Note.MAX_NOTE_LENGTH)).addThemeVariants(NotificationVariant.LUMO_WARNING);
+            if (length >= Comment.MAX_COMMENT_LENGTH)
+                Notification.show("Komentář je moc dlouhý. %d/%d".formatted(length, Comment.MAX_COMMENT_LENGTH)).addThemeVariants(NotificationVariant.LUMO_WARNING);
         });
 
         messageInput.addSubmitListener(submitEvent -> {
-            Note note = Note.builder()
+            Comment comment = Comment.builder()
                     .contract(contract)
-                    .note(submitEvent.getValue())
+                    .comment(submitEvent.getValue())
                     .build();
             try {
-                if (note.getNote().length() >= Note.MAX_NOTE_LENGTH)
-                    throw new Exception("Poznámka je moc dlouhá. %d/%d".formatted(note.getNote().length(), Note.MAX_NOTE_LENGTH));
-                noteService.save(note);
+                if (comment.getComment().length() >= Comment.MAX_COMMENT_LENGTH)
+                    throw new Exception("Komentář je moc dlouhý. %d/%d".formatted(comment.getComment().length(), Comment.MAX_COMMENT_LENGTH));
+                commentService.save(comment);
                 updateMessageList(contract.getId());
-                Notification.show("Poznámka uložena.").addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                Notification.show("Komentář uložen.").addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             } catch (Exception exception) {
                 Notification.show(exception.getMessage()).addThemeVariants(NotificationVariant.LUMO_ERROR);
             }
@@ -73,10 +73,10 @@ public class NoteForm extends Details {
 
 
     private void updateMessageList(Long contractId) {
-        long count = messageGrid.setItems(query -> noteService.findAllByContractId(contractId, query))
+        long count = messageGrid.setItems(query -> commentService.findAllByContractId(contractId, query))
                 .getItems()
                 .count();
-        this.setSummaryText("Poznámky (%d)".formatted(count));
+        this.setSummaryText("Komentáře (%d)".formatted(count));
 
         if (count > 0) {
             this.setOpened(true);

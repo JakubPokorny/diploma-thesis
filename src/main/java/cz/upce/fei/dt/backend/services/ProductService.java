@@ -54,6 +54,7 @@ public class ProductService extends AbstractBackEndDataProvider<Product, Product
                         .id(iProduct.getId())
                         .name(iProduct.getName())
                         .sellingPrice(iProduct.getSellingPrice())
+                        .productionPrice(iProduct.getProductionPrice())
                         .build()
                 );
     }

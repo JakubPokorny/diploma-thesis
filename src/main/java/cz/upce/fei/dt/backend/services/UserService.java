@@ -37,8 +37,9 @@ public class UserService extends AbstractBackEndDataProvider<User, UserFilter> {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final DeadlineService deadlineService;
-    private final NoteService noteService;
+    private final CommentService commentService;
     private final ComponentService componentService;
+    private final ContractService contractService;
 
     @Override
     public Stream<User> fetchFromBackEnd(Query<User, UserFilter> query) {
@@ -94,8 +95,9 @@ public class UserService extends AbstractBackEndDataProvider<User, UserFilter> {
         Long alternateUserId = alternateUser.getId();
 
         deadlineService.updateAllUserByUser(userId, alternateUserId);
-        noteService.updateAllUserByUser(userId, alternateUserId);
+        commentService.updateAllUserByUser(userId, alternateUserId);
         componentService.updateAllUserByUser(userId, alternateUserId);
+        contractService.updateAllUserByUser(userId, alternateUserId);
 
         userRepository.delete(user);
     }
@@ -140,6 +142,4 @@ public class UserService extends AbstractBackEndDataProvider<User, UserFilter> {
         });
         return resetToken;
     }
-
-
 }

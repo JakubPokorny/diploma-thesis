@@ -46,9 +46,14 @@ public class ContractsView extends VerticalLayout implements HasUrlParameter<Str
     private final ContactService contactService;
     private final DeadlineService deadlineService;
     private final StatusService statusService;
+
     private final Grid<Contract> grid;
     private final GridFormLayout<ContractForm, Contract> gridFormLayout;
     private final ContractFilter contractFilter = new ContractFilter();
+    private DataProvider<Contract, ContractFilter> dataProvider;
+    private ConfigurableFilterDataProvider<Contract, Void, ContractFilter> configurableFilterDataProvider;
+    private IDFilterField idFilterField;
+
     private final TabWithBadge all = createContractTabWithBadge("Všechny", "contrast", ContractFilterTag.ALL);
     private final TabWithBadge success = createContractTabWithBadge("Hotové", "success", ContractFilterTag.SUCCESS);
     private final TabWithBadge contrast = createContractTabWithBadge("Čeká na akci", "contrast", ContractFilterTag.CONTRAST);
@@ -58,9 +63,6 @@ public class ContractsView extends VerticalLayout implements HasUrlParameter<Str
     private final TabWithBadge withoutDeadline = createContractTabWithBadge("Bez termínu", "contrast", ContractFilterTag.WITHOUT_DEADLINE);
     private final TabWithBadge beforeDeadline = createContractTabWithBadge("Před termínem", "", ContractFilterTag.BEFORE_DEADLINE);
     private final TabWithBadge afterDeadline = createContractTabWithBadge("Po termínu", "error", ContractFilterTag.AFTER_DEADLINE);
-    private DataProvider<Contract, ContractFilter> dataProvider;
-    private ConfigurableFilterDataProvider<Contract, Void, ContractFilter> configurableFilterDataProvider;
-    private IDFilterField idFilterField;
 
     @Override
     public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
@@ -114,17 +116,18 @@ public class ContractsView extends VerticalLayout implements HasUrlParameter<Str
             ContractService contractService,
             ContactService contactService,
             ProductService productService,
-            NoteService noteService,
+            CommentService commentService,
             FileService fileService,
             DeadlineService deadlineService,
-            StatusService statusService) {
+            StatusService statusService,
+            ExtraCostService extraCostService) {
         this.contractService = contractService;
         this.productService = productService;
         this.contactService = contactService;
         this.deadlineService = deadlineService;
         this.statusService = statusService;
 
-        ContractForm form = new ContractForm(contactService, productService, noteService, fileService, deadlineService, statusService);
+        ContractForm form = new ContractForm(contactService, productService, commentService, fileService, deadlineService, statusService, extraCostService);
         grid = new Grid<>(Contract.class, false);
         gridFormLayout = new GridFormLayout<>(form, grid);
         MainLayout.setPageTitle("Zakázky", ContractsView.class);
@@ -193,11 +196,14 @@ public class ContractsView extends VerticalLayout implements HasUrlParameter<Str
         configurableFilterDataProvider.setFilter(contractFilter);
 
         Grid.Column<Contract> idColumn = grid.addColumn(Contract::getId).setHeader("ID").setKey(Contract_.ID).setWidth("50px");
-        Grid.Column<Contract> descriptionColumn = grid.addColumn(Contract::getDescription).setHeader("Popis").setWidth("300px");
+        Grid.Column<Contract> descriptionColumn = grid.addColumn(Contract::getNote).setHeader("Popis").setWidth("300px");
         Grid.Column<Contract> clientColumn = grid.addComponentColumn(this::getClient).setHeader("Klient").setWidth("150px");
         Grid.Column<Contract> stateColumn = grid.addComponentColumn(this::getState).setHeader("Stav").setWidth("150px");
-        Grid.Column<Contract> deadlineColumn = grid.addComponentColumn(this::getDeadline).setHeader("Termín").setWidth("150px");
-        Grid.Column<Contract> priceColumn = grid.addColumn(this::getPrice).setHeader("Cena s marží").setKey(Contract_.PRICE).setWidth("150px");
+        Grid.Column<Contract> finalDeadlineColumn = grid.addComponentColumn(contract -> getDateBadge(contract.getFinalDeadline())).setHeader("Konečný termín").setKey(Contract_.FINAL_DEADLINE).setWidth("150px");
+        Grid.Column<Contract> deadlineColumn = grid.addComponentColumn(contract -> getDateBadge(contract.getCurrentDeadline().getDeadline())).setHeader("Dílčí termín").setWidth("150px");
+        Grid.Column<Contract> invoiceColumn = grid.addColumn(contract -> getPrice(contract.getInvoicePrice())).setHeader("Fakturační cena").setKey(Contract_.INVOICE_PRICE).setWidth("150px");
+        Grid.Column<Contract> totalCostColumn = grid.addColumn(contract -> getPrice(contract.getTotalCost())).setHeader("Celkové náklady cena").setKey(Contract_.TOTAL_COST).setWidth("150px");
+        Grid.Column<Contract> totalProfitColumn = grid.addColumn(contract -> getPrice(contract.getTotalProfit())).setHeader("Čistý zisk").setKey(Contract_.TOTAL_PROFIT).setWidth("150px");
         Grid.Column<Contract> productsColumn = grid.addComponentColumn(this::getProducts).setHeader("Objednané produkty").setWidth("150px");
         Grid.Column<Contract> createdColumn = grid.addColumn(new LocalDateTimeRenderer<>(Contract::getCreated, "H:mm d. M. yyyy")).setHeader("Vytvořeno").setKey(Contract_.CREATED).setWidth("150px");
         Grid.Column<Contract> updatedColumn = grid.addColumn(new LocalDateTimeRenderer<>(Contract::getUpdated, "H:mm d. M. yyyy")).setHeader("Upraveno").setKey(Contract_.UPDATED).setWidth("150px");
@@ -206,11 +212,14 @@ public class ContractsView extends VerticalLayout implements HasUrlParameter<Str
 
         idFilterField = new IDFilterField(contractFilter::setIdFilter, configurableFilterDataProvider);
         headerRow.getCell(idColumn).setComponent(idFilterField.getFilterHeaderLayout());
-        headerRow.getCell(descriptionColumn).setComponent(FilterFields.createTextFieldFilter("popis", contractFilter::setDescriptionFilter, configurableFilterDataProvider));
+        headerRow.getCell(descriptionColumn).setComponent(FilterFields.createTextFieldFilter("popis", contractFilter::setNoteFilter, configurableFilterDataProvider));
         headerRow.getCell(clientColumn).setComponent(FilterFields.createContactMultiSelectComboBoxFilter("klienti", contractFilter::setClientsFilter, configurableFilterDataProvider, contactService));
         headerRow.getCell(stateColumn).setComponent(FilterFields.createStatusMultiSelectComboBoxFilter("stavy", contractFilter::setStatusFilter, configurableFilterDataProvider, statusService));
+        headerRow.getCell(finalDeadlineColumn).setComponent(new FromToLocalDateFilterFields(contractFilter::setFromFinalDeadlineFilter, contractFilter::setToFinalDeadlineFilter, configurableFilterDataProvider).getFilterHeaderLayout());
         headerRow.getCell(deadlineColumn).setComponent(new FromToLocalDateFilterFields(contractFilter::setFromDeadlineFilter, contractFilter::setToDeadlineFilter, configurableFilterDataProvider).getFilterHeaderLayout());
-        headerRow.getCell(priceColumn).setComponent(FilterFields.createFromToNumberFilter(contractFilter::setFromPriceFilter, contractFilter::setToPriceFilter, configurableFilterDataProvider));
+        headerRow.getCell(invoiceColumn).setComponent(FilterFields.createFromToNumberFilter(contractFilter::setFromInvoicePriceFilter, contractFilter::setToInvoicePriceFilter, configurableFilterDataProvider));
+        headerRow.getCell(totalCostColumn).setComponent(FilterFields.createFromToNumberFilter(contractFilter::setFromTotalCostFilter, contractFilter::setToTotalCostFilter, configurableFilterDataProvider));
+        headerRow.getCell(totalProfitColumn).setComponent(FilterFields.createFromToNumberFilter(contractFilter::setFromTotalProfitFilter, contractFilter::setToTotalProfitFilter, configurableFilterDataProvider));
         headerRow.getCell(productsColumn).setComponent(FilterFields.createProductMultiSelectComboBoxFilter("produkty", contractFilter::setProductsFilter, configurableFilterDataProvider, productService));
 
         FromToLocalDateFilterFields createdFromToDatePicker = new FromToLocalDateFilterFields(contractFilter::setFromCreatedFilter, contractFilter::setToCreatedFilter, configurableFilterDataProvider);
@@ -223,7 +232,7 @@ public class ContractsView extends VerticalLayout implements HasUrlParameter<Str
         grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT);
 
         grid.setMultiSort(true, Grid.MultiSortPriority.APPEND);
-        grid.setSortableColumns(Contract_.ID, Contract_.PRICE, Contract_.CREATED, Contract_.UPDATED);
+        grid.setSortableColumns(Contract_.ID, Contract_.INVOICE_PRICE, Contract_.TOTAL_COST, Contract_.TOTAL_PROFIT, Contract_.FINAL_DEADLINE, Contract_.CREATED, Contract_.UPDATED);
         grid.sort(List.of(new GridSortOrder<>(createdColumn, SortDirection.DESCENDING)));
 
         descriptionColumn.setVisible(false);
@@ -233,8 +242,11 @@ public class ContractsView extends VerticalLayout implements HasUrlParameter<Str
         gridFormLayout.showHideMenu.addColumnToggleItem("Popis", descriptionColumn);
         gridFormLayout.showHideMenu.addColumnToggleItem("Klient", clientColumn);
         gridFormLayout.showHideMenu.addColumnToggleItem("Stav", stateColumn);
-        gridFormLayout.showHideMenu.addColumnToggleItem("Termín", deadlineColumn);
-        gridFormLayout.showHideMenu.addColumnToggleItem("Cena s marží", priceColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Konečný termín", finalDeadlineColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Dílčí Temín", deadlineColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Fakturační cena", invoiceColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Celkové náklady", totalCostColumn);
+        gridFormLayout.showHideMenu.addColumnToggleItem("Čistý zisk", totalProfitColumn);
         gridFormLayout.showHideMenu.addColumnToggleItem("Objednané produkty", productsColumn);
         gridFormLayout.showHideMenu.addColumnToggleItem("Vytvořeno", createdColumn);
         gridFormLayout.showHideMenu.addColumnToggleItem("Upraveno", updatedColumn);
@@ -242,8 +254,8 @@ public class ContractsView extends VerticalLayout implements HasUrlParameter<Str
         updateGrid();
     }
 
-    private String getPrice(Contract contract) {
-        return String.format("%d", contract.getPrice().intValue()) + "Kč";
+    private String getPrice(Double price) {
+        return String.format("%s", Math.round(price)) + "Kč";
     }
 
     private Component getState(Contract contract) {
@@ -251,15 +263,14 @@ public class ContractsView extends VerticalLayout implements HasUrlParameter<Str
         return new Badge(status.getStatus(), status.getTheme().getTheme());
     }
 
-    private Component getDeadline(Contract contract) {
+    private Component getDateBadge(LocalDate date) {
         Span badge = new Span();
 
-        LocalDate deadline = contract.getCurrentDeadline().getDeadline();
-        if (deadline != null) {
-            badge.setText(deadline.format(DateTimeFormatter.ofPattern("d. M. yyyy")));
+        if (date != null) {
+            badge.setText(date.format(DateTimeFormatter.ofPattern("d. M. yyyy")));
             badge.getElement().getThemeList().add("badge pill");
 
-            if (LocalDate.now().isAfter(deadline))
+            if (LocalDate.now().isAfter(date))
                 badge.getElement().getThemeList().add(" error");
 
         } else {

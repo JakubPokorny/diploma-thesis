@@ -10,6 +10,7 @@ public class ContractProductGenerator {
         return new ContractProduct(
                 new ContractProductKey(contract.getId(), product.getId()),
                 1,
+                50.0,
                 100.0,
                 contract,
                 product

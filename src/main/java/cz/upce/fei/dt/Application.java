@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * The entry point of the Spring Boot application.
@@ -18,6 +19,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 //@NpmPackage(value = "lumo-css-framework", version = "^4.0.10")
 @Theme(value = "is-diploma-thesis")
 @EnableAsync
+@EnableScheduling
 public class Application extends SpringBootServletInitializer implements AppShellConfigurator {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);

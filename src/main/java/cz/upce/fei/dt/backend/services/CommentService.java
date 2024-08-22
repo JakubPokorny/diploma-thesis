@@ -3,11 +3,11 @@ package cz.upce.fei.dt.backend.services;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.spring.security.AuthenticationContext;
-import cz.upce.fei.dt.backend.entities.Note;
-import cz.upce.fei.dt.backend.entities.Note_;
+import cz.upce.fei.dt.backend.entities.Comment;
+import cz.upce.fei.dt.backend.entities.Comment_;
 import cz.upce.fei.dt.backend.entities.User;
 import cz.upce.fei.dt.backend.exceptions.AuthenticationException;
-import cz.upce.fei.dt.backend.repositories.NoteRepository;
+import cz.upce.fei.dt.backend.repositories.CommentRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -19,35 +19,35 @@ import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
-public class NoteService {
-    private final NoteRepository noteRepository;
+public class CommentService {
+    private final CommentRepository commentRepository;
     private final AuthenticationContext authenticationContext;
 
     @Transactional
-    public MessageListItem save(Note note) throws AuthenticationException {
+    public MessageListItem save(Comment comment) throws AuthenticationException {
         User authUser = authenticationContext.getAuthenticatedUser(User.class).orElseThrow(
                 () -> new AuthenticationException("Neznámý uživatel. Přihlašte se prosím."));
-        note.setUser(authUser);
-        Note savedNote = noteRepository.save(note);
+        comment.setUser(authUser);
+        Comment savedComment = commentRepository.save(comment);
 
         return new MessageListItem(
-                savedNote.getNote(),
-                savedNote.getCreated().toInstant(ZoneOffset.UTC),
-                savedNote.getUser().getFullName());
+                savedComment.getComment(),
+                savedComment.getCreated().toInstant(ZoneOffset.UTC),
+                savedComment.getUser().getFullName());
     }
 
     public Stream<MessageListItem> findAllByContractId(Long contractId, Query<MessageListItem, Void> query) {
-        return noteRepository.findAllByContractId(PageRequest.of(query.getPage(), query.getPageSize(), Sort.by(Sort.Direction.DESC, Note_.CREATED)), contractId)
+        return commentRepository.findAllByContractId(PageRequest.of(query.getPage(), query.getPageSize(), Sort.by(Sort.Direction.DESC, Comment_.CREATED)), contractId)
                 .stream()
-                .map(iNote -> new MessageListItem(
-                        iNote.getNote(),
-                        iNote.getCreated().toInstant(ZoneOffset.UTC),
-                        iNote.getFirstName() + " " + iNote.getLastName())
+                .map(iComment -> new MessageListItem(
+                        iComment.getComment(),
+                        iComment.getCreated().toInstant(ZoneOffset.UTC),
+                        iComment.getFirstName() + " " + iComment.getLastName())
                 );
     }
 
     @Transactional
     public void updateAllUserByUser(Long userId, Long alternateUserId) {
-        noteRepository.updateAllUserByUser(userId, alternateUserId);
+        commentRepository.updateAllUserByUser(userId, alternateUserId);
     }
 }

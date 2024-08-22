@@ -46,9 +46,11 @@ class UserServiceTest {
     @Mock
     private DeadlineService deadlineService;
     @Mock
-    private NoteService noteService;
+    private CommentService commentService;
     @Mock
     private ComponentService componentService;
+    @Mock
+    private ContractService contractService;
 
     @InjectMocks
     private UserService userService;
@@ -251,7 +253,7 @@ class UserServiceTest {
 
         verifyNoInteractions(userRepository);
         verifyNoInteractions(deadlineService);
-        verifyNoInteractions(noteService);
+        verifyNoInteractions(commentService);
         verifyNoInteractions(componentService);
     }
 
@@ -263,8 +265,9 @@ class UserServiceTest {
         userService.deleteUser(user, alternateUser);
 
         verify(deadlineService).updateAllUserByUser(1L, 2L);
-        verify(noteService).updateAllUserByUser(1L, 2L);
+        verify(commentService).updateAllUserByUser(1L, 2L);
         verify(componentService).updateAllUserByUser(1L, 2L);
+        verify(contractService).updateAllUserByUser(1L, 2L);
         verify(userRepository).delete(user);
     }
 

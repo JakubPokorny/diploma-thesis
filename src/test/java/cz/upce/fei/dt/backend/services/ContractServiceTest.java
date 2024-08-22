@@ -1,9 +1,11 @@
 package cz.upce.fei.dt.backend.services;
 
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.spring.security.AuthenticationContext;
 import cz.upce.fei.dt.backend.entities.Contract;
 import cz.upce.fei.dt.backend.entities.ContractProduct;
 import cz.upce.fei.dt.backend.entities.Deadline;
+import cz.upce.fei.dt.backend.entities.User;
 import cz.upce.fei.dt.backend.entities.keys.ContractProductKey;
 import cz.upce.fei.dt.backend.repositories.ContractRepository;
 import cz.upce.fei.dt.backend.services.filters.ContractFilter;
@@ -37,6 +39,8 @@ class ContractServiceTest {
     private ContractProductService contractProductService;
     @Mock
     private FileService fileService;
+    @Mock
+    private AuthenticationContext authenticationContext;
 
     @InjectMocks
     private ContractService contractService;
@@ -112,6 +116,7 @@ class ContractServiceTest {
 
     @Test
     void saveNewContract() {
+        User authUser = mock(User.class);
         Set<ContractProduct> contractProducts = Set.of(
                 ContractProduct.builder().id(new ContractProductKey(null, 1L)).build(),
                 ContractProduct.builder().id(new ContractProductKey(null, 2L)).build(),
@@ -126,6 +131,7 @@ class ContractServiceTest {
         savedContract.setId(1L);
 
         when(contractRepository.save(any(Contract.class))).thenReturn(savedContract);
+        when(authenticationContext.getAuthenticatedUser(User.class)).thenReturn(Optional.of(authUser));
 
         contractService.saveContract(contract);
 
@@ -146,11 +152,13 @@ class ContractServiceTest {
 
     @Test
     void saveContract() {
+        User authUser = mock(User.class);
         Contract contract = mock(Contract.class);
         Deadline deadline = mock(Deadline.class);
 
         when(contract.getId()).thenReturn(1L);
         when(contract.getCurrentDeadline()).thenReturn(deadline);
+        when(authenticationContext.getAuthenticatedUser(User.class)).thenReturn(Optional.of(authUser));
 
         contractService.saveContract(contract);
 

@@ -251,7 +251,7 @@ class ComponentServiceTest {
 
         verify(componentRepository, times(1)).updateAmountById(1L, 10);
         verify(componentRepository, times(1)).updateAmountById(2L, 0);
-        verify(emailService, times(1)).sendStockNotification(underMinInStockLimit);
+        verify(emailService, times(1)).notifyUserAboutMissingComponents(underMinInStockLimit);
     }
 
     @Test

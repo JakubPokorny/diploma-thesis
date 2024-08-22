@@ -1,5 +1,6 @@
 package cz.upce.fei.dt.backend.repositories;
 
+import cz.upce.fei.dt.backend.dto.ICheckExpiredPartialDeadline;
 import cz.upce.fei.dt.backend.dto.IDeadline;
 import cz.upce.fei.dt.backend.entities.Deadline;
 import org.springframework.data.domain.Page;
@@ -45,6 +46,30 @@ public interface DeadlineRepository extends JpaRepository<Deadline, Long> {
             ) sub ON d.contract.id = sub.contract_id AND d.created = sub.latest_created
             """)
     List<Deadline> findAllCurrentDeadlines();
+
+    @Query(value = """
+            SELECT
+                u.email as email,
+                c.id as id,
+                c.price as price,
+                s.status as status,
+                d.deadline as partialDeadline,
+                GROUP_CONCAT(p.name SEPARATOR ', ') as orderedProducts
+            FROM deadlines d
+                     INNER JOIN (
+                SELECT d.contract_id AS contract_id, MAX(d.created) AS latest_created
+                FROM deadlines d
+                where d.deadline < now()
+                GROUP BY d.contract_id
+            ) sub ON d.contract_id = sub.contract_id AND d.created = sub.latest_created
+            join users u on d.user_id = u.id
+            join contracts c on d.contract_id = c.id
+            join statuses s on d.status_id = s.id
+            join contract_products cp on  cp.contract_id = c.id
+            join products p on cp.product_id = p.id
+            group by d.deadline, c.id, c.price, s.status, u.email
+            """, nativeQuery = true)
+    List<ICheckExpiredPartialDeadline> findAllExpiredCurrentPartialDeadlines();
 
     @Query(value = """
             SELECT d
