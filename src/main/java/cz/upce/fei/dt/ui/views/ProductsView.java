@@ -9,6 +9,7 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -121,8 +122,8 @@ public class ProductsView extends VerticalLayout {
         Grid.Column<Product> profitColumn = grid.addColumn(this::getProfit).setHeader("Marže").setKey(Product_.PROFIT).setWidth("150px");
         Grid.Column<Product> sellingPrice = grid.addColumn(this::getSellingPrice).setHeader("Prodejní cena").setKey(Product_.SELLING_PRICE).setWidth("150px");
         Grid.Column<Product> componentsColumn = grid.addComponentColumn(this::createProductsComponent).setHeader("Komponenty").setWidth("150px");
-        Grid.Column<Product> createdColumn = grid.addComponentColumn(this::createProductsComponent).setHeader("Vytvořeno").setKey(Product_.CREATED).setWidth("150px");
-        Grid.Column<Product> updatedColumn = grid.addComponentColumn(this::createProductsComponent).setHeader("Upraveno").setKey(Product_.UPDATED).setWidth("150px");
+        Grid.Column<Product> createdColumn = grid.addColumn(new LocalDateTimeRenderer<>(Product::getCreated, "H:mm d. M. yyyy")).setHeader("Vytvořeno").setKey(Product_.CREATED).setWidth("150px");
+        Grid.Column<Product> updatedColumn = grid.addColumn(new LocalDateTimeRenderer<>(Product::getUpdated, "H:mm d. M. yyyy")).setHeader("Upraveno").setKey(Product_.UPDATED).setWidth("150px");
 
         HeaderRow headerRow = grid.appendHeaderRow();
         headerRow.getCell(nameColumn).setComponent(FilterFields.createTextFieldFilter("název", productFilter::setNameFilter, configurableFilterDataProvider));
