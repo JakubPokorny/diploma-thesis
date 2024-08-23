@@ -51,6 +51,8 @@ class UserServiceTest {
     private ComponentService componentService;
     @Mock
     private ContractService contractService;
+    @Mock
+    private ExtraCostService extraCostService;
 
     @InjectMocks
     private UserService userService;
@@ -259,8 +261,13 @@ class UserServiceTest {
 
     @Test
     void deleteUser() {
+        User authUser = mock(User.class);
+
         User user = UserGenerator.generateUser(1L);
         User alternateUser = UserGenerator.generateUser(2L);
+
+        when(authenticationContext.getAuthenticatedUser(User.class)).thenReturn(Optional.of(authUser));
+        when(authUser.getId()).thenReturn(2L);
 
         userService.deleteUser(user, alternateUser);
 
