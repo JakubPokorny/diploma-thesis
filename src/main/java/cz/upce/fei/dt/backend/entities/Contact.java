@@ -55,12 +55,12 @@ public class Contact {
     @Builder.Default
     Set<Contract> contracts = new HashSet<>();
 
-    @OneToOne(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "invoice_address_id", nullable = false)
     @ToString.Exclude
     private Address invoiceAddress;
 
-    @OneToOne(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "delivery_address_id")
     @ToString.Exclude
     private Address deliveryAddress;

@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class ContactService extends AbstractBackEndDataProvider<Contact, ContactFilter> {
     private final ContactRepository contactRepository;
+    private final AddressService addressService;
 
     @Override
     public Stream<Contact> fetchFromBackEnd(Query<Contact, ContactFilter> query) {
@@ -53,6 +54,8 @@ public class ContactService extends AbstractBackEndDataProvider<Contact, Contact
     public void saveContact(Contact contact) {
         if (!contact.hasDeliveryAddress())
             contact.setDeliveryAddress(null);
+        contact.setInvoiceAddress(addressService.save(contact.getInvoiceAddress()));
+        contact.setDeliveryAddress(addressService.save(contact.getDeliveryAddress()));
         contactRepository.save(contact);
     }
 
