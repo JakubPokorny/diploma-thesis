@@ -40,6 +40,7 @@ public class UserService extends AbstractBackEndDataProvider<User, UserFilter> {
     private final CommentService commentService;
     private final ComponentService componentService;
     private final ContractService contractService;
+    private final ExtraCostService extraCostService;
 
     @Override
     public Stream<User> fetchFromBackEnd(Query<User, UserFilter> query) {
@@ -91,6 +92,9 @@ public class UserService extends AbstractBackEndDataProvider<User, UserFilter> {
         if (user == null || alternateUser == null)
             return;
 
+        User authUser = authenticationContext.getAuthenticatedUser(User.class)
+                .orElseThrow(() -> new AuthenticationException("Neznámý uživatel. Přihlašte se prosím."));
+
         Long userId = user.getId();
         Long alternateUserId = alternateUser.getId();
 
@@ -98,8 +102,12 @@ public class UserService extends AbstractBackEndDataProvider<User, UserFilter> {
         commentService.updateAllUserByUser(userId, alternateUserId);
         componentService.updateAllUserByUser(userId, alternateUserId);
         contractService.updateAllUserByUser(userId, alternateUserId);
+        extraCostService.updateAllUserByUser(userId, alternateUserId);
 
         userRepository.delete(user);
+
+        if (authUser.getId().equals(user.getId()))
+            authenticationContext.logout();
     }
 
     public User findByResetToken(String token) throws NotFoundException {

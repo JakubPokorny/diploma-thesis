@@ -12,6 +12,7 @@ import cz.upce.fei.dt.backend.repositories.ExtraCostRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.stream.Stream;
 
@@ -57,5 +58,11 @@ public class ExtraCostService {
             return null;
         IExtraCost iExtraCost = extraCostRepository.countByContractId(contract.getId());
         return iExtraCost.getCount() == 0 ? null : iExtraCost;
+    }
+
+    @Transactional
+    public void updateAllUserByUser(Long userId, Long alternateUserId) {
+        extraCostRepository.updateAllCreatedByUser(userId, alternateUserId);
+        extraCostRepository.updateAllUpdatedByUser(userId, alternateUserId);
     }
 }
