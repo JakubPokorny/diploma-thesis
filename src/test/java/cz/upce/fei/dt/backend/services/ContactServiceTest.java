@@ -31,6 +31,8 @@ import static org.mockito.Mockito.*;
 class ContactServiceTest {
     @Mock
     private ContactRepository contactRepository;
+    @Mock
+    private AddressService addressService;
 
     @InjectMocks
     private ContactService contactService;
