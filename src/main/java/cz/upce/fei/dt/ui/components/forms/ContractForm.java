@@ -334,7 +334,7 @@ public class ContractForm extends FormLayout implements IEditForm<Contract> {
             }
             if (invoicePriceField.isReadOnly())
                 invoicePriceField.setValue(invoicePrice);
-            else
+            else if (invoicePriceField.getValue() != null)
                 invoicePrice = invoicePriceField.getValue();
         }
         totalCost += totalExtraCost;

@@ -5,7 +5,6 @@ import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.IntegerField;
-import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
@@ -21,6 +20,7 @@ import cz.upce.fei.dt.backend.entities.User;
 import cz.upce.fei.dt.backend.entities.keys.ProductComponentKey;
 import cz.upce.fei.dt.backend.services.ProductService;
 import cz.upce.fei.dt.backend.services.UserService;
+import cz.upce.fei.dt.ui.components.forms.fields.PriceField;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -35,7 +35,7 @@ public class ComponentForm extends FormLayout implements IEditForm<Component> {
     private final TextArea description = new TextArea("Popis");
     private final IntegerField inStock = new IntegerField("Skladem");
     private final IntegerField minInStock = new IntegerField("Minimálně skladem");
-    private final NumberField price = new NumberField("Cena");
+    private final PriceField price = new PriceField("Cena");
     private final ComboBox<User> notify = new ComboBox<>("Notifikovat");
     private final MultiSelectComboBox<Product> productsMSB = new MultiSelectComboBox<>("Produkty");
     private final FormLayout productComponentsFormLayout = new FormLayout();
@@ -75,15 +75,10 @@ public class ComponentForm extends FormLayout implements IEditForm<Component> {
         price.setStepButtonsVisible(true);
         price.setMin(0);
         price.setMax(Double.MAX_VALUE);
-        price.setSuffixComponent(new Span("Kč"));
         binder.forField(price)
                 .withValidator(new DoubleRangeValidator("Minimum mimo hodnoty", 0.0, Double.MAX_VALUE))
                 .asRequired()
                 .bind(Component::getPrice, Component::setPrice);
-        price.addValueChangeListener(event -> {
-            if (component != null && component.getPrice() != null)
-                price.setValue((double)Math.round(event.getValue()));
-        });
     }
 
     private void setupMinInStock() {

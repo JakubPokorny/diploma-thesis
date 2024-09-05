@@ -2,13 +2,12 @@ package cz.upce.fei.dt.ui.components.forms;
 
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
@@ -20,8 +19,9 @@ import cz.upce.fei.dt.backend.entities.Product;
 import cz.upce.fei.dt.backend.entities.ProductComponent;
 import cz.upce.fei.dt.backend.entities.keys.ProductComponentKey;
 import cz.upce.fei.dt.backend.services.ComponentService;
-import cz.upce.fei.dt.ui.components.PriceFieldWithButton;
 import cz.upce.fei.dt.ui.components.forms.events.UpdateProductProductionPriceEvent;
+import cz.upce.fei.dt.ui.components.forms.fields.PriceField;
+import cz.upce.fei.dt.ui.utilities.CustomComponent;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -33,9 +33,9 @@ public class ProductForm extends FormLayout implements IEditForm<Product> {
     private final Binder<Product> binder = new BeanValidationBinder<>(Product.class);
     private Product product;
     private final TextField name = new TextField("Název");
-    private final PriceFieldWithButton productionPrice = new PriceFieldWithButton("Výrobní cena", VaadinIcon.REFRESH);
-    private final NumberField profit = new NumberField("Marže");
-    private final PriceFieldWithButton sellingPrice = new PriceFieldWithButton("Prodejní cena", VaadinIcon.EDIT);
+    private final PriceField productionPriceField = new PriceField("Výrobní cena");
+    private final PriceField sellingPriceField = new PriceField("Prodejní cena");
+    private final PriceField profitField = new PriceField("Marže");
     private final MultiSelectComboBox<Component> componentMSB = new MultiSelectComboBox<>("Komponenty");
     private final FormLayout productComponentsFormLayout = new FormLayout();
     private final HashMap<Long, ProductComponentForm> productComponentForms = new HashMap<>();
@@ -57,18 +57,23 @@ public class ProductForm extends FormLayout implements IEditForm<Product> {
 
         ComponentUtil.addListener(UI.getCurrent(), UpdateProductProductionPriceEvent.class, this::updateProductionPrice);
 
-        add(name, productionPrice, profit, sellingPrice, componentMSB, productComponentsFormLayout);
+        add(name, productionPriceField, profitField, sellingPriceField, componentMSB, productComponentsFormLayout);
 
     }
 
     //region Setups
     private void setupProductionPrice() {
-        productionPrice.button.addClickListener(_ -> updateProductionPrice(null));
-        productionPrice.setReadOnly(true);
-        binder.forField(productionPrice).withValidator(new DoubleRangeValidator("Výrobní cena mimo hodnoty", 0.0, Double.MAX_VALUE)).asRequired().bind(Product::getProductionPrice, Product::setProductionPrice);
-        productionPrice.addValueChangeListener(event -> {
+        productionPriceField.setReadOnly(true);
+        Button updateProductionPriceField = CustomComponent.createSmallTertiaryButton(
+                VaadinIcon.REFRESH.create(),
+                _ -> updateProductionPrice(null)
+        );
+        productionPriceField.suffixLayout.add(updateProductionPriceField);
+
+        binder.forField(productionPriceField).withValidator(new DoubleRangeValidator("Výrobní cena mimo hodnoty", 0.0, Double.MAX_VALUE)).asRequired().bind(Product::getProductionPrice, Product::setProductionPrice);
+        productionPriceField.addValueChangeListener(event -> {
             if (product != null && product.getProductionPrice() != null)
-                productionPrice.setValue((double)Math.round(event.getValue()));
+                productionPriceField.setValue((double) Math.round(event.getValue()));
         });
     }
 
@@ -82,39 +87,46 @@ public class ProductForm extends FormLayout implements IEditForm<Product> {
             }
             totalProductionPrice += form.getValue().getComponentsPerProduct() * form.getValue().getComponent().getPrice();
         }
-        productionPrice.setValue(totalProductionPrice);
+        productionPriceField.setValue(totalProductionPrice);
         updateSellingPrice();
     }
 
     private void setupProfit() {
-        profit.setStepButtonsVisible(true);
-        profit.setMin(0);
-        profit.setMax(Double.MAX_VALUE);
-        profit.setValue(15.0);
-        profit.setSuffixComponent(new Span("%"));
+        profitField.setStepButtonsVisible(true);
+        profitField.setMin(0);
+        profitField.setMax(Double.MAX_VALUE);
+        profitField.setValue(15.0);
+        profitField.round = false;
+        profitField.currencySuffix.setText("%");
 
-        profit.addValueChangeListener(_ -> updateSellingPrice());
+        profitField.addValueChangeListener(_ -> updateSellingPrice());
 
-        binder.forField(profit).withValidator(new DoubleRangeValidator("Profit mimo hodnoty", 0.0, Double.MAX_VALUE)).asRequired().bind(Product::getProfit, Product::setProfit);
+        binder.forField(profitField)
+                .withValidator(new DoubleRangeValidator("Profit mimo hodnoty", 0.0, Double.MAX_VALUE))
+                .asRequired()
+                .bind(Product::getProfit, Product::setProfit);
     }
 
     private void setupSellingPrice() {
-        sellingPrice.button.addClickListener(_ -> {
-            product.setOwnSellingPrice(sellingPrice.isReadOnly());
-            sellingPrice.setReadOnly(!sellingPrice.isReadOnly());
-            updateSellingPrice();
-        });
+        Button editSellingPriceField = CustomComponent.createSmallTertiaryButton(
+                VaadinIcon.EDIT.create(),
+                _ -> {
+                    product.setOwnSellingPrice(sellingPriceField.isReadOnly());
+                    sellingPriceField.setReadOnly(!sellingPriceField.isReadOnly());
+                    updateSellingPrice();
+                }
+        );
+        sellingPriceField.suffixLayout.add(editSellingPriceField);
 
-        binder.forField(sellingPrice).withValidator(new DoubleRangeValidator("Prodejní cena mimo hodnoty", 0.0, Double.MAX_VALUE)).asRequired().bind(Product::getSellingPrice, Product::setSellingPrice);
-        sellingPrice.addValueChangeListener(event -> {
-            if (product != null && product.getSellingPrice() != null)
-                sellingPrice.setValue((double)Math.round(event.getValue()));
-        });
+        binder.forField(sellingPriceField)
+                .withValidator(new DoubleRangeValidator("Prodejní cena mimo hodnoty", 0.0, Double.MAX_VALUE))
+                .asRequired()
+                .bind(Product::getSellingPrice, Product::setSellingPrice);
     }
 
     private void updateSellingPrice() {
-        if (sellingPrice.isReadOnly() && productionPrice.getValue() != null && profit.getValue() != null)
-            sellingPrice.setValue(productionPrice.getValue() * (1 + (profit.getValue() / 100)));
+        if (sellingPriceField.isReadOnly() && productionPriceField.getValue() != null && profitField.getValue() != null)
+            sellingPriceField.setValue(productionPriceField.getValue() * (1 + (profitField.getValue() / 100)));
     }
 
     private void setupComponentMSB(ComponentService componentService) {
@@ -192,7 +204,7 @@ public class ProductForm extends FormLayout implements IEditForm<Product> {
                     )
             );
             componentMSB.setValue(product.getSelectedComponents());
-            sellingPrice.setReadOnly(!product.getOwnSellingPrice());
+            sellingPriceField.setReadOnly(!product.getOwnSellingPrice());
         }
         binder.readBean(product);
 
